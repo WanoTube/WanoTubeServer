@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Cool, huh!', condition: false });
+    res.send('Default web server');
 });
 
 /* GET users listing. */
