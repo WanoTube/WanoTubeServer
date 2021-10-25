@@ -2,17 +2,32 @@ const express = require('express');
 const path = require('path');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const users = require('./routes/users.route');
 
 const routes = require('./routes/index');
 
 const app = express();
-const port = 8080
+const PORT = 8080
+// const PORT = process.env.PORT || 8080
 
+// Only when local
+const corsOptions = {
+    origin: "http://localhost:"+ PORT
+}
+
+app.use(cors(corsOptions));
+
+// parse requests of content-type - application/json
+app.use(express.json());
+
+// parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({extended: true}));
-app.use(express.json())
 
 app.use(logger('dev'));
 app.use(cookieParser());
+
+app.use('/users', users);
 
 app.use('/', routes);
 
@@ -47,4 +62,4 @@ app.use(function(err, req, res, next) {
   });
 });
 
-app.listen(port, () => console.log("listeing on port " + port))
+app.listen(PORT, () => console.log("listeing on port " + PORT))
