@@ -2,17 +2,14 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const express = require('express');
 const logger = require('morgan');
-const mongoose = require('./models/index');
 const path = require('path');
 
-const usersRoute = require('./routes/users.route');
+const mongoose = require('./models/index');
+const routes = require('./routes/index.route');
 
 const app = express();
 const PORT = 8080
 // const PORT = process.env.PORT || 8080
-
-// Import utils
-const api = require("./utils/api-routes");
 
 // Only when local
 const corsOptions = {
@@ -20,15 +17,11 @@ const corsOptions = {
 }
 
 app.use(cors(corsOptions));
-
-// parse requests of content-type - application/json and application/x-www-form-urlencoded
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-
 app.use(logger('dev'));
 app.use(cookieParser());
-
-app.use(api.version + api.objects.users , usersRoute); // v1/users
+app.use("/", routes)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
