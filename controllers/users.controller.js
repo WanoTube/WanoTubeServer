@@ -1,19 +1,18 @@
-const Users = require('../models/users');
+const User = require('../models/users');
 
-exports.create = function (req, res) {
+exports.createUser = function (req, res) {
     var newUser = new User(req.body);
-    console.log(req.body);
     newUser.save(function (err) {
             if(err) {
-            res.status(400).send('Unable to save shark to database');
+            res.status(400).send(err);
         } else {
-            res.redirect('/users/index');
+            res.send(newUser)
         }
-  });
+    });
 };
 
-exports.list = function (req, res) {
-    Users.find({}).exec(function (err, users) {
+exports.getAllUsers = function (req, res) {
+    User.find({}).exec(function (err, users) {
         if (err) {
             return res.send(500, err);
         }
