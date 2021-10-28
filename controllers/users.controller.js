@@ -1,4 +1,4 @@
-const User = require('../models/users.model');
+const Users = require('../models/users');
 
 exports.create = function (req, res) {
     var newUser = new User(req.body);
@@ -13,11 +13,10 @@ exports.create = function (req, res) {
 };
 
 exports.list = function (req, res) {
-    User.find({}).exec(function (err, users) {
+    Users.find({}).exec(function (err, users) {
         if (err) {
             return res.send(500, err);
         }
-        console.log(users)
         res.send(users);
     });
 };

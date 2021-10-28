@@ -1,15 +1,18 @@
-const express = require('express');
-const path = require('path');
-const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const users = require('./routes/users.route');
+const express = require('express');
+const logger = require('morgan');
+const mongoose = require('./models/index');
+const path = require('path');
 
-const routes = require('./routes/index');
+const usersRoute = require('./routes/users.route');
 
 const app = express();
 const PORT = 8080
 // const PORT = process.env.PORT || 8080
+
+// Import utils
+const api = require("./utils/api-routes");
 
 // Only when local
 const corsOptions = {
@@ -18,18 +21,14 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// parse requests of content-type - application/json
+// parse requests of content-type - application/json and application/x-www-form-urlencoded
 app.use(express.json());
-
-// parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({extended: true}));
 
 app.use(logger('dev'));
 app.use(cookieParser());
 
-app.use('/users', users);
-
-app.use('/', routes);
+app.use(api.version + api.objects.users , usersRoute); // v1/users
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -45,10 +44,11 @@ app.use(function(req, res, next) {
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
-    });
+    res.send("")
+    // res.render('error', {
+    //   message: err.message,
+    //   error: err
+    // });
   });
 }
 
@@ -56,10 +56,12 @@ if (app.get('env') === 'development') {
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
+  res.send("")
+
+  // res.render('error', {
+  //   message: err.message,
+  //   error: {}
+  // });
 });
 
 app.listen(PORT, () => console.log("listeing on port " + PORT))
