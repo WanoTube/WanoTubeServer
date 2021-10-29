@@ -1,5 +1,4 @@
 require('dotenv').config()
-const fs = require('fs')
 const S3 = require('aws-sdk/clients/s3')
 
 const bucketName = process.env.AWS_BUCKET_NAME
@@ -14,15 +13,15 @@ const s3 = new S3({
 })
 
 // uploads a file to s3
-function uploadFile(file){
-    const fileStream = fs.createReadStream(file.path)
-
+function uploadFile(files){
+    console.log(files.video)
+    // Binary data base64
+    const fileStream  = Buffer.from(files.video.data, 'binary');
     const uploadParams = {
         Bucket: bucketName,
         Body: fileStream,
-        Key: file.filename
+        Key: files.video.name
     }
-
     return s3.upload(uploadParams).promise()
 }
 exports.uploadFile = uploadFile

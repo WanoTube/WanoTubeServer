@@ -3,6 +3,7 @@ const cors = require('cors');
 const express = require('express');
 const logger = require('morgan');
 const path = require('path');
+const fileUpload = require('express-fileupload');
 
 const mongoose = require('./models/index');
 const routes = require('./routes/index.route');
@@ -16,6 +17,7 @@ const corsOptions = {
     origin: "http://localhost:"+ PORT
 }
 
+app.use(fileUpload())
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
