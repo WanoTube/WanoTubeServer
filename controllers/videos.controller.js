@@ -1,7 +1,9 @@
-const { uploadFile, getFileStream, getFile } = require('../utils/aws-s3-handlers')
-const { videosConvertToAudio } = require('../utils/convert-videos-to-audio')
-const Video = require('../models/videos');
 const fs = require('fs')
+const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
+const { videosConvertToAudio } = require('../utils/convert-videos-to-audio')
+const { audioRecognition } = require('./audio-recoginition.controller')
+
+const Video = require('../models/videos');
   
 exports.getVideoById = function (req, res) {
     const key = req.params.key
@@ -16,7 +18,7 @@ exports.getVideoById = function (req, res) {
 exports.uploadVideo = async function (req, res) {
     const file = req.files.video
     const body = req.body
-    audioRecognition(file)
+    audioRecognitionFromVideo(file)
 
     // apply filter
     // resize
@@ -53,8 +55,14 @@ async function saveVideoToDatabase (file, body) {
     }
 }
 
-function audioRecognition(file) {
+function audioRecognitionFromVideo(file) {
+    const name = file.name
+    const audioSavedPath = './audios/' + name.split('.')[0] + '.mp3'; 
+
     videoAnalysis(file)
+    var bitmap = fs.readFileSync(audioSavedPath);
+    console.log("Audio recogniting...")
+    audioRecognition(Buffer.from(bitmap))
 }
 
 async function videoAnalysis(file){
@@ -72,7 +80,6 @@ async function videoAnalysis(file){
         videosConvertToAudio(videoSavedPath, audioSavedPath, function(err){
             if(!err) {
                 //...
-                
             }
         })
     })

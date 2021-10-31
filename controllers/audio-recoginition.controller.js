@@ -1,5 +1,3 @@
-const url = require('url');
-const fs = require('fs');
 const crypto = require('crypto');
 const request = require('request');
 
@@ -55,9 +53,6 @@ function identify(data, options, cb) {
     formData: formData
   }, cb);
 }
-
-
-// var bitmap = fs.readFileSync('into1.mp3');
 
 function audioRecognition (data) {
     identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
