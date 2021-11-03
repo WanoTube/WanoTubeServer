@@ -54,10 +54,32 @@ function identify(data, options, cb) {
   }, cb);
 }
 
-function audioRecognition (data) {
+function audioRecognition (data, callback) {
     identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
       if (err) console.log(err);
-      console.log(body);
+      else {
+        const result = JSON.parse(body);
+        if (result){
+          if (result.status.msg == "Success") {
+            const data = result.metadata
+            let musics = JSON.stringify(data.music) // array
+            musics = JSON.parse(musics)
+
+            const first = musics[0]
+            const title = first.title
+            const album = first.album.name
+            const artists  = first.artists // array
+            const songArtist = artists[0].name
+
+            let jsonResult = {}
+            jsonResult.title = title
+            jsonResult.album = album
+            jsonResult.songArtist = songArtist
+            console.log("audioRecognition result: " + JSON.stringify(jsonResult))
+            callback(jsonResult)
+          }
+        }
+      }
     });
 }
 

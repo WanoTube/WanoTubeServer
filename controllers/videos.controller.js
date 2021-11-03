@@ -18,7 +18,9 @@ exports.getVideoById = function (req, res) {
 exports.uploadVideo = async function (req, res) {
     const file = req.files.video
     const body = req.body
-    audioRecognitionFromVideo(file)
+    audioRecognitionFromVideo(file, function(data) {
+        res.send(JSON.stringify(data))
+    })
 
     // apply filter
     // resize
@@ -35,19 +37,18 @@ async function saveVideoToDatabase (file, body) {
         "title": title,
         "size": size,
         "description": description,
-        "url": "test-url"
+        "url": "test-url",
     }
     if (file) {
         const result = await uploadFile(file)
         console.log(result)
-        res.status(200)
         // store result.Key in url video
         const key = result.Key
         reqVideo.url = key
         const newVideo = new Video(reqVideo);
         newVideo.save(function (err) {
             if(err) {
-            res.status(400).send(err);
+                res.status(400).send(err);
             } else {
                 res.send(newVideo)
             }
@@ -55,17 +56,23 @@ async function saveVideoToDatabase (file, body) {
     }
 }
 
-function audioRecognitionFromVideo(file) {
+async function audioRecognitionFromVideo(file, callback) {
     const name = file.name
     const audioSavedPath = './audios/' + name.split('.')[0] + '.mp3'; 
 
-    videoAnalysis(file)
-    var bitmap = fs.readFileSync(audioSavedPath);
-    console.log("Audio recogniting...")
-    audioRecognition(Buffer.from(bitmap))
+    videoAnalysis(file, function(err){
+        if (!err) {
+            const bitmap = fs.readFileSync(audioSavedPath);
+            console.log("Audio recogniting...")
+            audioRecognition(Buffer.from(bitmap), function(result) {
+                callback(result)
+            })
+        }
+    })
+    // TO-DO: Remove audios, videos
 }
 
-async function videoAnalysis(file){
+async function videoAnalysis(file, callback){
     const dataBuffers = file.data
     const name = file.name
     // Check same name?
@@ -78,9 +85,7 @@ async function videoAnalysis(file){
         console.log("Saved " + videoSavedPath);
         console.log("Converting to " + audioSavedPath)
         videosConvertToAudio(videoSavedPath, audioSavedPath, function(err){
-            if(!err) {
-                //...
-            }
+            callback(err)
         })
     })
 }
