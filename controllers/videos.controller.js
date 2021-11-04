@@ -45,6 +45,12 @@ exports.updateVideoInfo = function (req, res) {
         })
 }
 
+exports.deleteVideoInfo = function (req, res) {
+    const id = req.params.id
+    // Is this id field correct?
+    await Video.deleteOne({ id: id }); // returns {deletedCount: 1}
+}
+
 exports.uploadVideo = async function (req, res) {
     const file = req.files.video
     const body = req.body

@@ -9,7 +9,7 @@ const apiRoutes = {
         login:          "/login",
 
         create:         "/add",
-        search:         "/search",
+        search:         "/results",
         update:         "/update",
         delete:         "/delete",
 
