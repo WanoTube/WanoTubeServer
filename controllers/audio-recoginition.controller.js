@@ -64,19 +64,7 @@ function audioRecognition (data, callback) {
             const data = result.metadata
             let musics = JSON.stringify(data.music) // array
             musics = JSON.parse(musics)
-
-            const first = musics[0]
-            const title = first.title
-            const album = first.album.name
-            const artists  = first.artists // array
-            const songArtist = artists[0].name
-
-            let jsonResult = {}
-            jsonResult.title = title
-            jsonResult.album = album
-            jsonResult.songArtist = songArtist
-            console.log("audioRecognition result: " + JSON.stringify(jsonResult))
-            callback(jsonResult)
+            callback(musics)
           }
         }
       }
@@ -84,3 +72,20 @@ function audioRecognition (data, callback) {
 }
 
 exports.audioRecognition = audioRecognition
+
+function musicIncluded(musics) {
+  const first = musics[0]
+  const title = first.title
+  const album = first.album.name
+  const artists  = first.artists // array
+  const songArtist = artists[0].name
+
+  let jsonResult = {}
+  jsonResult.title = title
+  jsonResult.album = album
+  jsonResult.songArtist = songArtist
+  console.log("audioRecognition result: " + JSON.stringify(jsonResult))
+  return jsonResult
+}
+
+exports.musicIncluded = musicIncluded

@@ -14,13 +14,13 @@ const s3 = new S3({
 
 // uploads a file to s3
 function uploadFile(files){
-    console.log(files.video)
+    console.log(files)
     // Binary data base64
-    const fileStream  = Buffer.from(files.video.data, 'binary');
+    const fileStream  = Buffer.from(files.data, 'binary');
     const uploadParams = {
         Bucket: bucketName,
         Body: fileStream,
-        Key: files.video.name
+        Key: files.name
     }
     return s3.upload(uploadParams).promise()
 }
