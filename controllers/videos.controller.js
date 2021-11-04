@@ -5,11 +5,45 @@ const { audioRecognition, musicIncluded } = require('./audio-recoginition.contro
 
 const Video = require('../models/videos');
   
+exports.getAllVideoInfos = function (req,res) {
+    Video.find()
+        .then(function(doc) {
+            res.send(doc)
+        })
+}
+
 exports.getVideoById = function (req, res) {
     const key = req.params.key
     const readStream = getFileStream(key)
     readStream.pipe(res);
 };
+
+exports.search = function (req, res) {
+    const searchKey = req.query.search_query
+    // TO-DO: SEARCH IN TITLE, not whole title
+    Video.
+        find({
+            title: searchKey,
+        })
+        .exec(function(err, result) {
+            res.send(result)
+        })
+};
+
+exports.updateVideoInfo = function (req, res) {
+    const body = req.body
+    const id = body.id;
+
+    Video.findById(id)
+        .then(function(err, video) {
+            if (err) 
+                console.error('error, no entry found');
+            video.title = body.title ? body.title : video.title;
+            video.url = body.url ? body.url : video.url;
+            video.size = body.size ? body.size : video.size;
+            video.save();
+        })
+}
 
 exports.uploadVideo = async function (req, res) {
     const file = req.files.video
@@ -26,14 +60,10 @@ exports.uploadVideo = async function (req, res) {
 }
 
 async function saveVideoToDatabase (file, body, recognizedMusics, callback) {
-    const size = file.size
-    const title = body.title
-    const description = body.description
-
     const reqVideo = {
-        "title": title,
-        "size": size,
-        "description": description,
+        "title": body.title,
+        "size": file.size,
+        "description": body.description,
         "url": "test-url",
         "recognitionResult": recognizedMusics
     }
