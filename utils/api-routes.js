@@ -12,7 +12,7 @@ const apiRoutes = {
         search:         "/results",
         update:         "/update",
         delete:         "/delete",
-
+        upload:         "/upload",
         confirm:        "/confirm",
 
         musicRecognizer:

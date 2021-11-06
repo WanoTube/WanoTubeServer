@@ -3,53 +3,13 @@ const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
 const { videosConvertToAudio } = require('../utils/convert-videos-to-audio')
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
 
-const Video = require('../models/videos');
+const Video = require('../models/video');
   
-exports.getAllVideoInfos = function (req,res) {
-    Video.find()
-        .then(function(doc) {
-            res.send(doc)
-        })
-}
-
 exports.getVideoById = function (req, res) {
     const key = req.params.key
     const readStream = getFileStream(key)
     readStream.pipe(res);
 };
-
-exports.search = function (req, res) {
-    const searchKey = req.query.search_query
-    // TO-DO: SEARCH IN TITLE, not whole title
-    Video.
-        find({
-            title: searchKey,
-        })
-        .exec(function(err, result) {
-            res.send(result)
-        })
-};
-
-exports.updateVideoInfo = function (req, res) {
-    const body = req.body
-    const id = body.id;
-
-    Video.findById(id)
-        .then(function(err, video) {
-            if (err) 
-                console.error('error, no entry found');
-            video.title = body.title ? body.title : video.title;
-            video.url = body.url ? body.url : video.url;
-            video.size = body.size ? body.size : video.size;
-            video.save();
-        })
-}
-
-exports.deleteVideoInfo = function (req, res) {
-    const id = req.params.id
-    // Is this id field correct?
-    await Video.deleteOne({ id: id }); // returns {deletedCount: 1}
-}
 
 exports.uploadVideo = async function (req, res) {
     const file = req.files.video

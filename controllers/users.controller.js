@@ -1,4 +1,4 @@
-const User = require('../models/users');
+const User = require('../models/user');
 
 exports.createUser = function (req, res) {
     var newUser = new User(req.body);

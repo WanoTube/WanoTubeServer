@@ -1,28 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const videos = require('../controllers/videos.controller');
+const videoInfos = require('../controllers/video-info.controller');
 const api = require("../utils/api-routes")
 
-router.get(api.actions.search, function(req, res) {
-    videos.search(req, res)
-})
+router.get(api.actions.search, videoInfos.search)
 
-router.get('/:key', function(req, res) {
-    videos.getVideoById(req, res)
-});
+router.get('/:id', videoInfos.getVideoInfoById);
 
-router.get('/', function(req, res) {
-    videos.getAllVideoInfos(req, res)
-})
+router.get('/stream/:key', videos.getVideoById);
 
-router.post(api.actions.update, function (req, res) {
-    videos.updateVideoInfo(req, res)
-})
+router.get('/', videoInfos.getAllVideoInfos)
 
-router.post('/', async (req, res) => {
-    videos.uploadVideo(req, res);
-});
+router.post(api.actions.upload, videos.uploadVideo);
 
-router.delete(api.actions.delete + "/:id", videos.deleteVideoInfo);
+router.put(api.actions.update, videoInfos.updateVideoInfo)
+
+router.delete(api.actions.delete + "/:id", videoInfos.deleteVideoInfo);
 
 module.exports = router;
