@@ -1,8 +1,3 @@
-const fs = require('fs')
-const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
-const { videosConvertToAudio } = require('../utils/convert-videos-to-audio')
-const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
-
 const Video = require('../models/video');
   
 exports.getAllVideoInfos = function (req,res) {

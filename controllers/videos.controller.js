@@ -1,14 +1,25 @@
 const fs = require('fs')
+const mongoose = require('mongoose');
+
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
 const { videosConvertToAudio } = require('../utils/convert-videos-to-audio')
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
 
 const Video = require('../models/video');
-  
+const { Like } = require('../models/like');
+
 exports.getVideoById = function (req, res) {
-    const key = req.params.key
-    const readStream = getFileStream(key)
-    readStream.pipe(res);
+    // const key = req.params.key
+    // const readStream = getFileStream(key)
+    // readStream.pipe(res);
+
+    const authorId = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
+    const targetId = new mongoose.mongo.ObjectId('617b844449ec929be6f85e60')
+    var like = new Like({ "authorId": authorId, "targetId": targetId})
+    like.save()
+        .then(function (err) {
+            res.send(like)
+        });
 };
 
 exports.uploadVideo = async function (req, res) {
@@ -31,7 +42,7 @@ async function saveVideoToDatabase (file, body, recognizedMusics, callback) {
         "size": file.size,
         "description": body.description,
         "url": "test-url",
-        "recognitionResult": recognizedMusics
+        "recognitionResult": recognizedMusics,
     }
 
     musicIncluded(reqVideo.recognitionResult)
@@ -44,9 +55,21 @@ async function saveVideoToDatabase (file, body, recognizedMusics, callback) {
         reqVideo.url = key
         console.log("Key: " + key)
         const newVideo = new Video(reqVideo);
-        newVideo.save(function (err) {
-            callback(err, newVideo)
-        });
+        console.log("Before: " + newVideo)
+
+        // TO-DO: UserID is hardcoded
+        const authorId = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
+        const targetId = newVideo.id
+        var like = new Like({ "authorId": authorId, "targetId": targetId})
+        newVideo.authorId = authorId
+        like.save()
+            .then(function (err) {
+                newVideo.likes.push(like) // Yes
+                newVideo.save().then(function(err) { // No
+                    console.log(newVideo)
+                    callback(err, newVideo)
+                });
+            });
     }
 }
 

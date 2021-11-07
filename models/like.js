@@ -5,9 +5,8 @@ const schemaOptions = {
   };
 
 const Like = new Schema ({
-    content: { type: String, required: true },
-    authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    targetId: { type: Schema.Types.ObjectId, ref: "Video", required: true }, //postId or commentId.
+    authorId: { type: Schema.Types.ObjectId, ref: "User" },
+    targetId: { type: Schema.Types.ObjectId, ref: "Video" }, //postId or commentId.
 }, schemaOptions);
 
 //Some points you need to consider:
@@ -17,4 +16,4 @@ const Like = new Schema ({
 // 3.You need to build a mechanism to calculate likes and store in that collection
 
 module.exports.likeSchema = Like
-module.exports.likeModel = mongoose.model('Like', Like)
+module.exports.Like = mongoose.model('Like', Like)
