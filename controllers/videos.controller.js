@@ -61,17 +61,7 @@ async function saveVideoToDatabase (file, body, recognizedMusics, callback) {
         // TO-DO: UserID is hardcoded
         const authorId = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
         newVideo.authorId = authorId
-        const targetId = newVideo.id
-        // var like = new Like({ "authorId": authorId, "targetId": targetId})
-        // like.save()
-        //     .then(function (err) {
-        //         newVideo.likes.push(like) // Yes
-        //         newVideo.save().then(function(err) { // No
-        //             console.log(newVideo)
-        //             callback(err, newVideo)
-        //         });
-        //     });
-        addLikeToVideo(authorId, targetId, newVideo, callback)
+        addLikeToVideo(authorId, newVideo, callback)
     }
 }
 

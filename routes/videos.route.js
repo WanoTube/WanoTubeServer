@@ -12,6 +12,8 @@ router.get('/:id', videoInfos.getVideoInfoById);
 
 router.get('/:id/likes', likes.getAllLikes)
 
+router.post('/like', likes.likeVideo)
+
 router.get('/stream/:key', videos.getVideoById);
 
 router.get('/', videoInfos.getAllVideoInfos)
