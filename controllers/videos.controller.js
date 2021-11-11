@@ -1,9 +1,10 @@
 const fs = require('fs')
 const mongoose = require('mongoose');
 
-const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
+const { uploadFile } = require('../utils/aws-s3-handlers')
 const { videosConvertToAudio } = require('../utils/convert-videos-to-audio')
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
+const { addLikeToVideo } = require('./likes.controller')
 
 const Video = require('../models/video');
 const { Like } = require('../models/like');
@@ -59,17 +60,18 @@ async function saveVideoToDatabase (file, body, recognizedMusics, callback) {
 
         // TO-DO: UserID is hardcoded
         const authorId = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
-        const targetId = newVideo.id
-        var like = new Like({ "authorId": authorId, "targetId": targetId})
         newVideo.authorId = authorId
-        like.save()
-            .then(function (err) {
-                newVideo.likes.push(like) // Yes
-                newVideo.save().then(function(err) { // No
-                    console.log(newVideo)
-                    callback(err, newVideo)
-                });
-            });
+        const targetId = newVideo.id
+        // var like = new Like({ "authorId": authorId, "targetId": targetId})
+        // like.save()
+        //     .then(function (err) {
+        //         newVideo.likes.push(like) // Yes
+        //         newVideo.save().then(function(err) { // No
+        //             console.log(newVideo)
+        //             callback(err, newVideo)
+        //         });
+        //     });
+        addLikeToVideo(authorId, targetId, newVideo, callback)
     }
 }
 

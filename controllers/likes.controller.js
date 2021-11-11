@@ -1,4 +1,4 @@
-const Like = require('../models/like');
+const { Like } = require('../models/like');
 const Video = require('../models/video');
 
 exports.getAllLikes = function (req, res) {
@@ -23,4 +23,16 @@ exports.likeVideo = function (req, res) {
 
     // likes.count => all likes of the videos
 
+}
+
+exports.addLikeToVideo = function(authorId, targetId, newVideo, callback) {
+    var like = new Like({ "authorId": authorId, "targetId": targetId})
+    like.save()
+        .then(function (err) {
+            newVideo.likes.push(like) // Yes
+            newVideo.save().then(function(err) { // No
+                console.log(newVideo)
+                callback(err, newVideo)
+            });
+        });
 }
