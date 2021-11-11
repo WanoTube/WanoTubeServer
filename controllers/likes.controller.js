@@ -5,10 +5,22 @@ exports.getAllLikes = function (req, res) {
     const id = req.params.id
     Video.findById(id)
         .exec(function(err, result) {
-            console.log("id:" + id + " result.id " + result.id)
             if (!err)
                 res.send(result.likes)
             else
                 res.send(err)
         })  
 };
+
+exports.likeVideo = function (req, res) {
+    const body = req.body
+    console.log(body)
+    body.targetId // videoId: the video being liked
+    body.authorId // userId : the person like video
+
+    // find if like is null => add
+    // else => unlike
+
+    // likes.count => all likes of the videos
+
+}
