@@ -2,7 +2,8 @@ const apiRoutes = {
     version:            "/v1",
     objects: {
         users:          "/users",
-        videos:         "/videos"
+        videos:         "/videos",
+        likes:         "/likes"
     },
     actions:
     {

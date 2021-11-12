@@ -5,7 +5,8 @@ const api = require("../utils/api-routes")
 
 router.get('/', likes.getAllLikes)
 
-// router.get("/:id", likes.getLike);
+router.delete(api.actions.delete + '/:id', likes.deleteLikeInfoById)
 
-// router.put(api.actions.update, likes.updateLike);
+router.delete(api.actions.delete, likes.deleteLikeInfo)
 
+module.exports = router;

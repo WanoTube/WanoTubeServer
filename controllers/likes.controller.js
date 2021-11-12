@@ -1,7 +1,15 @@
 const { Like } = require('../models/like');
 const Video = require('../models/video');
+const mongoose = require('mongoose');
 
 exports.getAllLikes = function (req, res) {
+    Like.find()
+        .then(function(doc) {
+            res.send(doc)
+        })
+}
+
+exports.getAllLikesByVideoId = function (req, res) {
     const id = req.params.id
     Video.findById(id)
         .exec(function(err, result) {
@@ -68,8 +76,32 @@ function removeLikeToVideo(authorId, video, callback) {
             $pull: {
                 likes: {authorId: authorId}
             }
-        }, callback(video))
-        //Like.deleteOne({}) // should we delete the like from Like document
+        }, function () {
+            Like.deleteOne({authorId:authorId, targetId: video.id}, callback(video))
+        })
     }
 }
 exports.removeLikeToVideo = removeLikeToVideo
+
+exports.deleteLikeInfoById = function (req, res) {
+    const id = req.params.id
+    console.log(id)
+    Like.deleteOne({ id: id })
+        .then(function(data) {
+            res.status(200).send(data)
+        })
+}
+
+exports.deleteLikeInfo = function (req, res) {
+    const authorId = new mongoose.mongo.ObjectId(req.query.authorId)
+    const targetId = new mongoose.mongo.ObjectId(req.query.targetId)
+
+    if (authorId && targetId) {
+        Like.deleteOne({ authorId: authorId, targetId: targetId }) //delete the first one it found
+            .then(function(data) {
+                res.status(200).send(data)
+            })
+    } else {
+        res.send("authorId and targetId is invalid")
+    }
+}

@@ -10,7 +10,7 @@ router.get(api.actions.search, videoInfos.search)
 
 router.get('/:id', videoInfos.getVideoInfoById);
 
-router.get('/:id/likes', likes.getAllLikes)
+router.get('/:id/likes', likes.getAllLikesByVideoId)
 
 router.post('/like', likes.likeVideo)
 
