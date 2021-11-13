@@ -17,6 +17,7 @@ const apiRoutes = {
         delete:         "/delete",
         upload:         "/upload",
         confirm:        "/confirm",
+        register:        "/register",
 
         musicRecognizer:
         {

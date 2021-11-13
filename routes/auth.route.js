@@ -18,11 +18,11 @@ router.post('/register', async (request, response) => {
     const hashPassword = await bcrypt.hash(request.body.password, salt);
 
     const user = new User({
-        username: request.body.name,
+        username: request.body.username,
         email: request.body.email,
         password: hashPassword,
         first_name: request.body.first_name,
-        first_name: request.body.last_name,
+        last_name: request.body.last_name,
     });
 
     try {

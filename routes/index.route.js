@@ -16,6 +16,6 @@ router.use(api.version + api.objects.users,     usersRoute); // v1/users
 router.use(api.version + api.objects.videos,    videoRoute); // v1/videos
 router.use(api.version + api.objects.likes,     likeRoute); // v1/likes
 router.use(api.version + api.objects.comments,  commentRoute); // v1/comments
-router.use(api.version + api.objects.comments,  authRoute); // v1/videos
+router.use(api.version + api.objects.auth,      authRoute); // v1/videos
 
 module.exports = router;
