@@ -3,6 +3,7 @@ const router = express.Router();
 const videos = require('../controllers/videos.controller');
 const videoInfos = require('../controllers/video-info.controller');
 const likes = require('../controllers/likes.controller');
+const comments = require('../controllers/comments.controller');
 
 const api = require("../utils/api-routes")
 
@@ -12,7 +13,13 @@ router.get('/:id', videoInfos.getVideoInfoById);
 
 router.get('/:id/likes', likes.getAllLikesByVideoId)
 
+router.get('/:id/comments', comments.getAllCommentsByVideoId)
+
 router.post('/like', likes.likeVideo)
+
+router.post('/comment', comments.commentVideo)
+
+router.post('/delete-comment', comments.deleteCommentFromVideo)
 
 router.get('/stream/:key', videos.getVideoById);
 

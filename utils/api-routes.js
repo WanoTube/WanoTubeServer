@@ -1,9 +1,11 @@
 const apiRoutes = {
     version:            "/v1",
     objects: {
-        users:          "/users",
-        videos:         "/videos",
-        likes:         "/likes"
+        auth:          "/auth",
+        comments:      "/comments",
+        likes:         "/likes",
+        users:         "/users",
+        videos:        "/videos",
     },
     actions:
     {

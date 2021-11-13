@@ -7,7 +7,7 @@ const schemaOptions = {
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
 };
 
-const Video = new Schema ({
+const videoSchema = new Schema ({
     title: { type: String, required: true },
     url: { type: String, required: true },
     size: { type: Number, required: true },
@@ -18,4 +18,4 @@ const Video = new Schema ({
     likes: [likeSchema]
 }, schemaOptions);
 
-module.exports = mongoose.model('Video', Video)
+module.exports.Video = mongoose.model('Video', videoSchema)

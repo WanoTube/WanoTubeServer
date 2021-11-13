@@ -1,5 +1,5 @@
 const { Like } = require('../models/like');
-const Video = require('../models/video');
+const { Video } = require('../models/video');
 const mongoose = require('mongoose');
 
 exports.getAllLikes = function (req, res) {
@@ -39,7 +39,7 @@ exports.likeVideo = function (req, res) {
                 } else {
                     // else => unlike => remove like from video
                     // remove likes have this userId 
-                    removeLikeToVideo(userId, result, function(video) {
+                    removeLikeFromVideo(userId, result, function(video) {
                         if (video) res.send(video)
                         else res.send("Cannot remove")
                     })
@@ -56,13 +56,12 @@ exports.likeVideo = function (req, res) {
 }
 
 function addLikeToVideo(authorId, video, callback) {
-    video.authorId = authorId
     var like = new Like({ "authorId": authorId, "targetId": video.id})
     console.log(like)
     like.save()
         .then(function (err) {
-            video.likes.push(like) // Yes
-            video.save().then(function(err) { // No
+            video.likes.push(like) 
+            video.save().then(function(err) { 
                 console.log(video)
                 callback(err, video)
             });
@@ -70,18 +69,16 @@ function addLikeToVideo(authorId, video, callback) {
 }
 exports.addLikeToVideo = addLikeToVideo
 
-function removeLikeToVideo(authorId, video, callback) {
-    if (video.likes) {
-        Video.findByIdAndUpdate(video.id, {
-            $pull: {
-                likes: {authorId: authorId}
-            }
-        }, function () {
-            Like.deleteOne({authorId:authorId, targetId: video.id}, callback(video))
-        })
-    }
+function removeLikeFromVideo(authorId, video, callback) {
+    Video.findByIdAndUpdate(video.id, {
+        $pull: {
+            likes: {authorId: authorId}
+        }
+    }, function () {
+        Like.deleteOne({authorId:authorId, targetId: video.id}, callback(video))
+    })
 }
-exports.removeLikeToVideo = removeLikeToVideo
+exports.removeLikeFromVideo = removeLikeFromVideo
 
 exports.deleteLikeInfoById = function (req, res) {
     const id = req.params.id

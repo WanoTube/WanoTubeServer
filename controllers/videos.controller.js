@@ -6,21 +6,12 @@ const { videosConvertToAudio } = require('../utils/convert-videos-to-audio')
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
 const { addLikeToVideo } = require('./likes.controller')
 
-const Video = require('../models/video');
-const { Like } = require('../models/like');
+const { Video } = require('../models/video');
 
 exports.getVideoById = function (req, res) {
-    // const key = req.params.key
-    // const readStream = getFileStream(key)
-    // readStream.pipe(res);
-
-    const authorId = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
-    const targetId = new mongoose.mongo.ObjectId('617b844449ec929be6f85e60')
-    var like = new Like({ "authorId": authorId, "targetId": targetId})
-    like.save()
-        .then(function (err) {
-            res.send(like)
-        });
+    const key = req.params.key
+    const readStream = getFileStream(key)
+    readStream.pipe(res);
 };
 
 exports.uploadVideo = async function (req, res) {
