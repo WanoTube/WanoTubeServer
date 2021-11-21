@@ -9,7 +9,7 @@ const mongoose = require('./models/index');
 const routes = require('./routes/index.route');
 
 const app = express();
-const PORT = 8080
+const PORT = 8000
 // const PORT = process.env.PORT || 8080
 
 // Only when local
@@ -19,8 +19,10 @@ const corsOptions = {
 
 app.use(fileUpload())
 app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+
 app.use(logger('dev'));
 app.use(cookieParser());
 app.use("/", routes)
