@@ -42,7 +42,6 @@ router.post('/login', async (request, response) => {
     
     const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
     response.header('auth-token', token).send(token);
-    return response.send(`User ${user.username} has logged in`);
 })
 
 module.exports = router;
