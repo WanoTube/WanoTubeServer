@@ -16,9 +16,9 @@ const PORT = 8000
 const corsOptions = {
     origin: "http://localhost:"+ PORT
 }
-
 app.use(fileUpload())
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
