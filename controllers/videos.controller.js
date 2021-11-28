@@ -58,6 +58,7 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics, callbac
         // Save to AWS
         const result = await uploadFile(newFilePath)
         // store result.Key in url video
+        console.log("AWS RESULT: " + result)
         const key = result.Key
         reqVideo.url = key
         console.log("Key: " + key)
