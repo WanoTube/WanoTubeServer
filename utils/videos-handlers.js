@@ -1,6 +1,6 @@
 const ffmpeg = require('fluent-ffmpeg');
 
-async function videosConvertToAudio(input, output, callback) {
+async function videoConvertToAudio(input, output, callback) {
     let isAudioIncluded = false;
     isVideoHaveAudioTrack(input, function (result) {
         isAudioIncluded = result;
@@ -21,10 +21,25 @@ async function videosConvertToAudio(input, output, callback) {
     })
     
 }
+exports.videoConvertToAudio = videoConvertToAudio
 
 function isVideoHaveAudioTrack(input, callback) {
     ffmpeg(input).ffprobe(function(err, data) {
         callback(data.streams.length > 1) 
       });
 }
-exports.videosConvertToAudio = videosConvertToAudio
+
+function compressVideo(input, output, callback) {
+    let command = ffmpeg(input)
+        .videoCodec('libx265')
+        .output(output)
+        .on('error', function(err) {
+            console.log('An error occurred: ' + err.message);
+            callback(err)
+        })
+        .on('end', function() {
+            console.log('Processing finished !');
+            callback()
+        });
+}
+exports.compressVideo = compressVideo

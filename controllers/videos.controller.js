@@ -2,7 +2,7 @@ const fs = require('fs')
 const mongoose = require('mongoose');
 
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
-const { videosConvertToAudio } = require('../utils/convert-videos-to-audio')
+const { compressVideo, videoConvertToAudio } = require('../utils/videos-handlers')
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
 const { addLikeToVideo } = require('./likes.controller')
 
@@ -54,8 +54,8 @@ async function saveVideoToDatabase (file, body, recognizedMusics, callback) {
     musicIncluded(reqVideo.recognitionResult)
 
     if (file) {
+        // Save to AWS
         const result = await uploadFile(file)
-        // console.log(result)
         // store result.Key in url video
         const key = result.Key
         reqVideo.url = key
@@ -91,17 +91,19 @@ async function audioRecognitionFromVideo(file, callback) {
 
 async function videoAnalysis(file, callback){
     const dataBuffers = file.data
-    const name = file.name
-    // Check same name?
-    const videoSavedPath = './videos/' + name
-    const audioSavedPath = './audios/' + name.split('.')[0] + '.mp3'; 
-    // console.log(audioSavedPath)
+    const fileName = file.name
+    const userId = "617a508f7e3e601cad80531d"
+    const timeStamp = Math.floor(Date.now() /1000);
+    const name = fileName.split('.')[0] + "_" + userId + "_" + timeStamp
 
-    fs.writeFile(videoSavedPath, dataBuffers, function(err){
+    const videoSavedPath = './videos/' + fileName
+    const newVideoSavedPath = './videos/' + name + "." + fileName.split('.')[1]
+    const audioSavedPath = './audios/' + name + '.mp3'; 
+    fs.writeFile(newVideoSavedPath, dataBuffers, function(err){
         if (err) return console.log(err);
-        console.log("Saved " + videoSavedPath);
+        console.log("Saved " + newVideoSavedPath);
         console.log("Converting to " + audioSavedPath)
-        videosConvertToAudio(videoSavedPath, audioSavedPath, function(err){
+        videoConvertToAudio(newVideoSavedPath, audioSavedPath, function(err){
             callback(err)
         })
     })
