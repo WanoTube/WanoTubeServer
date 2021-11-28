@@ -24,7 +24,6 @@ async function videosConvertToAudio(input, output, callback) {
 
 function isVideoHaveAudioTrack(input, callback) {
     ffmpeg(input).ffprobe(function(err, data) {
-        console.log(data.streams.length)
         callback(data.streams.length > 1) 
       });
 }
