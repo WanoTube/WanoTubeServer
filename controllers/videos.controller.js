@@ -1,7 +1,7 @@
 const fs = require('fs')
 const mongoose = require('mongoose');
 
-const { uploadFile } = require('../utils/aws-s3-handlers')
+const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
 const { videosConvertToAudio } = require('../utils/convert-videos-to-audio')
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
 const { addLikeToVideo } = require('./likes.controller')
@@ -15,17 +15,32 @@ exports.getVideoById = function (req, res) {
 };
 
 exports.uploadVideo = async function (req, res) {
-    const file = req.files.video
+    let file = req.files;
+    if (req.files) {
+         file = file.video
+    } else {
+        res.send("No file")
+        return
+    }
     const body = req.body
-    audioRecognitionFromVideo(file, function(recognizedMusics) {
-        // apply filter
-        // resize
-
-        saveVideoToDatabase(file, body, recognizedMusics, function (err, data) {
-            if (!err) res.send(data)
-            else res.status(400).send(err);
+    if (body && file) {
+        audioRecognitionFromVideo(file, function(err, recognizedMusics) {
+            // apply filter
+            // resize
+            if (err) {
+                res.status(400).send(err.toString())
+            }
+            else {
+                if (recognizedMusics)
+                    saveVideoToDatabase(file, body, recognizedMusics, function (err, data) {
+                        if (!err) res.status(200).send(data)
+                        else res.status(400).send(err);
+                    })
+            }
         })
-    })
+    } else {
+        res.status(400).send("No body")
+    }
 }
 
 async function saveVideoToDatabase (file, body, recognizedMusics, callback) {
@@ -36,7 +51,6 @@ async function saveVideoToDatabase (file, body, recognizedMusics, callback) {
         "url": "test-url",
         "recognitionResult": recognizedMusics,
     }
-
     musicIncluded(reqVideo.recognitionResult)
 
     if (file) {
@@ -66,8 +80,10 @@ async function audioRecognitionFromVideo(file, callback) {
             console.log("Audio recogniting...")
             audioRecognition(Buffer.from(bitmap), function(result) {
                 console.log("Recognized")
-                callback(result)
+                callback(null, result)
             })
+        } else {
+            callback(err, null)
         }
     })
     // TO-DO: Remove audios, videos
