@@ -30,16 +30,23 @@ function isVideoHaveAudioTrack(input, callback) {
 }
 
 function compressVideo(input, output, callback) {
-    let command = ffmpeg(input)
-        .videoCodec('libx265')
-        .output(output)
-        .on('error', function(err) {
-            console.log('An error occurred: ' + err.message);
-            callback(err)
-        })
-        .on('end', function() {
-            console.log('Processing finished !');
-            callback()
-        });
+    ffmpeg(input)
+    .audioCodec('copy')
+    .output(output)
+    // phải để ở vị trí này
+    .on('end', function() {                    
+        console.log('conversion ended');
+        callback(null);
+    })
+    .on('error', function(err){
+        console.log('error: ', err);
+        callback(err);
+    }).run();
 }
 exports.compressVideo = compressVideo
+
+function restrictVideoName(fileName, userId) {
+    const timeStamp = Math.floor(Date.now() /1000);
+    return fileName.split('.')[0] + "_" + userId + "_" + timeStamp
+}
+exports.restrictVideoName = restrictVideoName

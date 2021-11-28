@@ -2,7 +2,7 @@ const fs = require('fs')
 const mongoose = require('mongoose');
 
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
-const { compressVideo, videoConvertToAudio } = require('../utils/videos-handlers')
+const { compressVideo, videoConvertToAudio, restrictVideoName } = require('../utils/videos-handlers')
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
 const { addLikeToVideo } = require('./likes.controller')
 
@@ -24,7 +24,7 @@ exports.uploadVideo = async function (req, res) {
     }
     const body = req.body
     if (body && file) {
-        audioRecognitionFromVideo(file, function(err, recognizedMusics) {
+        audioRecognitionFromVideo(file, function(err, newFile, recognizedMusics) {
             // apply filter
             // resize
             if (err) {
@@ -71,40 +71,47 @@ async function saveVideoToDatabase (file, body, recognizedMusics, callback) {
 }
 
 async function audioRecognitionFromVideo(file, callback) {
-    const name = file.name
-    const audioSavedPath = './audios/' + name.split('.')[0] + '.mp3'; 
-
-    videoAnalysis(file, function(err){
+    videoAnalysis(file, function(err, videoSavedPath, audioSavedPath){
         if (!err) {
             const bitmap = fs.readFileSync(audioSavedPath);
             console.log("Audio recogniting...")
             audioRecognition(Buffer.from(bitmap), function(result) {
                 console.log("Recognized")
-                callback(null, result)
+                // From path to file?
+
+                callback(null, videoSavedPath, result)
             })
         } else {
-            callback(err, null)
+            callback(err, null, null)
         }
     })
     // TO-DO: Remove audios, videos
+
 }
 
 async function videoAnalysis(file, callback){
     const dataBuffers = file.data
     const fileName = file.name
-    const userId = "617a508f7e3e601cad80531d"
-    const timeStamp = Math.floor(Date.now() /1000);
-    const name = fileName.split('.')[0] + "_" + userId + "_" + timeStamp
+    const name = restrictVideoName(fileName, "617a508f7e3e601cad80531d");
 
     const videoSavedPath = './videos/' + fileName
     const newVideoSavedPath = './videos/' + name + "." + fileName.split('.')[1]
+    // const newVideoSavedPath = './videos/' + name + "." + fileName.split('.')[1]
+
     const audioSavedPath = './audios/' + name + '.mp3'; 
-    fs.writeFile(newVideoSavedPath, dataBuffers, function(err){
+    fs.writeFile(videoSavedPath, dataBuffers, function(err){
         if (err) return console.log(err);
-        console.log("Saved " + newVideoSavedPath);
-        console.log("Converting to " + audioSavedPath)
-        videoConvertToAudio(newVideoSavedPath, audioSavedPath, function(err){
-            callback(err)
-        })
+        console.log("Saved " + videoSavedPath);
+        compressVideo(videoSavedPath, newVideoSavedPath, function(err) {
+            console.log("Compressed video")
+            console.log("Converting to " + audioSavedPath)
+            if (!err)
+                videoConvertToAudio(newVideoSavedPath, videoSavedPath, audioSavedPath, function(err){
+                    callback(err, audioSavedPath)
+                })
+            else 
+                callback("Cannot compress")
+        }) 
+        
     })
 }

@@ -61,4 +61,4 @@ app.use(function(err, req, res, next) {
   // });
 });
 
-app.listen(PORT, () => console.log("listeing on port " + PORT))
+app.listen(PORT, () => console.log("listening on port " + PORT))
