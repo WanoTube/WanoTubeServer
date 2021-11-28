@@ -24,7 +24,7 @@ exports.uploadVideo = async function (req, res) {
     }
     const body = req.body
     if (body && file) {
-        audioRecognitionFromVideo(file, function(err, newFile, recognizedMusics) {
+        audioRecognitionFromVideo(file, function(err, newFilePath, recognizedMusics) {
             // apply filter
             // resize
             if (err) {
@@ -32,7 +32,7 @@ exports.uploadVideo = async function (req, res) {
             }
             else {
                 if (recognizedMusics)
-                    saveVideoToDatabase(file, body, recognizedMusics, function (err, data) {
+                    saveVideoToDatabase(newFilePath, body, recognizedMusics, function (err, data) {
                         if (!err) res.status(200).send(data)
                         else res.status(400).send(err);
                     })
@@ -43,19 +43,20 @@ exports.uploadVideo = async function (req, res) {
     }
 }
 
-async function saveVideoToDatabase (file, body, recognizedMusics, callback) {
+async function saveVideoToDatabase (newFilePath, body, recognizedMusics, callback) {
+    const fileSize = fs.statSync(newFilePath).size
     const reqVideo = {
         "title": body.title,
-        "size": file.size,
+        "size": fileSize,
         "description": body.description,
         "url": "test-url",
         "recognitionResult": recognizedMusics,
     }
     musicIncluded(reqVideo.recognitionResult)
 
-    if (file) {
+    if (newFilePath) {
         // Save to AWS
-        const result = await uploadFile(file)
+        const result = await uploadFile(newFilePath)
         // store result.Key in url video
         const key = result.Key
         reqVideo.url = key
@@ -77,8 +78,6 @@ async function audioRecognitionFromVideo(file, callback) {
             console.log("Audio recogniting...")
             audioRecognition(Buffer.from(bitmap), function(result) {
                 console.log("Recognized")
-                // From path to file?
-
                 callback(null, videoSavedPath, result)
             })
         } else {
@@ -106,8 +105,8 @@ async function videoAnalysis(file, callback){
             console.log("Compressed video")
             console.log("Converting to " + audioSavedPath)
             if (!err)
-                videoConvertToAudio(newVideoSavedPath, videoSavedPath, audioSavedPath, function(err){
-                    callback(err, audioSavedPath)
+                videoConvertToAudio(newVideoSavedPath, audioSavedPath, function(err){
+                    callback(err, newVideoSavedPath, audioSavedPath)
                 })
             else 
                 callback("Cannot compress")

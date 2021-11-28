@@ -1,5 +1,6 @@
 require('dotenv').config()
 const S3 = require('aws-sdk/clients/s3')
+const fs = require('fs')
 
 const bucketName = process.env.AWS_BUCKET_NAME
 const region = process.env.AWS_BUCKET_REGION
@@ -13,14 +14,15 @@ const s3 = new S3({
 })
 
 // uploads a file to s3
-function uploadFile(files){
-    console.log(files)
+function uploadFile(newFilePath){
     // Binary data base64
-    const fileStream  = Buffer.from(files.data, 'binary');
+    const newFileBuffer = fs.readFileSync(newFilePath)
+    const newFileName = newFilePath.split('/')[1]
+    const fileStream  = Buffer.from(newFileBuffer, 'binary');
     const uploadParams = {
         Bucket: bucketName,
         Body: fileStream,
-        Key: files.name
+        Key: newFileName
     }
     return s3.upload(uploadParams).promise()
 }
