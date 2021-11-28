@@ -16,9 +16,7 @@ const s3 = new S3({
 // uploads a file to s3
 function uploadFile(newFilePath){
     // Binary data base64
-    console.log("newFilePath: " + newFilePath)
     const newFileBuffer = fs.readFileSync(newFilePath)
-    console.log("newFileBuffer: " + newFileBuffer)
     const fileName = newFilePath.split('/')[2]
     const newFileName = fileName + fileName.split('.')[1]
     const fileStream  = Buffer.from(newFileBuffer, 'binary');

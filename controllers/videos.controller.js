@@ -58,7 +58,6 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics, callbac
         // Save to AWS
         const result = await uploadFile(newFilePath)
         // store result.Key in url video
-        console.log("AWS RESULT: " + result)
         const key = result.Key
         reqVideo.url = key
         console.log("Key: " + key)
@@ -96,8 +95,6 @@ async function videoAnalysis(file, callback){
 
     const videoSavedPath = './videos/' + fileName
     const newVideoSavedPath = './videos/' + name + "." + fileName.split('.')[1]
-    // const newVideoSavedPath = './videos/' + name + "." + fileName.split('.')[1]
-
     const audioSavedPath = './audios/' + name + '.mp3'; 
     fs.writeFile(videoSavedPath, dataBuffers, function(err){
         if (err) return console.log(err);
