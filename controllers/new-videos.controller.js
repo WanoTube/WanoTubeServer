@@ -1,0 +1,138 @@
+const fs = require('fs')
+const mongoose = require('mongoose');
+
+const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
+const { compressVideo, videoConvertToAudio, restrictVideoName } = require('../utils/videos-handlers')
+const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
+const { addLikeToVideo } = require('./likes.controller')
+
+const { Video } = require('../models/video');
+const httpStatus = require('../utils/http-status')
+exports.uploadVideo = async function (req, res) {
+    // let promise = await myFunction()
+    // res.send(promise)
+
+    let file = req.files;
+    const body = req.body
+
+    if (req.files) {
+         file = file.video
+    } else {
+        res.status(400).send("No file")
+        return
+    }
+    if (body && file) {
+        try {
+            // muốn truyền newFilePath thì sao?
+            let recognizedMusic = await audioRecognitionFromVideo(file)
+            if (recognizedMusic) {
+                console.log('Recognized music: ' + recognizedMusic)
+                res.send(recognizedMusic)
+                // const saveDBResult = await saveVideoToDatabase(newFilePath, body, recognizedMusics)
+                // if (saveDBResult) res.status(200).send(saveDBResult)
+                // else res.status(400).send("Cannot save DB");
+            }
+        } catch(error) {
+            res.status(400).send(error.message)
+        }
+        
+    } else {
+        res.status(400).send("No body")
+    }
+}
+
+async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
+    return new Promise(async function(resolve, reject) {
+        try {
+            const fileSize = fs.statSync(newFilePath).size
+        const reqVideo = {
+            "title": body.title,
+            "size": fileSize,
+            "description": body.description,
+            "url": "test-url",
+            "recognitionResult": recognizedMusics,
+        }
+        musicIncluded(reqVideo.recognitionResult)
+    
+        if (newFilePath) {
+            // Save to AWS
+            const result = await uploadFile(newFilePath)
+            // store result.Key in url video
+            const key = result.Key
+            reqVideo.url = key
+            console.log("Key: " + key)
+            const newVideo = new Video(reqVideo);
+            console.log("Before: " + newVideo)
+    
+            // TO-DO: UserID is hardcoded
+            const authorId = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
+            newVideo.authorId = authorId
+            addLikeToVideo(authorId, newVideo, callback)
+        }
+        } catch (error) {
+            reject(error)
+        }
+    })
+    
+}
+
+async function audioRecognitionFromVideo(file) {
+    return new Promise(async function(resolve, reject) {
+        try {
+            if (file) {
+                console.log("Recognizing audio");
+                let audioSavedPath = await videoAnalysis(file);
+                if (audioSavedPath) {
+                    const bitmap = fs.readFileSync(audioSavedPath);
+                    console.log("Audio recogniting...");
+                    const recognizeResult = await audioRecognition(Buffer.from(bitmap));
+                    if (recognizeResult) {
+                        console.log("Recognized")
+                        // TO-DO: resolve(videoSavedPath, result)
+                        resolve(recognizeResult)
+                    } else {
+                        console.log("Cannot recognize result")
+                        resolve(null)
+                    }
+                }
+            } else {
+                throw new Error("file required");
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+    
+}
+
+async function videoAnalysis(file) {
+    const dataBuffers = file.data;
+    const fileName = file.name;
+    const name = restrictVideoName(fileName, "617a508f7e3e601cad80531d");
+
+    const videoSavedPath = './videos/' + fileName;
+    const newVideoSavedPath = './videos/' + name + "." + fileName.split('.')[1];
+    const audioSavedPath = './audios/' + name + '.mp3'; 
+    return new Promise(async function(resolve, reject) {
+        try {
+            console.log("Writing file: ", videoSavedPath)
+            fs.writeFileSync(videoSavedPath, dataBuffers) 
+            console.log("Saved " + videoSavedPath);
+
+            await compressVideo(videoSavedPath, newVideoSavedPath) ;
+            console.log("Compressed video");
+
+            console.log("Converting to " + audioSavedPath);
+            const convertResult = await videoConvertToAudio(newVideoSavedPath, audioSavedPath)
+            if (convertResult) {
+                // TO-DO: How to pass newVideoSavedPath and audioSavedPath
+                console.log("Converted music")
+                resolve(audioSavedPath);
+            } else {
+                throw new Error("Cannot convert music")
+            }
+        } catch (error) {
+            reject(error);
+        }
+    })  
+}

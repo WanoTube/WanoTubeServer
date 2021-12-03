@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const videos = require('../controllers/videos.controller');
+const videos = require('../controllers/new-videos.controller');
 const videoInfos = require('../controllers/video-info.controller');
 const likes = require('../controllers/likes.controller');
 const comments = require('../controllers/comments.controller');
@@ -21,7 +21,7 @@ router.post('/comment', comments.commentVideo)
 
 router.post('/delete-comment', comments.deleteCommentFromVideo)
 
-router.get('/stream/:key', videos.getVideoById);
+// router.get('/stream/:key', videos.getVideoById);
 
 router.get('/', videoInfos.getAllVideoInfos)
 

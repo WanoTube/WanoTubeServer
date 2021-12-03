@@ -29,8 +29,7 @@ exports.uploadVideo = async function (req, res) {
             // resize
             if (err) {
                 res.status(400).send(err.toString())
-            }
-            else {
+            } else {
                 if (recognizedMusics)
                     saveVideoToDatabase(newFilePath, body, recognizedMusics, function (err, data) {
                         if (!err) res.status(200).send(data)

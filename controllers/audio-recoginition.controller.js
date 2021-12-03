@@ -54,21 +54,32 @@ function identify(data, options, cb) {
   }, cb);
 }
 
-function audioRecognition (data, callback) {
-    identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
-      if (err) console.log(err);
-      else {
-        const result = JSON.parse(body);
-        if (result){
-          if (result.status.msg == "Success") {
-            const data = result.metadata
-            let musics = JSON.stringify(data.music) // array
-            musics = JSON.parse(musics)
-            callback(musics)
+function audioRecognition (data) {
+  return new Promise(function (resolve, reject) {
+    try {
+      identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
+        if (err) console.log(err);
+        else {
+          const result = JSON.parse(body);
+          if (result){
+            if (result.status.msg == "Success") {
+              const data = result.metadata
+              let musics = JSON.stringify(data.music) // array
+              musics = JSON.parse(musics)
+              resolve(musics)
+            } else {
+              reject("Recognition does not success: " + result.status.msg);
+            }
+          } else {
+            reject("Cannot recognize music");
           }
         }
-      }
-    });
+      });
+    } catch (error) {
+      reject(error)
+    }
+  })
+    
 }
 
 exports.audioRecognition = audioRecognition
