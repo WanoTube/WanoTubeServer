@@ -1,4 +1,6 @@
 const fs = require('fs')
+const path = require('path');
+
 const mongoose = require('mongoose');
 
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
@@ -25,6 +27,8 @@ exports.uploadVideo = async function (req, res) {
                 // console.log( "recognizedMusic.savedName ", recognizedMusic.savedName )
                 // console.log( "recognizedMusic.recognizeResult ", recognizedMusic.recognizeResult )
                 const saveDBResult = await saveVideoToDatabase(recognizedMusic.savedName, body, recognizedMusic.recognizeResult)
+                await removeRedundantFiles('./videos');
+                await removeRedundantFiles('./audios');
                 if (saveDBResult) res.status(200).send(saveDBResult)
                 else res.status(400).send("Cannot save DB");
             }
@@ -39,6 +43,13 @@ exports.uploadVideo = async function (req, res) {
     }
 }
 
+async function removeRedundantFiles(directory) {
+    let files = await fs.promises.readdir(directory)
+    if(files.length){
+        const promises = files.map(e => fs.promises.unlink(path.join(directory, e)));
+        await Promise.all(promises)
+    }
+}
 async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
     return new Promise(async function(resolve, reject) {
         try {
