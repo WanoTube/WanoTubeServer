@@ -1,12 +1,11 @@
 const ffmpeg = require('fluent-ffmpeg');
 
 async function videoConvertToAudio(input, output) {
-    let isAudioIncluded = true;
-    // const result = await isVideoHaveAudioTrack(input);
-    // isAudioIncluded = result;
-    
-    return new Promise(function(resolve, reject) {
+    return new Promise(async function(resolve, reject) {
         try {
+            let isAudioIncluded = true;
+            const result = await isVideoHaveAudioTrack(input);
+            isAudioIncluded = result;
             if (isAudioIncluded) {
                 console.log("videoConvertToAudio: input: ", input, ", output: ", output)
         
@@ -39,16 +38,20 @@ exports.videoConvertToAudio = videoConvertToAudio
 
 function isVideoHaveAudioTrack(input) {
     return new Promise(function(resolve, reject) {
-        ffmpeg(input).ffprobe(function(err, data) {
-            if (data)
-                resolve(data.streams.length > 1);
-            else if (!err)
-                reject("data is null")
-            else 
-                reject(err);
-        });
+        try {
+            ffmpeg(input)
+            .ffprobe(function(err, data) {
+                if (err) 
+                    throw new Error(err);
+                if (data)
+                    resolve(data.streams.length > 1);
+                else if (!err)
+                    throw new Error('No data to track audio');
+            });
+        } catch (error) {
+            reject(error)
+        }
     })
-    
 }
 
 async function compressVideo(input, output) {
