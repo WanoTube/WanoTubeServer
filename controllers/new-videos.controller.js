@@ -9,9 +9,6 @@ const { addLikeToVideo } = require('./likes.controller')
 const { Video } = require('../models/video');
 const httpStatus = require('../utils/http-status')
 exports.uploadVideo = async function (req, res) {
-    // let promise = await myFunction()
-    // res.send(promise)
-
     let file = req.files;
     const body = req.body
 
@@ -105,8 +102,6 @@ async function audioRecognitionFromVideo(file) {
                     };
                     if (recognizeResult) {
                         console.log("Recognized")
-                        // .mp3 => .mp4 save
-                        // TO-DO: resolve(videoSavedPath, result)
                         resolve(recognizeResult)
                     } else {
                         console.log("Cannot recognize result")

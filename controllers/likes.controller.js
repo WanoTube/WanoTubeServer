@@ -85,18 +85,6 @@ function addLikeToVideo(authorId, video) {
     });
 }
 
-// function addLikeToVideo(authorId, video, callback) {
-//     var like = new Like({ "authorId": authorId, "targetId": video.id})
-//     console.log(like)
-//     like.save()
-//         .then(function (err) {
-//             video.likes.push(like) 
-//             video.save().then(function(err) { 
-//                 console.log(video)
-//                 callback(err, video)
-//             });
-//         });
-// }
 exports.addLikeToVideo = addLikeToVideo
 
 function removeLikeFromVideo(authorId, video, callback) {

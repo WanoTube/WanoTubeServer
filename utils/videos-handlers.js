@@ -35,27 +35,6 @@ async function videoConvertToAudio(input, output) {
     });
 }
 
-// async function videoConvertToAudio(input, output, callback) {
-//     let isAudioIncluded = false;
-//     isVideoHaveAudioTrack(input, function (result) {
-//         isAudioIncluded = result;
-//         if (isAudioIncluded) {
-//             ffmpeg(input)
-//             .output(output)
-//             .on('end', function() {                    
-//                 console.log('conversion ended');
-//                 callback(null);
-//             })
-//             .on('error', function(err){
-//                 console.log('error: ', err);
-//                 callback(err);
-//             }).run();
-//         } else {
-//             callback("Video doesn't have audio")
-//         }
-//     })
-    
-// }
 exports.videoConvertToAudio = videoConvertToAudio
 
 function isVideoHaveAudioTrack(input) {
@@ -71,12 +50,6 @@ function isVideoHaveAudioTrack(input) {
     })
     
 }
-
-// function isVideoHaveAudioTrack(input, callback) {
-//     ffmpeg(input).ffprobe(function(err, data) {
-//         callback(data.streams.length > 1) 
-//       });
-// }
 
 async function compressVideo(input, output) {
     return new Promise(function(resolve, reject) {
@@ -101,20 +74,6 @@ async function compressVideo(input, output) {
     
 }
 
-// function compressVideo(input, output, callback) {
-//     ffmpeg(input)
-//     .audioCodec('copy')
-//     .output(output)
-//     // phải để ở vị trí này
-//     .on('end', function() {                    
-//         console.log('conversion ended');
-//         callback(null);
-//     })
-//     .on('error', function(err){
-//         console.log('error: ', err);
-//         callback(err);
-//     }).run();
-// }
 exports.compressVideo = compressVideo
 
 function restrictVideoName(fileName, userId) {
