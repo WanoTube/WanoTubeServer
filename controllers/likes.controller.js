@@ -55,18 +55,48 @@ exports.likeVideo = function (req, res) {
 
 }
 
-function addLikeToVideo(authorId, video, callback) {
-    var like = new Like({ "authorId": authorId, "targetId": video.id})
-    console.log(like)
-    like.save()
-        .then(function (err) {
-            video.likes.push(like) 
-            video.save().then(function(err) { 
-                console.log(video)
-                callback(err, video)
-            });
-        });
+function addLikeToVideo(authorId, video) {
+    return new Promise(function (resolve, reject) {
+        try {
+            let like = new Like({ "authorId": authorId, "targetId": video.id});
+            console.log(like);
+            like.save()
+                .then(function (savedData) {
+                    if (savedData) {
+                        video.likes.push(like) ;
+                        video.save().then(function(videoSaved) { 
+                            if (videoSaved) {
+                                console.log(video);
+                                resolve(video);
+                            } else {
+                                throw new Error('Cannot save video')
+                            }
+                        });
+                    } else { 
+                        throw new Error('Cannot save like')
+                    }
+                })
+                .catch(function(error) {
+                    throw new Error(error)
+                })
+        } catch (error) {
+            reject(error);
+        }
+    });
 }
+
+// function addLikeToVideo(authorId, video, callback) {
+//     var like = new Like({ "authorId": authorId, "targetId": video.id})
+//     console.log(like)
+//     like.save()
+//         .then(function (err) {
+//             video.likes.push(like) 
+//             video.save().then(function(err) { 
+//                 console.log(video)
+//                 callback(err, video)
+//             });
+//         });
+// }
 exports.addLikeToVideo = addLikeToVideo
 
 function removeLikeFromVideo(authorId, video, callback) {
