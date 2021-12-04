@@ -22,11 +22,13 @@ exports.uploadVideo = async function (req, res) {
     }
     if (body && file) {
         try {
-            let recognizedMusic = await audioRecognitionFromVideo(file)
+            let analizedVideo = await videoAnalysis(file);
+            let reqVideo = await uploadToS3(analizedVideo);
+            let recognizedMusic = await audioRecognitionFromVideo(analizedVideo);
             if (recognizedMusic) {
                 // console.log( "recognizedMusic.savedName ", recognizedMusic.savedName )
                 // console.log( "recognizedMusic.recognizeResult ", recognizedMusic.recognizeResult )
-                const saveDBResult = await saveVideoToDatabase(recognizedMusic.savedName, body, recognizedMusic.recognizeResult)
+                const saveDBResult = await saveVideoToDatabase(analizedVideo, body, recognizedMusic.recognizeResult)
                 await removeRedundantFiles('./videos');
                 await removeRedundantFiles('./audios');
                 if (saveDBResult) res.status(200).send(saveDBResult)
@@ -54,6 +56,7 @@ async function removeRedundantFiles(directory) {
 async function uploadToS3 (newFilePath) {
     return new Promise(async function(resolve, reject) {
         try {
+            // reqVideo is redundant
             let reqVideo = {
                 "url": "test-url",
                 "videoFile": newFilePath 
@@ -70,7 +73,6 @@ async function uploadToS3 (newFilePath) {
                     throw new Error("Cannot save to AWS S3");
                 }
             }
-
         } catch (error) {
             reject(error)
         }
@@ -85,15 +87,15 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
                 "title": body.title,
                 "size": fileSize,
                 "description": body.description,
-                "url": "test-url",
+                "url": newFilePath.split('/')[2],
                 "recognitionResult": recognizedMusics,
             }
             musicIncluded(reqVideo.recognitionResult)
         
             if (newFilePath) {
-                // // Save to AWS
-                const s3Result = await uploadToS3(newFilePath);
-                reqVideo.url = s3Result.url;
+                // Save to AWS
+                // const s3Result = await uploadToS3(newFilePath);
+                // reqVideo.url = s3Result.url;
                 const newVideo = new Video(reqVideo);
 
                 // TO-DO: UserID is hardcoded
@@ -118,12 +120,12 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
     
 }
 
-async function audioRecognitionFromVideo(file) {
+async function audioRecognitionFromVideo(newVideoSavedPath) {
     return new Promise(async function(resolve, reject) {
         try {
-            if (file) {
+            if (newVideoSavedPath) {
                 console.log("Recognizing audio");
-                let newVideoSavedPath = await videoAnalysis(file);
+                // let newVideoSavedPath = await videoAnalysis(file);
                 if (newVideoSavedPath) {
                     let audioSavedPath = newVideoSavedPath.split('/')[2];
                     audioSavedPath = './audios/' + audioSavedPath.split('.')[0] + '.mp3';
