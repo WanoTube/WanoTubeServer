@@ -50,11 +50,38 @@ async function removeRedundantFiles(directory) {
         await Promise.all(promises)
     }
 }
+
+async function uploadToS3 (newFilePath) {
+    return new Promise(async function(resolve, reject) {
+        try {
+            let reqVideo = {
+                "url": "test-url",
+                "videoFile": newFilePath 
+            }
+            if (newFilePath) {
+                // Save to AWS
+                const result = await uploadFile(newFilePath);
+                // store result.Key in url video
+                if (result) {
+                    reqVideo.url = result.Key;
+                    console.log("reqVideo in uploadToS3: ", reqVideo);
+                    resolve(reqVideo);
+                } else {
+                    throw new Error("Cannot save to AWS S3");
+                }
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    });
+}
+
 async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
     return new Promise(async function(resolve, reject) {
         try {
             const fileSize = fs.statSync(newFilePath).size
-            const reqVideo = {
+            let reqVideo = {
                 "title": body.title,
                 "size": fileSize,
                 "description": body.description,
@@ -64,15 +91,11 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
             musicIncluded(reqVideo.recognitionResult)
         
             if (newFilePath) {
-                // Save to AWS
-                const result = await uploadFile(newFilePath)
-                // store result.Key in url video
-                const key = result.Key
-                reqVideo.url = key
-                console.log("Key: " + key)
+                // // Save to AWS
+                const s3Result = await uploadToS3(newFilePath);
+                reqVideo.url = s3Result.url;
                 const newVideo = new Video(reqVideo);
-                // console.log("Before: " + newVideo)
-        
+
                 // TO-DO: UserID is hardcoded
                 const authorId = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
                 newVideo.authorId = authorId
