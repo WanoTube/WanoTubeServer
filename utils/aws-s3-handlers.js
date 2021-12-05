@@ -26,15 +26,14 @@ function uploadFile(newFilePath){
         Body: fileStream,
         Key: fileName
     };
-    return s3.upload(uploadParams).promise();
-
-    // return s3.upload(uploadParams, function(err, data) {
-    //     if (err) {
-    //         console.log('There was an error uploading your file: ', err);
-    //         return false;
-    //       }
-    //       console.log('Successfully uploaded file.', data);
-    // }).promise()
+    return s3.upload(uploadParams, function(err, data) {
+        if (err) {
+            console.log('There was an error uploading your file: ', err);
+            return false;
+          }
+          console.log('Successfully uploaded file.', data);
+          return true;
+    });
 }
 exports.uploadFile = uploadFile
 

@@ -23,9 +23,7 @@ exports.uploadVideo = async function (req, res) {
     if (body && file) {
         try {
             let analizedVideo = await videoAnalysis(file);
-            let reqVideo = await uploadToS3(analizedVideo);
-
-            // Seperated 
+            await uploadToS3(analizedVideo);
             let recognizedMusic = await audioRecognitionFromVideo(analizedVideo);
             const saveDBResult = await saveVideoToDatabase(analizedVideo, body, recognizedMusic)
             await removeRedundantFiles('./videos');
@@ -51,8 +49,8 @@ async function removeRedundantFiles(directory) {
     }
 }
 
-async function uploadToS3 (newFilePath) {
-    return new Promise(async function(resolve, reject) {
+function uploadToS3 (newFilePath) {
+    return new Promise(function(resolve, reject) {
         try {
             // reqVideo is redundant
             let reqVideo = {
@@ -61,15 +59,23 @@ async function uploadToS3 (newFilePath) {
             }
             if (newFilePath) {
                 // Save to AWS
-                const result = await uploadFile(newFilePath);
-                // store result.Key in url video
-                if (result) {
-                    reqVideo.url = result.Key;
-                    console.log("reqVideo in uploadToS3: ", reqVideo);
-                    resolve(reqVideo);
-                } else {
-                    throw new Error("Cannot save to AWS S3");
-                }
+                uploadFile(newFilePath)
+                .on('httpUploadProgress', function(progress) {
+                    let progressPercentage = Math.round(progress.loaded / progress.total * 100);
+                    console.log("Upload to S3: " + progressPercentage + "%");
+
+                    progressBar.style.width = progressPercentage + "%";
+
+                    // if (progressPercentage < 100) {
+                    //   fileUpload.progressStatus = progressPercentage;
+             
+                    // } else if (progressPercentage == 100) {
+                    //   fileUpload.progressStatus = progressPercentage;
+             
+                    //   fileUpload.status = "Uploaded";
+                    // }
+                  });
+                  resolve(reqVideo);
             }
         } catch (error) {
             reject(error)
