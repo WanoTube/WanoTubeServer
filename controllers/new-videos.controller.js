@@ -181,15 +181,16 @@ async function videoAnalysis(file) {
     const newVideoSavedPath = './videos/' + name + "." + ext;
     return new Promise(async function(resolve, reject) {
         try {
-            console.log("Writing file: ", videoSavedPath)
-            fs.writeFileSync(videoSavedPath, dataBuffers) 
-            console.log("Saved " + videoSavedPath);
-
-            console.log("EXTENSION FILE: ", ext);
-            if (ext.localeCompare(".webm") != 0)
+            // Because if webm we will not compress video. But if we compress video, we need to have 2 paths
+            let willSavePath = (ext.localeCompare(".webm") != 0) ? videoSavedPath : newVideoSavedPath;
+            console.log("Writing file: ", willSavePath)
+            fs.writeFileSync(willSavePath, dataBuffers) 
+            console.log("Saved " + willSavePath);     
+            if (ext.localeCompare(".webm") != 0) {
                 await compressVideo(videoSavedPath, newVideoSavedPath) ;
-            console.log("Compressed video");
-            resolve(newVideoSavedPath);
+                console.log("Compressed video");
+            }
+            resolve(willSavePath);
         } catch (error) {
             reject(error);
         }
