@@ -21,7 +21,7 @@ router.post('/comment', comments.commentVideo)
 
 router.post('/delete-comment', comments.deleteCommentFromVideo)
 
-// router.get('/stream/:key', videos.getVideoById);
+router.get('/stream/:key', videos.getVideoById);
 
 router.get('/', videoInfos.getAllVideoInfos)
 

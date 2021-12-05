@@ -4,12 +4,25 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
-const { compressVideo, videoConvertToAudio, restrictVideoName, isVideoHaveAudioTrack } = require('../utils/videos-handlers')
+const { 
+    compressVideo, 
+    videoConvertToAudio, 
+    restrictVideoName, 
+    isVideoHaveAudioTrack,
+    convertToWebmFormat } = require('../utils/videos-handlers')
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
 const { addLikeToVideo } = require('./likes.controller')
 
 const { Video } = require('../models/video');
 const httpStatus = require('../utils/http-status')
+
+
+exports.getVideoById = function (req, res) {
+    const key = req.params.key
+    const readStream = getFileStream(key)
+    readStream.pipe(res);
+};
+
 exports.uploadVideo = async function (req, res) {
     let file = req.files;
     const body = req.body
@@ -26,10 +39,10 @@ exports.uploadVideo = async function (req, res) {
             await uploadToS3(analizedVideo);
             let recognizedMusic = await audioRecognitionFromVideo(analizedVideo);
             const saveDBResult = await saveVideoToDatabase(analizedVideo, body, recognizedMusic)
-            await removeRedundantFiles('./videos');
-            await removeRedundantFiles('./audios');
             if (saveDBResult) res.status(200).send(saveDBResult)
             else res.status(400).send("Cannot save DB");
+            await removeRedundantFiles('./videos');
+            await removeRedundantFiles('./audios');
         } catch(error) {
             console.log("error: ", error)
             if (error.message) res.status(400).send(error.message)
@@ -147,6 +160,9 @@ async function audioRecognitionFromVideo(newVideoSavedPath) {
                         throw new Error("Cannot convert music")
                     }
                     const bitmap = fs.readFileSync(audioSavedPath);
+
+                    //TO-DO: Split to multiple audios for recognize quicker and easier to track the song name from timestamp?
+
                     console.log("Audio recogniting...");
                     const recognizeResultACR = await audioRecognition(Buffer.from(bitmap));
                     let recognizeResult = {
@@ -183,6 +199,8 @@ async function videoAnalysis(file) {
 
     const videoSavedPath = './videos/' + fileName;
     const newVideoSavedPath = './videos/' + name + ext;
+    const newVideoSavedPathWebm = './videos/' + name + '.webm';
+
     return new Promise(async function(resolve, reject) {
         try {
             // Because if webm we will not compress video. But if we compress video, we need to have 2 paths
@@ -192,7 +210,8 @@ async function videoAnalysis(file) {
             console.log("Saved " + willSavePath);     
             if (ext.localeCompare(".webm") != 0) {
                 await compressVideo(videoSavedPath, newVideoSavedPath) ;
-                willSavePath = newVideoSavedPath;
+                await convertToWebmFormat(newVideoSavedPath, newVideoSavedPathWebm);
+                willSavePath = newVideoSavedPathWebm;
                 console.log("Compressed video");
             }
             resolve(willSavePath);

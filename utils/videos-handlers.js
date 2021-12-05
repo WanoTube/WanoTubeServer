@@ -69,15 +69,45 @@ async function compressVideo(input, output) {
                 console.log('error: ', err);
                 reject(err)
             }).save(output)
+
+            
         } catch (error) {
             reject(error)
         }
         
     });
-    
 }
 
 exports.compressVideo = compressVideo
+
+function convertToWebmFormat(input, output) {
+    return new Promise(function(resolve, reject) {
+        try {
+            console.log("Convert to webm")
+            ffmpeg(input)
+            .addOutputOption(["-f webm"])
+            .on("start", function(commandLine) {
+                console.log("Spawned FFmpeg with command: " + commandLine);
+            })
+            .on('progress', (progress) => {
+                console.log('Processing: ' + progress.targetSize + ' KB converted');
+            })
+            .on('end', function() {                    
+                console.log('conversion ended');
+                resolve('conversion ended')
+            })
+            .on('error', function(err){
+                console.log('error: ', err);
+                reject(err)
+            }).save(output)
+            
+        } catch (error) {
+            reject(error)
+        }
+        
+    });
+}
+exports.convertToWebmFormat = convertToWebmFormat;
 
 function restrictVideoName(fileName, userId) {
     const timeStamp = Math.floor(Date.now() /1000);
