@@ -52,9 +52,12 @@ async function compressVideo(input, output) {
     return new Promise(function(resolve, reject) {
         try {
             ffmpeg(input)
-            .audioCodec('copy')
-            .output(output)
-            // phải để ở vị trí này
+            // .setStartTime(2) //Can be in "HH:MM:SS" format also
+            // .setDuration(10) 
+            .addOutputOption(["-vcodec libx265"])
+            .on("start", function(commandLine) {
+                console.log("Spawned FFmpeg with command: " + commandLine);
+            })
             .on('progress', (progress) => {
                 console.log('Processing: ' + progress.targetSize + ' KB converted');
             })
@@ -65,7 +68,7 @@ async function compressVideo(input, output) {
             .on('error', function(err){
                 console.log('error: ', err);
                 reject(err)
-            }).run();
+            }).save(output)
         } catch (error) {
             reject(error)
         }
