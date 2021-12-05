@@ -106,12 +106,12 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
                     musicIncluded(recognizedMusics)
             }
             const fileSize = fs.statSync(newFilePath).size;
-            const { name } = path.parse(newFilePath);
+            const { base } = path.parse(newFilePath);
             let reqVideo = {
                 "title": body.title,
                 "size": fileSize,
                 "description": body.description,
-                "url": name,
+                "url": base,
                 "recognitionResult": recognizedMusics,
             }
         
