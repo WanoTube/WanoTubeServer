@@ -129,7 +129,7 @@ async function audioRecognitionFromVideo(newVideoSavedPath) {
         try {
             const { name } = path.parse(newVideoSavedPath);
             console.log("NAME: " + name);
-            const audioSavedPath = './audios/' + name + 'mp3'; 
+            const audioSavedPath = './audios/' + name + '.mp3'; 
 
             if (newVideoSavedPath) {
                 let isAudioIncluded = true;
@@ -178,7 +178,7 @@ async function videoAnalysis(file) {
     console.log("New name: ", name);
 
     const videoSavedPath = './videos/' + fileName;
-    const newVideoSavedPath = './videos/' + name + "." + ext;
+    const newVideoSavedPath = './videos/' + name + ext;
     return new Promise(async function(resolve, reject) {
         try {
             // Because if webm we will not compress video. But if we compress video, we need to have 2 paths
