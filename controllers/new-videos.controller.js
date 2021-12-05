@@ -104,8 +104,6 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
         
             if (newFilePath) {
                 // Save to AWS
-                // const s3Result = await uploadToS3(newFilePath);
-                // reqVideo.url = s3Result.url;
                 const newVideo = new Video(reqVideo);
 
                 // TO-DO: UserID is hardcoded
