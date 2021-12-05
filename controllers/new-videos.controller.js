@@ -4,7 +4,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
-const { compressVideo, videoConvertToAudio, restrictVideoName } = require('../utils/videos-handlers')
+const { compressVideo, videoConvertToAudio, restrictVideoName, isVideoHaveAudioTrack } = require('../utils/videos-handlers')
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
 const { addLikeToVideo } = require('./likes.controller')
 
@@ -24,16 +24,14 @@ exports.uploadVideo = async function (req, res) {
         try {
             let analizedVideo = await videoAnalysis(file);
             let reqVideo = await uploadToS3(analizedVideo);
+
+            // Seperated 
             let recognizedMusic = await audioRecognitionFromVideo(analizedVideo);
-            if (recognizedMusic) {
-                // console.log( "recognizedMusic.savedName ", recognizedMusic.savedName )
-                // console.log( "recognizedMusic.recognizeResult ", recognizedMusic.recognizeResult )
-                const saveDBResult = await saveVideoToDatabase(analizedVideo, body, recognizedMusic.recognizeResult)
-                await removeRedundantFiles('./videos');
-                await removeRedundantFiles('./audios');
-                if (saveDBResult) res.status(200).send(saveDBResult)
-                else res.status(400).send("Cannot save DB");
-            }
+            const saveDBResult = await saveVideoToDatabase(analizedVideo, body, recognizedMusic)
+            await removeRedundantFiles('./videos');
+            await removeRedundantFiles('./audios');
+            if (saveDBResult) res.status(200).send(saveDBResult)
+            else res.status(400).send("Cannot save DB");
         } catch(error) {
             console.log("error: ", error)
             if (error.message) res.status(400).send(error.message)
@@ -82,15 +80,19 @@ async function uploadToS3 (newFilePath) {
 async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
     return new Promise(async function(resolve, reject) {
         try {
-            const fileSize = fs.statSync(newFilePath).size
+            if (recognizedMusics) {
+                musicIncluded(reqVideo.recognitionResult)
+                recognizedMusics = recognizedMusics.recognizeResult;
+            }
+            const fileSize = fs.statSync(newFilePath).size;
+            const { name } = path.parse(newFilePath);
             let reqVideo = {
                 "title": body.title,
                 "size": fileSize,
                 "description": body.description,
-                "url": newFilePath.split('/')[2],
+                "url": name,
                 "recognitionResult": recognizedMusics,
             }
-            musicIncluded(reqVideo.recognitionResult)
         
             if (newFilePath) {
                 // Save to AWS
@@ -123,26 +125,43 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
 async function audioRecognitionFromVideo(newVideoSavedPath) {
     return new Promise(async function(resolve, reject) {
         try {
+            const { name } = path.parse(newVideoSavedPath);
+            console.log("NAME: " + name);
+            const audioSavedPath = './audios/' + name + 'mp3'; 
+
             if (newVideoSavedPath) {
-                console.log("Recognizing audio");
-                // let newVideoSavedPath = await videoAnalysis(file);
-                if (newVideoSavedPath) {
-                    let audioSavedPath = newVideoSavedPath.split('/')[2];
-                    audioSavedPath = './audios/' + audioSavedPath.split('.')[0] + '.mp3';
-                    const bitmap = fs.readFileSync(audioSavedPath);
-                    console.log("Audio recogniting...");
-                    const recognizeResultACR = await audioRecognition(Buffer.from(bitmap));
-                    let recognizeResult = {
-                        "savedName": newVideoSavedPath,
-                        "recognizeResult": recognizeResultACR
-                    };
-                    if (recognizeResult) {
-                        console.log("Recognized")
-                        resolve(recognizeResult)
+                let isAudioIncluded = true;
+                isAudioIncluded = await isVideoHaveAudioTrack(newVideoSavedPath);
+                if (isAudioIncluded == true) {
+                    console.log("Converting to " + audioSavedPath);
+                    const convertResult = await videoConvertToAudio(newVideoSavedPath, audioSavedPath)
+                    if (convertResult) {
+                        console.log("Converted music")
+                        resolve(newVideoSavedPath);
                     } else {
-                        console.log("Cannot recognize result")
-                        resolve(null)
+                        throw new Error("Cannot convert music")
                     }
+                    console.log("Recognizing audio");
+                    // let newVideoSavedPath = await videoAnalysis(file);
+                    if (newVideoSavedPath) {
+                        const bitmap = fs.readFileSync(audioSavedPath);
+                        console.log("Audio recogniting...");
+                        const recognizeResultACR = await audioRecognition(Buffer.from(bitmap));
+                        let recognizeResult = {
+                            "savedName": newVideoSavedPath,
+                            "recognizeResult": recognizeResultACR
+                        };
+                        if (recognizeResult) {
+                            console.log("Recognized")
+                            resolve(recognizeResult)
+                        } else {
+                            console.log("Cannot recognize result")
+                            resolve(null)
+                        }
+                    }
+                } else {
+                    console.log("Video does not contain audio");
+                    resolve(null)
                 }
             } else {
                 throw new Error("file required");
@@ -157,11 +176,12 @@ async function audioRecognitionFromVideo(newVideoSavedPath) {
 async function videoAnalysis(file) {
     const dataBuffers = file.data;
     const fileName = file.name;
+    const { ext } = path.parse(fileName);
     const name = restrictVideoName(fileName, "617a508f7e3e601cad80531d");
+    console.log("New name: ", name);
 
     const videoSavedPath = './videos/' + fileName;
-    const newVideoSavedPath = './videos/' + name + "." + fileName.split('.')[1];
-    const audioSavedPath = './audios/' + name + '.mp3'; 
+    const newVideoSavedPath = './videos/' + name + "." + ext;
     return new Promise(async function(resolve, reject) {
         try {
             console.log("Writing file: ", videoSavedPath)
@@ -170,15 +190,7 @@ async function videoAnalysis(file) {
 
             await compressVideo(videoSavedPath, newVideoSavedPath) ;
             console.log("Compressed video");
-
-            console.log("Converting to " + audioSavedPath);
-            const convertResult = await videoConvertToAudio(newVideoSavedPath, audioSavedPath)
-            if (convertResult) {
-                console.log("Converted music")
-                resolve(newVideoSavedPath);
-            } else {
-                throw new Error("Cannot convert music")
-            }
+            resolve(newVideoSavedPath);
         } catch (error) {
             reject(error);
         }

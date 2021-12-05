@@ -1,32 +1,25 @@
 const ffmpeg = require('fluent-ffmpeg');
+const path = require('path');
 
 async function videoConvertToAudio(input, output) {
     return new Promise(async function(resolve, reject) {
         try {
-            let isAudioIncluded = true;
-            const result = await isVideoHaveAudioTrack(input);
-            isAudioIncluded = result;
-            if (isAudioIncluded) {
-                console.log("videoConvertToAudio: input: ", input, ", output: ", output)
-        
-                ffmpeg(input)
-                .output(output)
-               
-                .on('progress', (progress) => {
-                    console.log('Processing: ' + progress.targetSize + ' KB converted');
-                })
-                .on('error', function(err){
-                    console.log('error: ', err);
-                    reject(err)
-                })
-                .on('end', function() {                    
-                    console.log('conversion ended');
-                    resolve(output)
-                })
-                .run();
-            } else {
-                reject("Video doesn't have audio")
-            }
+            console.log("videoConvertToAudio: input: ", input, ", output: ", output)
+            ffmpeg(input)
+            .output(output)
+            
+            .on('progress', (progress) => {
+                console.log('Processing: ' + progress.targetSize + ' KB converted');
+            })
+            .on('error', function(err){
+                console.log('error: ', err);
+                reject(err)
+            })
+            .on('end', function() {                    
+                console.log('conversion ended');
+                resolve(output)
+            })
+            .run();
         } catch (error) {
             reject(error)
         }
@@ -53,6 +46,7 @@ function isVideoHaveAudioTrack(input) {
         }
     })
 }
+exports.isVideoHaveAudioTrack = isVideoHaveAudioTrack;
 
 async function compressVideo(input, output) {
     return new Promise(function(resolve, reject) {
@@ -61,6 +55,9 @@ async function compressVideo(input, output) {
             .audioCodec('copy')
             .output(output)
             // phải để ở vị trí này
+            .on('progress', (progress) => {
+                console.log('Processing: ' + progress.targetSize + ' KB converted');
+            })
             .on('end', function() {                    
                 console.log('conversion ended');
                 resolve('conversion ended')
@@ -81,6 +78,8 @@ exports.compressVideo = compressVideo
 
 function restrictVideoName(fileName, userId) {
     const timeStamp = Math.floor(Date.now() /1000);
-    return fileName.split('.')[0] + "_" + userId + "_" + timeStamp
+    let { name } = path.parse(fileName);
+    // name = name.replace(/[^a-z0-9/]/gi, '_').toLowerCase();
+    return name + "_" + userId + "_" + timeStamp
 }
 exports.restrictVideoName = restrictVideoName
