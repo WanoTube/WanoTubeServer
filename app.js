@@ -8,6 +8,7 @@ const http = require('http')
 
 const mongoose = require('./models/index');
 const routes = require('./routes/index.route');
+const socketController = require('./controllers/socket.controller');
 
 const app = express();
 const server = http.createServer(app);
@@ -44,13 +45,7 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-
-io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-  });
-});
+io.on('connection', socketController.respond);
 
 server.listen(PORT, () => {
   console.log('listening on *:8000');
