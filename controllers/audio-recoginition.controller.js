@@ -68,15 +68,18 @@ function audioRecognition (data) {
               musics = JSON.parse(musics)
               resolve(musics)
             } else {
-              reject("Recognition does not success: " + result.status.msg);
+              console.log("Recognition does not success: " + result.status.msg);
+              resolve(null);
             }
           } else {
-            reject("Cannot recognize music");
+            console.log("Cannot recognize music");
+            resolve(null);
           }
         }
       });
     } catch (error) {
-      reject(error)
+      console.log(error)
+      resolve(null)
     }
   })
     

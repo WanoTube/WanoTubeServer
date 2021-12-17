@@ -18,9 +18,6 @@ const httpStatus = require('../utils/http-status')
 
 
 exports.getVideoById = function (req, res) {
-    const io = req.app.get('socketio');
-    io.emit('hi', "hello");
-
     const key = req.params.key
     const readStream = getFileStream(key)
     readStream.pipe(res);
@@ -38,8 +35,8 @@ exports.uploadVideo = async function (req, res) {
     }
     if (body && file) {
         try {
-            let analizedVideo = await videoAnalysis(file);
-            await uploadToS3(analizedVideo);
+            let analizedVideo = await videoAnalysis(file, res.app);
+            await uploadToS3(analizedVideo, req.app);
             let recognizedMusic = await audioRecognitionFromVideo(analizedVideo);
             const saveDBResult = await saveVideoToDatabase(analizedVideo, body, recognizedMusic)
             if (saveDBResult) res.status(200).send(saveDBResult)
@@ -65,7 +62,9 @@ async function removeRedundantFiles(directory) {
     }
 }
 
-function uploadToS3 (newFilePath) {
+function uploadToS3 (newFilePath, app) {
+    const io = app.get('socketio');
+
     return new Promise(function(resolve, reject) {
         try {
             // reqVideo is redundant
@@ -78,9 +77,9 @@ function uploadToS3 (newFilePath) {
                 uploadFile(newFilePath)
                 .on('httpUploadProgress', function(progress) {
                     let progressPercentage = Math.round(progress.loaded / progress.total * 100);
-                    console.log("Upload to S3: " + progressPercentage + "%");
+                    io.emit('Upload to S3', progressPercentage);
 
-                    progressBar.style.width = progressPercentage + "%";
+                    // progressBar.style.width = progressPercentage + "%";
 
                     // if (progressPercentage < 100) {
                     //   fileUpload.progressStatus = progressPercentage;
@@ -172,7 +171,7 @@ async function audioRecognitionFromVideo(newVideoSavedPath) {
                         "savedName": newVideoSavedPath,
                         "recognizeResult": recognizeResultACR
                     };
-                    if (recognizeResult) {
+                    if (recognizeResult && recognizeResultACR) {
                         console.log("Recognized")
                         resolve(recognizeResult)
                     } else {
@@ -193,7 +192,7 @@ async function audioRecognitionFromVideo(newVideoSavedPath) {
     
 }
 
-async function videoAnalysis(file) {
+async function videoAnalysis(file, app) {
     const dataBuffers = file.data;
     const fileName = file.name;
     const { ext } = path.parse(fileName);
@@ -212,8 +211,8 @@ async function videoAnalysis(file) {
             fs.writeFileSync(willSavePath, dataBuffers) 
             console.log("Saved " + willSavePath);     
             if (ext.localeCompare(".webm") != 0) {
-                await compressVideo(videoSavedPath, newVideoSavedPath) ;
-                await convertToWebmFormat(newVideoSavedPath, newVideoSavedPathWebm);
+                await compressVideo(videoSavedPath, newVideoSavedPath, app) ;
+                await convertToWebmFormat(newVideoSavedPath, newVideoSavedPathWebm, app);
                 willSavePath = newVideoSavedPathWebm;
                 console.log("Compressed video");
             }

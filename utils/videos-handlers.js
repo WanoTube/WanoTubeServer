@@ -2,6 +2,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 
 async function videoConvertToAudio(input, output) {
+    let nextProgress = 0;
     return new Promise(async function(resolve, reject) {
         try {
             console.log("videoConvertToAudio: input: ", input, ", output: ", output)
@@ -9,7 +10,12 @@ async function videoConvertToAudio(input, output) {
             .output(output)
             
             .on('progress', (progress) => {
-                console.log('Processing: ' + progress.targetSize + ' KB converted');
+                if (progress) {
+                    if (nextProgress >= 100 || (nextProgress < 100 && progress.percent  >= nextProgress)) {
+                        console.log("videoConvertToAudio: ", progress.percent, "%")
+                        nextProgress += 15;
+                    }
+                }
             })
             .on('error', function(err){
                 console.log('error: ', err);
@@ -48,7 +54,9 @@ function isVideoHaveAudioTrack(input) {
 }
 exports.isVideoHaveAudioTrack = isVideoHaveAudioTrack;
 
-async function compressVideo(input, output) {
+async function compressVideo(input, output, app) {
+    const io = app.get('socketio');
+    let nextProgress = 0;
     return new Promise(function(resolve, reject) {
         try {
             ffmpeg(input)
@@ -59,7 +67,12 @@ async function compressVideo(input, output) {
                 console.log("Spawned FFmpeg with command: " + commandLine);
             })
             .on('progress', (progress) => {
-                console.log('Processing: ' + progress.targetSize + ' KB converted');
+                if (progress) {
+                    if (nextProgress >= 100 || (nextProgress < 100 && progress.percent  >= nextProgress)) {
+                        io.emit('Compress video', progress);
+                        nextProgress += 15;
+                    }
+                }
             })
             .on('end', function() {                    
                 console.log('conversion ended');
@@ -69,8 +82,6 @@ async function compressVideo(input, output) {
                 console.log('error: ', err);
                 reject(err)
             }).save(output)
-
-            
         } catch (error) {
             reject(error)
         }
@@ -80,7 +91,9 @@ async function compressVideo(input, output) {
 
 exports.compressVideo = compressVideo
 
-function convertToWebmFormat(input, output) {
+function convertToWebmFormat(input, output, app) {
+    const io = app.get('socketio');
+    let nextProgress = 0;
     return new Promise(function(resolve, reject) {
         try {
             console.log("Convert to webm")
@@ -90,7 +103,12 @@ function convertToWebmFormat(input, output) {
                 console.log("Spawned FFmpeg with command: " + commandLine);
             })
             .on('progress', (progress) => {
-                console.log('Processing: ' + progress.targetSize + ' KB converted');
+                if (progress) {
+                    if (nextProgress >= 100 || (nextProgress < 100 && progress.percent  >= nextProgress)) {
+                        io.emit('Convert to Webm Format', progress);
+                        nextProgress += 15;
+                    }
+                }
             })
             .on('end', function() {                    
                 console.log('conversion ended');
