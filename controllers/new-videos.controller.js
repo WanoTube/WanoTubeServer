@@ -18,6 +18,9 @@ const httpStatus = require('../utils/http-status')
 
 
 exports.getVideoById = function (req, res) {
+    const io = req.app.get('socketio');
+    io.emit('hi', "hello");
+
     const key = req.params.key
     const readStream = getFileStream(key)
     readStream.pipe(res);

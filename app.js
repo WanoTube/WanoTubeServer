@@ -45,7 +45,9 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-io.on('connection', socketController.respond);
+io.on('connection', socketController.onSocketConnected);
+
+app.set('socketio', io);
 
 server.listen(PORT, () => {
   console.log('listening on *:8000');
