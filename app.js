@@ -10,20 +10,28 @@ const mongoose = require('./models/index');
 const routes = require('./routes/index.route');
 
 const app = express();
+const server = http.createServer(app);
 const PORT = 8000
 // const PORT = process.env.PORT || 8080
 
 // Only when local
 const corsOptions = {
-    origin: "http://localhost:"+ PORT
+    origin: "http://localhost:"+ 8080,
+    methods: ["GET", "POST"],
+    allowedHeaders: ["my-custom-header"],
+    credentials: true
 }
+
+const io = require("socket.io")(server, {
+  cors: corsOptions
+});
+
 app.use(fileUpload())
 // app.use(cors(corsOptions));
 app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-// app.use(express.static("public")); // ?
 
 app.use(logger('dev'));
 app.use(cookieParser());
@@ -36,49 +44,16 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-const server = http.createServer(app);
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "http://localhost:8080",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["my-custom-header"],
-    credentials: true
-  }
-});
+
 io.on('connection', (socket) => {
   console.log('a user connected');
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
 });
+
 server.listen(PORT, () => {
   console.log('listening on *:8000');
 });
-// // error handlers
-
-// // development error handler
-// // will print stacktrace
-// if (app.get('env') === 'development') {
-//   app.use(function(err, req, res, next) {
-//     res.status(err.status || 500);
-//     res.send("")
-//     // res.render('error', {
-//     //   message: err.message,
-//     //   error: err
-//     // });
-//   });
-// }
-
-// // production error handler
-// // no stacktraces leaked to user
-// app.use(function(err, req, res, next) {
-//   res.status(err.status || 500);
-//   res.send("")
-
-//   // res.render('error', {
-//   //   message: err.message,
-//   //   error: {}
-//   // });
-// });
 
 // app.listen(PORT, () => console.log("listening on port " + PORT))
