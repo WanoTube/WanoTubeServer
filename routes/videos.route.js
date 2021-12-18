@@ -7,6 +7,8 @@ const comments = require('../controllers/comments.controller');
 
 const api = require("../utils/api-routes")
 
+router.get('/users/:authorId', videoInfos.getAllVideoInfosWithUserId)
+
 router.get(api.actions.search, videoInfos.search)
 
 router.get('/:id', videoInfos.getVideoInfoById);

@@ -1,5 +1,6 @@
 const { Video } = require('../models/video');
-  
+const mongoose = require('mongoose');
+
 exports.getAllVideoInfos = function (req,res) {
     Video.find()
         .then(function(doc) {
@@ -7,8 +8,17 @@ exports.getAllVideoInfos = function (req,res) {
         })
 }
 
+exports.getAllVideoInfosWithUserId = function (req,res) {
+    const authId = new mongoose.mongo.ObjectId(req.params.authorId)
+    Video.find({authorId: authId})
+        .then(function(doc) {
+            res.send(doc)
+        })
+}
+
 exports.getVideoInfoById = function (req, res) {
     const id = req.params.id
+    console.log("id: ", id)
     Video.findById(id)
         .exec(function(err, result) {
             if (!err)
@@ -19,6 +29,7 @@ exports.getVideoInfoById = function (req, res) {
 };
 
 exports.search = function (req, res) {
+    console.log("Searching..")
     const searchKey = req.query.search_query
     // TO-DO: SEARCH IN TITLE, not whole title
     Video.
