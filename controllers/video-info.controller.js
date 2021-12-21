@@ -55,6 +55,7 @@ exports.updateVideoInfo = function (req, res) {
             }
             else {
                 video.title = body.title ? body.title : video.title;
+                video.description = body.description ? body.description : video.description;
                 video.url = body.url ? body.url : video.url;
                 video.size = body.size ? body.size : video.size;
                 video.save();
