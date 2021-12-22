@@ -31,6 +31,6 @@ router.post(api.actions.upload, videos.uploadVideo);
 
 router.put(api.actions.update, videoInfos.updateVideoInfo)
 
-router.delete(api.actions.delete + "/:id", videoInfos.deleteVideoInfo);
+router.post(api.actions.delete, videoInfos.deleteVideoInfo);
 
 module.exports = router;

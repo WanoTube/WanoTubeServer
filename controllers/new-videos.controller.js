@@ -17,10 +17,15 @@ const { Video } = require('../models/video');
 const httpStatus = require('../utils/http-status')
 
 
-exports.getVideoById = function (req, res) {
-    const key = req.params.key
-    const readStream = getFileStream(key)
-    readStream.pipe(res);
+exports.getVideoById = async function (req, res) {
+    const key = req.params.key;
+    try {
+        const readStream = await getFileStream(key)
+        if (readStream)
+            readStream.pipe(res);
+    } catch(error) {
+        res.status(error.statusCode).send(error);
+    }
 };
 
 exports.uploadVideo = async function (req, res) {
@@ -78,19 +83,8 @@ function uploadToS3 (newFilePath, app) {
                 .on('httpUploadProgress', function(progress) {
                     let progressPercentage = Math.round(progress.loaded / progress.total * 100);
                     io.emit('Upload to S3', progressPercentage);
-
-                    // progressBar.style.width = progressPercentage + "%";
-
-                    // if (progressPercentage < 100) {
-                    //   fileUpload.progressStatus = progressPercentage;
-             
-                    // } else if (progressPercentage == 100) {
-                    //   fileUpload.progressStatus = progressPercentage;
-             
-                    //   fileUpload.status = "Uploaded";
-                    // }
                   });
-                  resolve(reqVideo);
+                resolve(reqVideo);
             }
         } catch (error) {
             reject(error)

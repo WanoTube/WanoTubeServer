@@ -15,7 +15,7 @@ const s3 = new S3({
 });
 
 // uploads a file to s3
-function uploadFile(newFilePath){
+exports.uploadFile = function (newFilePath) {
     // Binary data base64
     const newFileBuffer = fs.readFileSync(newFilePath);
     const { base } = path.parse(newFilePath);
@@ -35,14 +35,56 @@ function uploadFile(newFilePath){
           return true;
     });
 }
-exports.uploadFile = uploadFile
 
 // downloads a file from s3
-function getFileStream(fileKey){
+exports.getFileStream = async function (fileKey){
     const downloadParams = {
         Key: fileKey,
         Bucket: bucketName
     }
-    return s3.getObject(downloadParams).createReadStream()
+    return new Promise(async function(resolve, reject) {
+        try {
+            await s3.headObject(downloadParams).promise();
+            try {
+                console.log("File Found in S3?");
+                const result = s3.getObject(downloadParams).createReadStream()
+                if (result)
+                    resolve(result);
+                else 
+                    reject("Cannot get video");
+            } catch (err) {
+                console.log(err)
+                reject(err)
+            }
+        } catch (err) {
+            console.log("File not Found ERROR : " + err.code);
+            reject(err);
+        }
+    });
 }
-exports.getFileStream = getFileStream
+
+exports.deleteFile = function (fileKey) {
+    // fileKey = fileKey + '.webm';
+    const deleteParams = {
+        Key: fileKey,
+        Bucket: bucketName
+    }
+    return new Promise(async function(resolve, reject) {
+        try {
+            await s3.headObject(deleteParams).promise();
+            try {
+                const result = await s3.deleteObject(deleteParams).promise();
+                if (result)
+                    resolve(result);
+                else 
+                    reject("Cannot delete video");
+            } catch (error) {
+                console.log("Cannot delete video, error: ", error);
+                reject(error);
+            }
+        } catch (error) {
+            console.log("Cannot find video, error: ", error);
+            reject(error);
+        }
+    });
+}

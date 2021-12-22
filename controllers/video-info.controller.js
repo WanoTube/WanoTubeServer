@@ -1,4 +1,6 @@
 const { Video } = require('../models/video');
+const { deleteFile } = require('../utils/aws-s3-handlers')
+
 const mongoose = require('mongoose');
 
 exports.getAllVideoInfos = function (req,res) {
@@ -65,10 +67,18 @@ exports.updateVideoInfo = function (req, res) {
 }
 
 exports.deleteVideoInfo = async function (req, res) {
-    const id = req.params.id
-    console.log(id)
-    Video.deleteOne({ id: id })
-        .then(function(data) {
-            res.status(200)
-        })
+    const id = req.body.id
+    const url = req.body.url
+    console.log(req.body)
+    try {
+        await deleteFile(url)
+        // try {
+        //     const data = await Video.deleteOne({ id: id }).promise();
+        //     res.status(200).send(data);
+        // } catch(error) {
+        //     res.status(error.statusCode).send(error);
+        // }
+    } catch (error) {
+        res.status(error.statusCode).send(error);
+    }
 }
