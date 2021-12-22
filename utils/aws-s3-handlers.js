@@ -46,7 +46,6 @@ exports.getFileStream = async function (fileKey){
         try {
             await s3.headObject(downloadParams).promise();
             try {
-                console.log("File Found in S3?");
                 const result = s3.getObject(downloadParams).createReadStream()
                 if (result)
                     resolve(result);
