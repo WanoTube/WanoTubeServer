@@ -71,14 +71,14 @@ exports.deleteVideoInfo = async function (req, res) {
     const url = req.body.url
     console.log(req.body)
     try {
-        // await deleteFile(url)
+        await deleteFile(url)
         try {
             const data = await Video.deleteOne({ id: id });
             res.status(200).send(data);
         } catch(error) {
-            res.status(error).send(error);
+            res.send(error);
         }
     } catch (error) {
-        res.status(error).send(error);
+        res.send(error);
     }
 }

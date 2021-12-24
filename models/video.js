@@ -15,7 +15,11 @@ const videoSchema = new Schema ({
     recognitionResult: { type: Schema.Types.Mixed },
     authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     comments: [commentSchema],
-    likes: [likeSchema]
+    likes: [likeSchema],
+    totalLikes: { type: Number, default: 0, required: true },
+    totalComments: { type: Number, default: 0, required: true },
+    totalViews: { type: Number, default: 0, required: true },
+    visibility: { type: Number, default: 0, required: true }, // 0: public, 1: private, 2: followers
 }, schemaOptions);
 
 module.exports.Video = mongoose.model('Video', videoSchema)
