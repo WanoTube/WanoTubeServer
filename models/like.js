@@ -5,8 +5,8 @@ const schemaOptions = {
   };
 
 const likeSchema = new Schema ({
-    authorId: { type: Schema.Types.ObjectId, ref: "User" },
-    targetId: { type: Schema.Types.ObjectId, ref: "Video" }, //postId or commentId.
+    author_id: { type: Schema.Types.ObjectId, ref: "User" },
+    target_id: { type: Schema.Types.ObjectId, ref: "Video" }, //postId or commentId.
 }, schemaOptions);
 
 //Some points you need to consider:

@@ -7,15 +7,15 @@ const comments = require('../controllers/comments.controller');
 
 const api = require("../utils/api-routes")
 
-router.get('/users/:authorId', videoInfos.getAllVideoInfosWithUserId)
+router.get('/users/:author_id', videoInfos.getAllVideoInfosWithUserId)
 
 router.get(api.actions.search, videoInfos.search)
 
 router.get('/:id', videoInfos.getVideoInfoById);
 
-router.get('/:id/likes', likes.getAllLikesByVideoId)
+router.get('/:id/likes', likes.getAllLikesByvideo_id)
 
-router.get('/:id/comments', comments.getAllCommentsByVideoId)
+router.get('/:id/comments', comments.getAllCommentsByvideo_id)
 
 router.post('/like', likes.likeVideo)
 

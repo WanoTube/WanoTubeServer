@@ -11,7 +11,7 @@ const {
     isVideoHaveAudioTrack,
     convertToWebmFormat } = require('../utils/videos-handlers')
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
-const { addLikeToVideo } = require('./likes.controller')
+const { createVideoInfos } = require('./video-info.controller')
 
 const { Video } = require('../models/video');
 const httpStatus = require('../utils/http-status')
@@ -108,7 +108,7 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
                 "size": fileSize,
                 "description": body.description,
                 "url": base,
-                "recognitionResult": recognizedMusics,
+                "recognition_result": recognizedMusics,
             }
         
             if (newFilePath) {
@@ -116,15 +116,14 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
                 const newVideo = new Video(reqVideo);
 
                 // TO-DO: UserID is hardcoded
-                const authorId = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
-                newVideo.authorId = authorId
-                console.log("Begin to videoAfterAddLike")
+                const author_id = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
+                newVideo.author_id = author_id
 
-                const videoAfterAddLike =  await addLikeToVideo(authorId, newVideo);
-                
-                if (videoAfterAddLike) {
-                    console.log("videoAfterAddLike: " + videoAfterAddLike)
-                    resolve(videoAfterAddLike)
+                console.log("Begin to create video in DB")
+                const videoAfterCreatedInDB =  await createVideoInfos(newVideo);
+                if (videoAfterCreatedInDB) {
+                    console.log("videoAfterCreatedInDB: " + videoAfterCreatedInDB)
+                    resolve(videoAfterCreatedInDB)
                 } 
                 else reject("Cannot save video to DB")
             } else {

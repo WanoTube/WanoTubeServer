@@ -49,9 +49,9 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics, callbac
         "size": fileSize,
         "description": body.description,
         "url": "test-url",
-        "recognitionResult": recognizedMusics,
+        "recognition_result": recognizedMusics,
     }
-    musicIncluded(reqVideo.recognitionResult)
+    musicIncluded(reqVideo.recognition_result)
 
     if (newFilePath) {
         // Save to AWS
@@ -64,9 +64,9 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics, callbac
         console.log("Before: " + newVideo)
 
         // TO-DO: UserID is hardcoded
-        const authorId = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
-        newVideo.authorId = authorId
-        addLikeToVideo(authorId, newVideo, callback)
+        const author_id = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
+        newVideo.author_id = author_id
+        addLikeToVideo(author_id, newVideo, callback)
     }
 }
 

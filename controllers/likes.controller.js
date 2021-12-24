@@ -9,7 +9,7 @@ exports.getAllLikes = function (req, res) {
         })
 }
 
-exports.getAllLikesByVideoId = function (req, res) {
+exports.getAllLikesByvideo_id = function (req, res) {
     const id = req.params.id
     Video.findById(id)
         .exec(function(err, result) {
@@ -24,10 +24,10 @@ exports.getAllLikesByVideoId = function (req, res) {
 exports.likeVideo = function (req, res) {
     const body = req.body
     console.log(body)
-    const videoId = body.targetId // videoId: the video being liked
-    const userId = body.authorId // userId : the person like video
+    const video_id = body.target_id // video_id: the video being liked
+    const userId = body.author_id // userId : the person like video
 
-    Video.findById(videoId)
+    Video.findById(video_id)
         .exec(function(err, result) {
             if (result && !err) {
                 if (result.likes.length <= 0) {
@@ -55,23 +55,23 @@ exports.likeVideo = function (req, res) {
 
 }
 
-function addLikeToVideo(authorId, video) {
+function addLikeToVideo(author_id, video) {
     return new Promise(function (resolve, reject) {
         try {
-            let like = new Like({ "authorId": authorId, "targetId": video.id});
+            let like = new Like({ "author_id": author_id, "target_id": video.id});
             console.log(like);
             like.save()
-                .then(function (savedData) {
+                .then(async function (savedData) {
                     if (savedData) {
+                        video.total_likes += 1;
                         video.likes.push(like) ;
-                        video.save().then(function(videoSaved) { 
-                            if (videoSaved) {
-                                console.log(video);
-                                resolve(video);
-                            } else {
-                                throw new Error('Cannot save video')
-                            }
-                        });
+                        const videoSaved = await video.save();
+                        if (videoSaved) {
+                            console.log(video);
+                            resolve(video);
+                        } else {
+                            throw new Error('Cannot save video')
+                        }
                     } else { 
                         throw new Error('Cannot save like')
                     }
@@ -87,13 +87,13 @@ function addLikeToVideo(authorId, video) {
 
 exports.addLikeToVideo = addLikeToVideo
 
-function removeLikeFromVideo(authorId, video, callback) {
+function removeLikeFromVideo(author_id, video, callback) {
     Video.findByIdAndUpdate(video.id, {
         $pull: {
-            likes: {authorId: authorId}
+            likes: {author_id: author_id}
         }
     }, function () {
-        Like.deleteOne({authorId:authorId, targetId: video.id}, callback(video))
+        Like.deleteOne({author_id:author_id, target_id: video.id}, callback(video))
     })
 }
 exports.removeLikeFromVideo = removeLikeFromVideo
@@ -108,15 +108,15 @@ exports.deleteLikeInfoById = function (req, res) {
 }
 
 exports.deleteLikeInfo = function (req, res) {
-    const authorId = new mongoose.mongo.ObjectId(req.query.authorId)
-    const targetId = new mongoose.mongo.ObjectId(req.query.targetId)
+    const author_id = new mongoose.mongo.ObjectId(req.query.author_id)
+    const target_id = new mongoose.mongo.ObjectId(req.query.target_id)
 
-    if (authorId && targetId) {
-        Like.deleteOne({ authorId: authorId, targetId: targetId }) //delete the first one it found
+    if (author_id && target_id) {
+        Like.deleteOne({ author_id: author_id, target_id: target_id }) //delete the first one it found
             .then(function(data) {
                 res.status(200).send(data)
             })
     } else {
-        res.send("authorId and targetId is invalid")
+        res.send("author_id and target_id is invalid")
     }
 }

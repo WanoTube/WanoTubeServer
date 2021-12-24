@@ -3,6 +3,22 @@ const { deleteFile } = require('../utils/aws-s3-handlers')
 
 const mongoose = require('mongoose');
 
+exports.createVideoInfos = function (video) {
+    return new Promise(async function(resolve, reject) { 
+        try {
+            const videoSaved = await video.save();
+            if (videoSaved) {
+                console.log(video);
+                resolve(video);
+            } else {
+                throw new Error('Cannot save video')
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 exports.getAllVideoInfos = function (req,res) {
     Video.find()
         .then(function(doc) {
@@ -11,8 +27,8 @@ exports.getAllVideoInfos = function (req,res) {
 }
 
 exports.getAllVideoInfosWithUserId = function (req,res) {
-    const authId = new mongoose.mongo.ObjectId(req.params.authorId)
-    Video.find({authorId: authId})
+    const authId = new mongoose.mongo.ObjectId(req.params.author_id)
+    Video.find({author_id: authId})
         .then(function(doc) {
             res.send(doc)
         })
