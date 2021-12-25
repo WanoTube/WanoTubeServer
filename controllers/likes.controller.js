@@ -28,31 +28,33 @@ exports.likeVideo = function (req, res) {
     const userId = body.author_id // userId : the person like video
 
     Video.findById(video_id)
-        .exec(function(err, result) {
+        .exec(async function(err, result) {
             if (result && !err) {
-                if (result.likes.length <= 0) {
+                // console.log("result.likes.length: ", result.likes.length)
+                if (result.total_likes <= 0) {
                     // find if like is null => add
-                    addLikeToVideo(userId, result, function(err, video) {
-                        if (!err) res.send(video)
-                        else res.send(err)
-                    })
+                    try {
+                        const video = await addLikeToVideo(userId, result);
+                        res.send(video)
+                    } catch (error) {
+                        res.send(error)
+                    }
                 } else {
                     // else => unlike => remove like from video
                     // remove likes have this userId 
-                    removeLikeFromVideo(userId, result, function(video) {
-                        if (video) res.send(video)
-                        else res.send("Cannot remove")
-                    })
+                    try {
+                        const video = await removeLikeFromVideo(userId, result);
+                        if (video) res.send(video);
+                        else res.send("Cannot remove");
+                    } catch (error) {
+                        res.send(error)
+                    }
                 }
             } else {
                 if (!result) res.send("Cannot find video")
                 else res.send(err)
             }
         })
-    
-
-    // likes.count => all likes of the videos
-
 }
 
 function addLikeToVideo(author_id, video) {
@@ -87,14 +89,25 @@ function addLikeToVideo(author_id, video) {
 
 exports.addLikeToVideo = addLikeToVideo
 
-function removeLikeFromVideo(author_id, video, callback) {
-    Video.findByIdAndUpdate(video.id, {
-        $pull: {
-            likes: {author_id: author_id}
+function removeLikeFromVideo(author_id, video) {
+    return new Promise(async function (resolve, reject) {
+        try {
+            const total_likes = video.total_likes - 1;
+            await Video.findByIdAndUpdate(video.id, {
+                total_likes: total_likes,
+                $pull: {
+                    likes: {author_id: author_id}
+                },
+            })
+            await Like.deleteOne({
+                author_id: author_id, 
+                target_id: video.id
+            });
+            resolve(video);
+        } catch (error) {
+            reject(error);
         }
-    }, function () {
-        Like.deleteOne({author_id:author_id, target_id: video.id}, callback(video))
-    })
+    });
 }
 exports.removeLikeFromVideo = removeLikeFromVideo
 
