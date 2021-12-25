@@ -26,7 +26,8 @@ const User = new mongoose.Schema ({
             required: true,
             min: 6,
             max: 255
-        }
+        },
+        avatar: { type: String },
 }, schemaOptions);
 
 module.exports = mongoose.model('User', User)
