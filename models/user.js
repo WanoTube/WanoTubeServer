@@ -9,8 +9,8 @@ const User = new mongoose.Schema ({
                 min: 6,
                 max: 255
         },
-        first_name: { type: String, required: true },
-        last_name: { type: String, required: true },
+        first_name: { type: String },
+        last_name: { type: String },
         email: {
                 type: String,
                 required: true,
