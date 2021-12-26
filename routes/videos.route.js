@@ -11,6 +11,8 @@ router.get('/users/:author_id', videoInfos.getAllVideoInfosWithUserId)
 
 router.get(api.actions.search, videoInfos.search)
 
+router.get('/public', videoInfos.getAllPublicVideoInfos)
+
 router.get('/:id', videoInfos.getVideoInfoById);
 
 router.get('/:id/likes', likes.getAllLikesByvideo_id)
@@ -24,6 +26,7 @@ router.post('/comment', comments.commentVideo)
 router.post('/delete-comment', comments.deleteCommentFromVideo)
 
 router.get('/stream/:key', videos.getVideoById);
+
 
 router.get('/', videoInfos.getAllVideoInfos)
 

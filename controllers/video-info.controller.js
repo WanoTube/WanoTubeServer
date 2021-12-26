@@ -34,6 +34,13 @@ exports.getAllVideoInfosWithUserId = function (req,res) {
         })
 }
 
+exports.getAllPublicVideoInfos = function (req,res) {
+    Video.find({visibility: 0})
+        .then(function(doc) {
+            res.send(doc)
+        })
+}
+
 exports.getVideoInfoById = function (req, res) {
     const id = req.params.id
     console.log("id: ", id)

@@ -117,16 +117,20 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
                 const newVideo = new Video(reqVideo);
 
                 // TO-DO: UserID is hardcoded
-                const author_id = new mongoose.mongo.ObjectId('617a508f7e3e601cad80531d')
-                newVideo.author_id = author_id
+                const author_id = body.author_id;
+                if (author_id) {
+                    newVideo.author_id = author_id
 
-                console.log("Begin to create video in DB")
-                const videoAfterCreatedInDB =  await createVideoInfos(newVideo);
-                if (videoAfterCreatedInDB) {
-                    console.log("videoAfterCreatedInDB: " + videoAfterCreatedInDB)
-                    resolve(videoAfterCreatedInDB)
+                    console.log("Begin to create video in DB")
+                    const videoAfterCreatedInDB =  await createVideoInfos(newVideo);
+                    if (videoAfterCreatedInDB) {
+                        console.log("videoAfterCreatedInDB: " + videoAfterCreatedInDB)
+                        resolve(videoAfterCreatedInDB)
+                    } 
+                    else reject("Cannot save video to DB")
                 } 
-                else reject("Cannot save video to DB")
+                else 
+                    reject("No user id passed")
             } else {
                 reject ("newFilePath not found")
             }
