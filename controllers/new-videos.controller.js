@@ -22,13 +22,10 @@ exports.getVideoById = async function (req, res) {
     try {
         const readStream = await getFileStream(key)
         if (readStream) {
-            readStream.on('error', function () {
-                res.status(404).end();
-            });
             readStream.pipe(res);
         }
     } catch(error) {
-        res.status(error.statusCode).send(error);
+        res.send(error);
     }
 };
 

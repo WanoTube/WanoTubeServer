@@ -27,7 +27,12 @@ exports.createUser = async function (request, response) {
 
     try {
         const newUser = await user.save();
-        await response.send(newUser);
+        const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
+        const result = {
+            "token": token,
+            "user": newUser
+        }
+        response.header('auth-token', token).send(result);
     } catch (err) {
         response.status(400).send(err);
     }
@@ -42,7 +47,11 @@ exports.login = async function (request, response) {
     if (!checkPassword) return response.status(422).send('Email or Password is not correct');
     
     const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
-    response.header('auth-token', token).send(token);
+    const result = {
+        "token": token,
+        "user": user
+    }
+    response.header('auth-token', token).send(result);
 }
 
 exports.getAllUsers = function (req, res) {

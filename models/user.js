@@ -16,7 +16,7 @@ const User = new mongoose.Schema ({
                 required: true,
                 min: 6,
                 max: 225
-            },
+        },
         gender: { type: String },
         birth_date: { type: Date },
         phone_number: { type: String },
@@ -27,7 +27,7 @@ const User = new mongoose.Schema ({
                 min: 6,
                 max: 255
         },
-        role: { type: mongoose.Schema.Types.ObjectId, ref: "roleSchema", default: mongoose.mongo.ObjectId("61c835841cf23b3200a016e8") },
+        is_admin: { type: Boolean, default: false },
         avatar: { type: String },
 }, schemaOptions);
 
