@@ -34,6 +34,14 @@ exports.getAllVideoInfosWithUserId = function (req,res) {
         })
 }
 
+exports.getAllPublicVideoInfosWithUserId = function (req,res) {
+    const authId = new mongoose.mongo.ObjectId(req.params.author_id)
+    Video.find({author_id: authId, visibility: 0})
+        .then(function(doc) {
+            res.send(doc)
+        })
+}
+
 exports.getAllPublicVideoInfos = function (req,res) {
     Video.find({visibility: 0})
         .then(function(doc) {

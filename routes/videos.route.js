@@ -9,6 +9,8 @@ const api = require("../utils/api-routes")
 
 router.get('/users/:author_id', videoInfos.getAllVideoInfosWithUserId)
 
+router.get('/users/:author_id/public', videoInfos.getAllPublicVideoInfosWithUserId)
+
 router.get(api.actions.search, videoInfos.search)
 
 router.get('/public', videoInfos.getAllPublicVideoInfos)
@@ -26,7 +28,6 @@ router.post('/comment', comments.commentVideo)
 router.post('/delete-comment', comments.deleteCommentFromVideo)
 
 router.get('/stream/:key', videos.getVideoById);
-
 
 router.get('/', videoInfos.getAllVideoInfos)
 

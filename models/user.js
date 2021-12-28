@@ -29,6 +29,7 @@ const User = new mongoose.Schema ({
         },
         is_admin: { type: Boolean, default: false },
         avatar: { type: String },
+        description: { type: String }
 }, schemaOptions);
 
 module.exports = mongoose.model('User', User)
