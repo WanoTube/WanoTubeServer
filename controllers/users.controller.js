@@ -2,6 +2,7 @@ const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { registerValidator } = require('../validations/auth');
+const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
 
 exports.createUser = async function (request, response) {
     const { error } = registerValidator(request.body);
@@ -62,4 +63,16 @@ exports.getAllUsers = function (req, res) {
             res.send(users);
         }
     });
+};
+
+exports.getAvatar = async function (req, res) {
+    const key = req.params.key;
+    try {
+        const readStream = await getFileStream(key)
+        if (readStream) {
+            readStream.pipe(res);
+        }
+    } catch(error) {
+        res.send(error);
+    }
 };

@@ -3,12 +3,10 @@ const router = express.Router();
 const user = require('../controllers/users.controller');
 const verifyToken = require('./../middlewares/verifyToken.middleware');
 
-router.get('/', verifyToken, function(req, res){
-    user.getAllUsers(req,res); 
-});
+router.get('/', verifyToken, user.getAllUsers);
 
-router.post('/', function(req, res) {
-    user.createUser(req,res);
-});
+router.post('/', user.createUser);
+
+router.get('/avatar/:key', user.getAvatar)
 
 module.exports = router;
