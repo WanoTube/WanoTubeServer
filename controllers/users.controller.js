@@ -31,7 +31,7 @@ exports.createUser = async function (request, response) {
         password: hashPassword,
     });
     account.user_id = user._id;
-    
+
     try {
         const newAccount = await account.save();
         console.log(newAccount)
@@ -52,19 +52,26 @@ exports.login = async function (request, response) {
     const account = await Account.findOne({email: request.body.email});
     if (!account) return response.status(422).send('Email is not correct');
     const checkPassword = await bcrypt.compare(request.body.password, account.password);
-
     if (!checkPassword) return response.status(422).send('Password is not correct');
-    
-    console.log("account: ", account);
-    let user = await User.findOne({_id: account._id});
-    user.username = account.username;
-    console.log("user: ", user);
-    const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
-    const result = {
-        "token": token,
-        "user": user
+    try {
+        let user = await User.findOne({user_id: account._id});
+        if (user) {
+            const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
+            const result = {
+                "token": token,
+                "user": {
+                    "_id": user._id,
+                    "username": account.username,
+                    "is_admin": account.is_admin
+                }
+            }
+            response.header('auth-token', token).send(result);
+        } else {
+            response.status(400).send("Cannot find user");
+        }
+    } catch (error) {
+        response.status(400).send(err);
     }
-    response.header('auth-token', token).send(result);
 }
 
 exports.getAllUsers = function (req, res) {
