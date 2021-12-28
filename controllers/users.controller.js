@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const Account = require('../models/account');
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { registerValidator } = require('../validations/auth');
@@ -9,7 +11,7 @@ exports.createUser = async function (request, response) {
 
     if (error) return response.send(registerValidator(request.body));
 
-    const checkEmailExist = await User.findOne({ email: request.body.email });
+    const checkEmailExist = await Account.findOne({ email: request.body.email });
 
     if (checkEmailExist) return response.status(422).send('Email is exist');
 
@@ -17,17 +19,22 @@ exports.createUser = async function (request, response) {
     const hashPassword = await bcrypt.hash(request.body.password, salt);
 
     const user = new User({
-        username: request.body.username,
-        email: request.body.email,
-        password: hashPassword,
         first_name: request.body.first_name,
         last_name: request.body.last_name,
         phone_number: request.body.phone_number,
         birth_date: request.body.birth_date
     });
-
+    let account = new Account({
+        username: request.body.username,
+        email: request.body.email,
+        password: hashPassword,
+    });
+        account.user_id = user._id;
     try {
+        const newAccount = await account.save();
+        console.log(newAccount)
         const newUser = await user.save();
+
         const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
         const result = {
             "token": token,
@@ -41,12 +48,15 @@ exports.createUser = async function (request, response) {
 
 exports.login = async function (request, response) {
     //TO-DO: Check role admin or user?
-    const user = await User.findOne({email: request.body.email});
-    if (!user) return response.status(422).send('Email or Password is not correct');
-    const checkPassword = await bcrypt.compare(request.body.password, user.password);
+    const account = await Account.findOne({email: request.body.email});
+    if (!account) return response.status(422).send('Email is not correct');
+    const checkPassword = await bcrypt.compare(request.body.password, account.password);
 
-    if (!checkPassword) return response.status(422).send('Email or Password is not correct');
+    if (!checkPassword) return response.status(422).send('Password is not correct');
     
+    console.log("account: ", account);
+    const user = await Account.findOne({_id: account._id});
+    console.log("user: ", user);
     const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
     const result = {
         "token": token,
