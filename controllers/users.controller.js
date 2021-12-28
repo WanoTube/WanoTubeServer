@@ -9,7 +9,7 @@ const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
 exports.createUser = async function (request, response) {
     const { error } = registerValidator(request.body);
 
-    if (error) return response.send(registerValidator(request.body));
+    if (error) return response.send(error);
 
     const checkEmailExist = await Account.findOne({ email: request.body.email });
 
@@ -24,17 +24,18 @@ exports.createUser = async function (request, response) {
         phone_number: request.body.phone_number,
         birth_date: request.body.birth_date
     });
+
     let account = new Account({
         username: request.body.username,
         email: request.body.email,
         password: hashPassword,
     });
-        account.user_id = user._id;
+    account.user_id = user._id;
+    
     try {
         const newAccount = await account.save();
         console.log(newAccount)
         const newUser = await user.save();
-
         const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
         const result = {
             "token": token,
@@ -55,7 +56,8 @@ exports.login = async function (request, response) {
     if (!checkPassword) return response.status(422).send('Password is not correct');
     
     console.log("account: ", account);
-    const user = await Account.findOne({_id: account._id});
+    let user = await User.findOne({_id: account._id});
+    user.username = account.username;
     console.log("user: ", user);
     const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
     const result = {
