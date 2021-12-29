@@ -4,7 +4,9 @@ const Account = require('../models/account');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { registerValidator } = require('../validations/auth');
-const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
+const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers');
+const account = require('../models/account');
+const mongoose = require('mongoose');
 
 exports.createUser = async function (request, response) {
     const { error } = registerValidator(request.body);
@@ -88,7 +90,7 @@ exports.getAllUsers = function (req, res) {
 };
 
 exports.getUserById = function (req, res) {
-    const userId = req.params.id
+    const userId = new mongoose.mongo.ObjectId(req.query.id)
     User.findById(userId).exec(function (err, user) {
         if (err) {
             res.send(400, err);
@@ -98,13 +100,24 @@ exports.getUserById = function (req, res) {
     });
 };
 
-exports.getUserIdByUsername = function (req, res) {
+exports.getUserByUsername = function (req, res) {
     const username = req.params.username
-    User.find({username: username}).exec(function (err, user) {
+    Account.find({username: username}).exec(function (err, account) {
         if (err) {
-            res.send(400, err);
+            res.status(400).send(err);
         } else {
-            res.send(user);
+            if (account) {
+                const userId =  account[0].user_id;
+                User.findById(userId).exec(function (error, user) {
+                    if (err) {
+                        res.status(400).send(error);
+                    } else {
+                        res.status(200).send(user);
+                    }
+                })
+            } else {
+                res.send(400, "Cannot find account")
+            }
         }
     });
 };
