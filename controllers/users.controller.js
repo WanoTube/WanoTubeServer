@@ -52,7 +52,6 @@ exports.createUser = async function (request, response) {
 };
 
 exports.login = async function (request, response) {
-    //TO-DO: Check role admin or user?
     const account = await Account.findOne({email: request.body.email});
     if (!account) return response.status(422).send('Email is not correct');
     const checkPassword = await bcrypt.compare(request.body.password, account.password);
@@ -84,6 +83,28 @@ exports.getAllUsers = function (req, res) {
             res.send(400, err);
         } else {
             res.send(users);
+        }
+    });
+};
+
+exports.getUserById = function (req, res) {
+    const userId = req.params.id
+    User.findById(userId).exec(function (err, user) {
+        if (err) {
+            res.send(400, err);
+        } else {
+            res.send(user);
+        }
+    });
+};
+
+exports.getUserIdByUsername = function (req, res) {
+    const username = req.params.username
+    User.find({username: username}).exec(function (err, user) {
+        if (err) {
+            res.send(400, err);
+        } else {
+            res.send(user);
         }
     });
 };

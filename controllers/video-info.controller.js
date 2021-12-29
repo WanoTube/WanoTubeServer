@@ -51,7 +51,6 @@ exports.getAllPublicVideoInfos = function (req,res) {
 
 exports.getVideoInfoById = function (req, res) {
     const id = req.params.id
-    console.log("id: ", id)
     Video.findById(id)
         .exec(function(err, result) {
             if (!err)
