@@ -7,6 +7,8 @@ const { registerValidator } = require('../validations/auth');
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers');
 const account = require('../models/account');
 const mongoose = require('mongoose');
+const { restrictImageName } = require('../utils/image-handlers')
+const path = require('path');
 
 exports.createUser = async function (request, response) {
     const { error } = registerValidator(request.body);
@@ -133,3 +135,49 @@ exports.getAvatar = async function (req, res) {
         res.send(error);
     }
 };
+
+exports.updateAvatar = async function (req, res) {
+    const body = req.body;
+    const file = req.files.avatar;
+    const fileName = file.name;
+    const dataBuffers = file.data;
+    let { ext } = path.parse(fileName);
+    const avatarName = restrictImageName(fileName, body.user_id) + ext;
+    try {
+        await uploadToS3(avatarName, dataBuffers, req.app);
+        const saveDBResult = await updateAvatarInDB(body.user_id, avatarName);
+        res.send(saveDBResult);
+        // TO-DO: Remove older image?
+    } catch (error) {
+        res.send(error);
+    }
+}
+
+function updateAvatarInDB (userId, avatarName) {
+    return new Promise(async function(resolve, reject) {
+        try {
+            return await User.updateOne({ _id: userId }, { avatar: avatarName });
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+function uploadToS3 (fileName, fileStream, app) {
+    const io = app.get('socketio');
+    return new Promise(function(resolve, reject) {
+        try {
+            if (fileName) {
+                // Save to AWS
+                uploadFile(fileName, fileStream)
+                .on('httpUploadProgress', function(progress) {
+                    let progressPercentage = Math.round(progress.loaded / progress.total * 100);
+                    io.emit('Upload avatar image to S3', progressPercentage);
+                  });
+                resolve(fileName);
+            }
+        } catch (error) {
+            reject(error)
+        }
+    });
+}

@@ -13,4 +13,6 @@ router.post('/', user.createUser);
 
 router.get('/avatar/:key', user.getAvatar)
 
+router.post('/avatar/', user.updateAvatar)
+
 module.exports = router;

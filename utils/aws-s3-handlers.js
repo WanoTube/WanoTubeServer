@@ -15,12 +15,12 @@ const s3 = new S3({
 });
 
 // uploads a file to s3
-exports.uploadFile = function (newFilePath) {
+exports.uploadFile = function (fileName, fileStream) {
     // Binary data base64
-    const newFileBuffer = fs.readFileSync(newFilePath);
-    const { base } = path.parse(newFilePath);
-    const fileName = base;
-    const fileStream  = Buffer.from(newFileBuffer, 'binary');
+    // const { base } = path.parse(newFilePath);
+    // const fileName = base;
+    // const newFileBuffer = fs.readFileSync(newFilePath);
+    // const fileStream  = Buffer.from(newFileBuffer, 'binary');
     const uploadParams = {
         Bucket: bucketName,
         Body: fileStream,

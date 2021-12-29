@@ -2,13 +2,14 @@ const fs = require('fs')
 const path = require('path');
 const mongoose = require('mongoose');
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
-
 const { 
     compressVideo, 
     videoConvertToAudio, 
     restrictVideoName, 
     isVideoHaveAudioTrack,
-    convertToWebmFormat } = require('../utils/videos-handlers')
+    convertToWebmFormat 
+} = require('../utils/videos-handlers')
+
 const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
 const { createVideoInfos } = require('./video-info.controller')
 
@@ -40,7 +41,7 @@ exports.uploadVideo = async function (req, res) {
     }
     if (body && file) {
         try {
-            let analizedVideo = await videoAnalysis(file, res.app);
+            let analizedVideo = await videoAnalysis(file, res.app, body);
             await uploadToS3(analizedVideo, req.app);
             let recognizedMusic = await audioRecognitionFromVideo(analizedVideo);
             const saveDBResult = await saveVideoToDatabase(analizedVideo, body, recognizedMusic)
@@ -79,7 +80,11 @@ function uploadToS3 (newFilePath, app) {
             }
             if (newFilePath) {
                 // Save to AWS
-                uploadFile(newFilePath)
+                const { base } = path.parse(newFilePath);
+                const fileName = base;
+                const newFileBuffer = fs.readFileSync(newFilePath);
+                const fileStream  = Buffer.from(newFileBuffer, 'binary');
+                uploadFile(fileName, fileStream)
                 .on('httpUploadProgress', function(progress) {
                     let progressPercentage = Math.round(progress.loaded / progress.total * 100);
                     io.emit('Upload to S3', progressPercentage);
@@ -189,11 +194,11 @@ async function audioRecognitionFromVideo(newVideoSavedPath) {
     
 }
 
-async function videoAnalysis(file, app) {
+async function videoAnalysis(file, app, body) {
     const dataBuffers = file.data;
     const fileName = file.name;
     const { ext } = path.parse(fileName);
-    const name = restrictVideoName(fileName, "617a508f7e3e601cad80531d");
+    const name = restrictVideoName(fileName, body.author_id);
     console.log("New name: ", name);
 
     const videoSavedPath = './videos/' + fileName;
