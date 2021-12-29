@@ -92,12 +92,23 @@ exports.getAllUsers = function (req, res) {
 };
 
 exports.getUserById = function (req, res) {
-    const userId = new mongoose.mongo.ObjectId(req.query.id)
+    const userId = new mongoose.mongo.ObjectId(req.params.id)
     User.findById(userId).exec(function (err, user) {
         if (err) {
             res.send(400, err);
         } else {
             res.send(user);
+        }
+    });
+};
+
+exports.getAccountByUserId = function (req, res) {
+    const userId = new mongoose.mongo.ObjectId(req.params.user_id)
+    Account.find({user_id: userId}).exec(function (err, account) {
+        if (err) {
+            res.send(400, err);
+        } else {
+            res.send(account);
         }
     });
 };
@@ -180,4 +191,32 @@ function uploadToS3 (fileName, fileStream, app) {
             reject(error)
         }
     });
+}
+
+exports.updateUser = async function (req, res) {
+    const body = req.body
+    const id = body.id;
+    if (body.email) {
+        try {
+           await  Account.updateOne({user_id: id}, {email: body.email});
+        } catch (error) {
+            res.send(error);
+        }
+    }
+    if (body && id) {
+        try {
+            const user = await User.updateOne({_id: id}, {
+                first_name: body.first_name,
+                last_name: body.last_name,
+                gender: body.gender,
+                birth_date: body.birth_date,
+                phone_number: body.phone_number,
+                description: body.description,
+                country: body.country
+            });
+            res.send(user);
+        } catch (error) {
+            res.send(error);
+        }
+    }
 }

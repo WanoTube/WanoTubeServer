@@ -7,9 +7,13 @@ const verifyToken = require('./../middlewares/verifyToken.middleware');
 
 router.get('/:username', verifyToken, user.getUserByUsername);
 
+router.get('/account/:user_id', user.getAccountByUserId);
+
 router.get('/', verifyToken, user.getAllUsers);
 
 router.post('/', user.createUser);
+
+router.put('/update', user.updateUser);
 
 router.get('/avatar/:key', user.getAvatar)
 
