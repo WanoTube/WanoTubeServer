@@ -59,7 +59,7 @@ exports.login = async function (request, response) {
     const checkPassword = await bcrypt.compare(request.body.password, account.password);
     if (!checkPassword) return response.status(422).send('Password is not correct');
     try {
-        let user = await User.findOne({user_id: account._id});
+        let user = await User.findOne({_id: account.user_id});
         if (user) {
             const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
             const result = {
