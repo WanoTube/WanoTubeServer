@@ -26,7 +26,6 @@ exports.getTotalCommentsByVideoId = async function (req, res) {
 
 exports.commentVideo = function (req, res) {
     const body = req.body
-    console.log(body)
     const video_id = body.video_id // video_id: the video being liked
     const userId = body.author_id // userId : the person like video
     const content = body.content // content of the comment
