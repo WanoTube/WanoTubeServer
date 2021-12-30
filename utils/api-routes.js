@@ -12,7 +12,7 @@ const apiRoutes = {
         login:          "/login",
 
         create:         "/add",
-        search:         "/results",
+        search:         "/search",
         update:         "/update",
         delete:         "/delete",
         upload:         "/upload",

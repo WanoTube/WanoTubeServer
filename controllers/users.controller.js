@@ -114,8 +114,9 @@ exports.getAccountByUserId = function (req, res) {
     });
 };
 
+
 exports.getUserByUsername = function (req, res) {
-    const username = req.params.username
+    const username = req.query.username;
     Account.find({username: username}).exec(function (err, account) {
         if (err) {
             res.status(400).send(err);
