@@ -92,15 +92,23 @@ exports.getAllUsers = function (req, res) {
     });
 };
 
-exports.getUserById = function (req, res) {
+exports.getUserById = async function (req, res) {
     const userId = new mongoose.mongo.ObjectId(req.params.id)
-    User.findById(userId).exec(function (err, user) {
-        if (err) {
-            res.send(400, err);
-        } else {
-            res.send(user);
+    try {
+        const user = await User.findById(userId);
+        try {
+            const account = await Account.findOne({ user_id: user._id });
+            const result = {
+                user: user,
+                username: account.username
+            }
+            res.send(result);
+        } catch (error) {
+            res.send(error);
         }
-    });
+    } catch (error) {
+        res.send(error);
+    }
 };
 
 exports.getAccountByUserId = function (req, res) {
