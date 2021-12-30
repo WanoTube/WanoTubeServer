@@ -9,7 +9,7 @@ exports.getAllLikes = function (req, res) {
         })
 }
 
-exports.getAllLikesByvideo_id = function (req, res) {
+exports.getAllLikesByVideoId = function (req, res) {
     const id = req.params.id
     Video.findById(id)
         .exec(function(err, result) {
@@ -21,16 +21,26 @@ exports.getAllLikesByvideo_id = function (req, res) {
         })  
 };
 
+exports.getTotalLikesByVideoId = async function (req, res) {
+    const id = req.params.id
+    try {
+        const video = await Video.findById(id);
+        if (video) {
+            res.status(200).send(JSON.stringify(video.total_likes));
+        }
+    } catch (error) {
+        res.status(400).send(error);
+    }
+};
+
 exports.likeVideo = function (req, res) {
     const body = req.body
-    console.log(body)
     const video_id = body.target_id // video_id: the video being liked
     const userId = body.author_id // userId : the person like video
 
     Video.findById(video_id)
         .exec(async function(err, result) {
             if (result && !err) {
-                // console.log("result.likes.length: ", result.likes.length)
                 if (result.total_likes <= 0) {
                     // find if like is null => add
                     try {

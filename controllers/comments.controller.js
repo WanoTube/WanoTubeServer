@@ -2,7 +2,7 @@ const { Video } = require('../models/video');
 const { Comment } = require('../models/comment');
 const mongoose = require('mongoose');
 
-exports.getAllCommentsByvideo_id = function (req, res) {
+exports.getAllCommentsByVideoId = function (req, res) {
     const id = req.params.id
     Video.findById(id)
         .exec(function(err, result) {
@@ -12,6 +12,16 @@ exports.getAllCommentsByvideo_id = function (req, res) {
             } else
                 res.send(err)
         })  
+};
+
+exports.getTotalCommentsByVideoId = async function (req, res) {
+    const id = req.params.id
+    try {
+        const video = await Video.findById(id)
+        res.status(200).send(JSON.stringify(video.total_comments));
+    } catch (error) {
+        res.send(error);
+    }
 };
 
 exports.commentVideo = function (req, res) {

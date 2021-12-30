@@ -17,15 +17,19 @@ router.get('/public', videoInfos.getAllPublicVideoInfos)
 
 router.get('/:id', videoInfos.getVideoInfoById);
 
-router.get('/:id/likes', likes.getAllLikesByvideo_id)
+router.get('/:id/likes', likes.getAllLikesByVideoId)
 
-router.get('/:id/comments', comments.getAllCommentsByvideo_id)
+router.get('/:id/total-likes', likes.getTotalLikesByVideoId)
+
+router.get('/:id/comments', comments.getAllCommentsByVideoId)
+
+router.get('/:id/total-comments', comments.getTotalCommentsByVideoId)
 
 router.post('/like', likes.likeVideo)
 
 router.post('/comment', comments.commentVideo)
 
-router.post('/delete-comment', comments.deleteCommentFromVideo)
+router.post('/comment/delete', comments.deleteCommentFromVideo)
 
 router.get('/stream/:key', videos.getVideoById);
 
