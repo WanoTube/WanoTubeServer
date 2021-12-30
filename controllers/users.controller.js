@@ -69,7 +69,8 @@ exports.login = async function (request, response) {
                 "user": {
                     "_id": user._id,
                     "username": account.username,
-                    "is_admin": account.is_admin
+                    "is_admin": account.is_admin,
+                    "avatar": user.avatar
                 }
             }
             response.header('auth-token', token).send(result);
@@ -156,9 +157,10 @@ exports.updateAvatar = async function (req, res) {
     const avatarName = restrictImageName(fileName, body.user_id) + ext;
     try {
         await uploadToS3(avatarName, dataBuffers, req.app);
-        const saveDBResult = await updateAvatarInDB(body.user_id, avatarName);
-        res.send(saveDBResult);
+        await updateAvatarInDB(body.user_id, avatarName);
         // TO-DO: Remove older image?
+        
+        res.send(avatarName);
     } catch (error) {
         res.send(error);
     }
@@ -167,7 +169,8 @@ exports.updateAvatar = async function (req, res) {
 function updateAvatarInDB (userId, avatarName) {
     return new Promise(async function(resolve, reject) {
         try {
-            return await User.updateOne({ _id: userId }, { avatar: avatarName });
+            const user = await User.updateOne({ _id: userId }, { avatar: avatarName });
+            resolve(user);
         } catch (error) {
             reject(error);
         }
@@ -198,7 +201,9 @@ exports.updateUser = async function (req, res) {
     const id = body.id;
     if (body.email) {
         try {
-           await  Account.updateOne({user_id: id}, {email: body.email});
+            const checkEmailExist = await Account.findOne({ email: request.body.email });
+            if (checkEmailExist) res.status(422).send('Email is exist');
+            else await  Account.updateOne({user_id: id}, {email: body.email});
         } catch (error) {
             res.send(error);
         }

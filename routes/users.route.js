@@ -5,7 +5,7 @@ const verifyToken = require('./../middlewares/verifyToken.middleware');
 
 // router.get('/:id', verifyToken, user.getUserById);
 
-router.get('/:username', verifyToken, user.getUserByUsername);
+router.get('/:username', user.getUserByUsername);
 
 router.get('/account/:user_id', user.getAccountByUserId);
 

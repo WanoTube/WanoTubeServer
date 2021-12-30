@@ -5,7 +5,7 @@ const schemaOptions = {
 const User = new mongoose.Schema ({
         first_name: { type: String },
         last_name: { type: String },
-        gender: { type: String, default: "Female", required: true },
+        gender: { type: String, default: "Female" },
         birth_date: { type: Date },
         phone_number: { type: String },
         country: { type: String },
