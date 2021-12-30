@@ -24,26 +24,22 @@ exports.getTotalCommentsByVideoId = async function (req, res) {
     }
 };
 
-exports.commentVideo = function (req, res) {
+exports.commentVideo = async function (req, res) {
     const body = req.body
     const video_id = body.video_id // video_id: the video being liked
     const userId = body.author_id // userId : the person like video
     const content = body.content // content of the comment
 
-    Video.findById(video_id)
-        .exec(function(err, video) {
-            // Add comment
-            if (video) {
-                addComment(userId, video, content, function (err, video) {
-                    if (!err && video) res.send(video)
-                    else {
-                        if (err) res.send(err)
-                        else res.send("Video is null")
-                    }
-                })
-            } else res.send("Video not found")
-        })
-    
+    try {
+        const video = await Video.findById(video_id)
+        if (video) {
+            addComment(userId, video, content, function (err, comment) {
+                res.send(comment);
+            })
+        }
+    } catch (error) {
+        res.send(error);
+    }
 }
 
 function addComment(author_id, video, content, callback) {
@@ -53,8 +49,7 @@ function addComment(author_id, video, content, callback) {
             video.comments.push(comment);
             video.total_comments += 1;
             video.save().then(function(err) { 
-                console.log(video)
-                callback(err, video)
+                callback(err, comment)
             });
         });
 }
