@@ -76,25 +76,21 @@ exports.search = function (req, res) {
         })
 };
 
-exports.updateVideoInfo = function (req, res) {
+exports.updateVideoInfo = async function (req, res) {
     const body = req.body
-    const id = body.id;
-    Video.findById(id)
-        .exec(function(err, video) {
-            if (err) {
-                console.error('error, no entry found');
-                res.send(err)
-            }
-            else {
-                video.title = body.title ? body.title : video.title;
-                video.description = body.description ? body.description : video.description;
-                video.url = body.url ? body.url : video.url;
-                video.size = body.size ? body.size : video.size;
-                video.visibility = body.visibility ? body.visibility : video.visibility;
-                video.save();
-                res.send(video)
-            }
-        })
+    try {
+        const video = await Video.updateOne({ _id: body.id }, { 
+            total_views: body.totalViews,
+            title : body.title,
+            description : body.description,
+            url : body.url,
+            size : body.size,
+            visibility : body.visibility
+        });
+        res.send(video);
+    } catch (error) {
+        res.send(error);
+    }
 }
 
 exports.deleteVideoInfo = async function (req, res) {
@@ -111,5 +107,17 @@ exports.deleteVideoInfo = async function (req, res) {
         }
     } catch (error) {
         res.send(error);
+    }
+}
+
+exports.getTotalViewsByVideoId = async function(req, res) {
+    const id = req.params.id
+    try {
+        const video = await Video.findById(id);
+        if (video) {
+            res.status(200).send(JSON.stringify(video.total_views));
+        }
+    } catch (error) {
+        res.status(400).send(error);
     }
 }

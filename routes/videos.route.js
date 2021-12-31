@@ -19,11 +19,13 @@ router.get('/:id', videoInfos.getVideoInfoById);
 
 router.get('/:id/likes', likes.getAllLikesByVideoId)
 
-router.get('/:id/total-likes', likes.getTotalLikesByVideoId)
-
 router.get('/:id/comments', comments.getAllCommentsByVideoId)
 
+router.get('/:id/total-likes', likes.getTotalLikesByVideoId)
+
 router.get('/:id/total-comments', comments.getTotalCommentsByVideoId)
+
+router.get('/:id/total-views', videoInfos.getTotalViewsByVideoId)
 
 router.post('/like', likes.likeVideo)
 
