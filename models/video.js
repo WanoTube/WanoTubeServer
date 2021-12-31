@@ -19,7 +19,8 @@ const videoSchema = new Schema ({
     total_likes: { type: Number, default: 0, required: true },
     total_comments: { type: Number, default: 0, required: true },
     total_views: { type: Number, default: 0, required: true },
-    visibility: { type: Number, default: 0, required: true }, // 0: public, 1: private, 2: followers
+    visibility: { type: Number, default: 0, required: true }, // 0: public, 1: private, 2: followers,
+    duration: { type: String }
 }, schemaOptions);
 
 module.exports.Video = mongoose.model('Video', videoSchema)

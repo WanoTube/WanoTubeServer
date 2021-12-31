@@ -112,6 +112,7 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
                 "title": body.title,
                 "size": fileSize,
                 "description": body.description,
+                "duration": body.duration,
                 "url": base,
                 "recognition_result": recognizedMusics,
             }

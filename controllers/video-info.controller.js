@@ -85,7 +85,8 @@ exports.updateVideoInfo = async function (req, res) {
             description : body.description,
             url : body.url,
             size : body.size,
-            visibility : body.visibility
+            visibility : body.visibility,
+            duration: body.duration
         });
         res.send(video);
     } catch (error) {
