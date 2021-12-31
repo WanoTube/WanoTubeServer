@@ -115,6 +115,7 @@ async function saveVideoToDatabase (newFilePath, body, recognizedMusics) {
                 "duration": body.duration,
                 "url": base,
                 "recognition_result": recognizedMusics,
+                "visibility": body.privacy
             }
         
             if (newFilePath) {
