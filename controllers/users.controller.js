@@ -169,11 +169,11 @@ exports.updateAvatar = async function (req, res) {
     let { ext } = path.parse(fileName);
     const avatarName = restrictImageName(fileName, body.user_id) + ext;
     try {
-        await uploadToS3(avatarName, dataBuffers, req.app);
+        const uploaded = await uploadToS3(avatarName, dataBuffers, req.app);
         await updateAvatarInDB(body.user_id, avatarName);
         // TO-DO: Remove older image?
-        
-        res.send(avatarName);
+        if (uploaded)
+            res.send(avatarName);
     } catch (error) {
         res.send(error);
     }
@@ -200,8 +200,9 @@ function uploadToS3 (fileName, fileStream, app) {
                 .on('httpUploadProgress', function(progress) {
                     let progressPercentage = Math.round(progress.loaded / progress.total * 100);
                     io.emit('Upload avatar image to S3', progressPercentage);
+                    if (progressPercentage >= 100)
+                        resolve(fileName);
                   });
-                resolve(fileName);
             }
         } catch (error) {
             reject(error)
