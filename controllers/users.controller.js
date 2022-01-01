@@ -19,6 +19,10 @@ exports.createUser = async function (request, response) {
 
     if (checkEmailExist) return response.status(422).send('Email is exist');
 
+    const usernameExist = await Account.findOne({ username: request.body.username });
+
+    if (usernameExist) return response.status(422).send('Username is exist');
+
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(request.body.password, salt);
 
