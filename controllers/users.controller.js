@@ -9,6 +9,7 @@ const account = require('../models/account');
 const mongoose = require('mongoose');
 const { restrictImageName } = require('../utils/image-handlers')
 const path = require('path');
+const user = require('../models/user');
 
 exports.createUser = async function (request, response) {
     const { error } = registerValidator(request.body);
@@ -86,14 +87,44 @@ exports.login = async function (request, response) {
     }
 }
 
-exports.getAllUsers = function (req, res) {
-    User.find({}).exec(function (err, users) {
-        if (err) {
-            res.send(400, err);
-        } else {
-            res.send(users);
+exports.getAllUsers = async function (req, res) {
+    try {
+        let users = await User.find({});
+        let results = [];
+        console.log(Array.isArray(users))
+        console.log(Array.isArray(results))
+
+        for (eachUser of users) {
+            let user = {
+                "_id": eachUser._id,
+                "first_name": eachUser.first_name,
+                "last_name": eachUser.last_name,
+                "gender": eachUser.gender,
+                "birth_date": eachUser.birth_date,
+                "avatar": eachUser.avatar,
+                "phone_number": eachUser.phone_number,
+                "country": eachUser.country
+            }
+            try {
+                const account = await Account.findOne({user_id: user._id});
+                if (account) {
+                    user.username = account.username;
+                    user.email = account.email;
+                    user.is_admin = account.is_admin;
+                }
+                results.push(user);
+            } catch (error) {
+                res.send(error);
+            }
         }
-    });
+        if (results) {
+            res.send(results);
+        } else {
+            res.send("Cannot find any user")
+        }
+    } catch (error) {
+        res.send(error);
+    }
 };
 
 exports.getUserById = async function (req, res) {
