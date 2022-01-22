@@ -4,3 +4,6 @@ config/db.js
 uploads
 audios
 videos
+
+yarn.lock
+package-lock.json
