@@ -1,49 +1,48 @@
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const express = require('express');
-const logger = require('morgan');
+const morgan = require('morgan');
 const path = require('path');
 const fileUpload = require('express-fileupload');
 const http = require('http')
+require('dotenv').config()
 
-const mongoose = require('./models/index');
+const { connectToMongoDb } = require('./configs/database');
+const { connectSocket } = require('./configs/socket');
 const routes = require('./routes/index.route');
-const socketController = require('./controllers/socket.controller');
+const {
+  errorHandler,
+  notFoundErrorHandler,
+} = require("./middlewares/error_handler")
 
 const app = express();
 const server = http.createServer(app);
-const PORT = 8000
-// const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT || 8000
 
-// Only when local
-const corsOptions = {
-    origin: "http://localhost:"+ 8080,
-    methods: ["GET", "POST"],
-    allowedHeaders: ["my-custom-header"],
-    credentials: true
+async function initServer() {
+  await connectToMongoDb();
+  await connectSocket(server);
+
+  server.listen(PORT, () => {
+    console.log(`listening on PORT ${PORT}`);
+  });
 }
+initServer()
 
-const io = require("socket.io")(server, {
-  cors: corsOptions
-});
+//use third-party middlewares
+function useMiddleware(app) {
+  app.use(fileUpload())
+  app.use(cors());
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(morgan('dev'));
+  app.use(cookieParser());
+}
+useMiddleware(app)
 
-app.use(fileUpload())
-// app.use(cors(corsOptions));
-app.use(cors());
-
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-
-app.use(logger('dev'));
-app.use(cookieParser());
+//init routes
 app.use("/", routes)
 
-io.on('connection', socketController.onSocketConnected);
-
-app.set('socketio', io);
-
-server.listen(PORT, () => {
-  console.log('listening on *:8000');
-});
-
-// app.listen(PORT, () => console.log("listening on port " + PORT))
+//handle errors
+app.use(notFoundErrorHandler)
+app.use(errorHandler)

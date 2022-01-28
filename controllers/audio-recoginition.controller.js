@@ -1,14 +1,16 @@
 const crypto = require('crypto');
 const request = require('request');
 
+const { ACRCLOUD_HOST, ACRCLOUD_ACCESS_KEY, ACRCLOUD_SECRET_KEY } = process.env
+
 const defaultOptions = {
-  host: process.env.ACRCLOUD_HOST,
+  host: ACRCLOUD_HOST,
   endpoint: '/v1/identify',
   signature_version: '1',
-  data_type:'audio',
+  data_type: 'audio',
   secure: true,
-  access_key: process.env.ACRCLOUD_ACCESS_KEY,
-  access_secret: process.env.ACRCLOUD_SECRET_KEY
+  access_key: ACRCLOUD_ACCESS_KEY,
+  access_secret: ACRCLOUD_SECRET_KEY
 };
 
 function buildStringToSign(method, uri, accessKey, dataType, signatureVersion, timestamp) {
@@ -27,7 +29,7 @@ function sign(signString, accessSecret) {
 function identify(data, options, cb) {
 
   const current_data = new Date();
-  const timestamp = current_data.getTime()/1000;
+  const timestamp = current_data.getTime() / 1000;
 
   const stringToSign = buildStringToSign('POST',
     options.endpoint,
@@ -40,28 +42,28 @@ function identify(data, options, cb) {
 
   const formData = {
     sample: data,
-    access_key:options.access_key,
-    data_type:options.data_type,
-    signature_version:options.signature_version,
-    signature:signature,
-    sample_bytes:data.length,
-    timestamp:timestamp,
+    access_key: options.access_key,
+    data_type: options.data_type,
+    signature_version: options.signature_version,
+    signature: signature,
+    sample_bytes: data.length,
+    timestamp: timestamp,
   }
   request.post({
-    url: "http://"+options.host + options.endpoint,
+    url: "http://" + options.host + options.endpoint,
     method: 'POST',
     formData: formData
   }, cb);
 }
 
-function audioRecognition (data) {
+function audioRecognition(data) {
   return new Promise(function (resolve, reject) {
     try {
       identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
         if (err) console.log(err);
         else {
           const result = JSON.parse(body);
-          if (result){
+          if (result) {
             if (result.status.msg == "Success") {
               const data = result.metadata
               let musics = JSON.stringify(data.music) // array
@@ -82,7 +84,7 @@ function audioRecognition (data) {
       resolve(null)
     }
   })
-    
+
 }
 
 exports.audioRecognition = audioRecognition
@@ -91,7 +93,7 @@ function musicIncluded(musics) {
   const first = musics[0]
   const title = first.title
   const album = first.album.name
-  const artists  = first.artists // array
+  const artists = first.artists // array
   const songArtist = artists[0].name
 
   let jsonResult = {}

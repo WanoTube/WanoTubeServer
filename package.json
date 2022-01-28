@@ -1,43 +1,43 @@
-{
-  "name": "watchoutserver",
-  "version": "1.0.0",
-  "description": "A server handling audio recognition using ACR Cloud and Amazon S3 service.",
-  "main": "index.js",
-  "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nguyendacthienngan/WatchOutServer.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/nguyendacthienngan/WatchOutServer/issues"
-  },
-  "homepage": "https://github.com/nguyendacthienngan/WatchOutServer#readme",
-  "dependencies": {
-    "aws-sdk": "^2.1042.0",
-    "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
-    "crypto": "^1.0.1",
-    "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "express-fileupload": "^1.2.1",
-    "ffmpeg": "0.0.4",
-    "fluent-ffmpeg": "^2.1.2",
-    "joi": "^17.5.0",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.0.14",
-    "morgan": "^1.10.0",
-    "multer": "^1.4.3",
-    "path": "^0.12.7",
-    "request": "^2.88.2",
-    "socket.io": "^4.4.0"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.15"
+  {
+    "name": "watchoutserver",
+    "version": "1.0.0",
+    "description": "A server handling audio recognition using ACR Cloud and Amazon S3 service.",
+    "main": "index.js",
+    "scripts": {
+      "start": "node app.js",
+      "dev": "nodemon app.js"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/nguyendacthienngan/WatchOutServer.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/nguyendacthienngan/WatchOutServer/issues"
+    },
+    "homepage": "https://github.com/nguyendacthienngan/WatchOutServer#readme",
+    "dependencies": {
+      "aws-sdk": "^2.1042.0",
+      "bcryptjs": "^2.4.3",
+      "cookie-parser": "^1.4.6",
+      "cors": "^2.8.5",
+      "crypto": "^1.0.1",
+      "dotenv": "^10.0.0",
+      "express": "^4.17.1",
+      "express-fileupload": "^1.2.1",
+      "ffmpeg": "0.0.4",
+      "fluent-ffmpeg": "^2.1.2",
+      "joi": "^17.5.0",
+      "jsonwebtoken": "^8.5.1",
+      "mongoose": "^6.0.14",
+      "morgan": "^1.10.0",
+      "multer": "^1.4.3",
+      "path": "^0.12.7",
+      "request": "^2.88.2",
+      "socket.io": "^4.4.0"
+    },
+    "devDependencies": {
+      "nodemon": "^2.0.15"
+    }
   }
-}
