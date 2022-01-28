@@ -4,7 +4,8 @@
   "description": "A server handling audio recognition using ACR Cloud and Amazon S3 service.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -35,5 +36,8 @@
     "path": "^0.12.7",
     "request": "^2.88.2",
     "socket.io": "^4.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }
