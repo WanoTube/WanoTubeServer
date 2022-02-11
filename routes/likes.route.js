@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const likes = require('../controllers/likes.controller');
+const likesController = require('../controllers/likes.controller');
 const api = require("../utils/api-routes")
 
-router.get('/', likes.getAllLikes)
+router.get('/', likesController.getAllLikes)
 
-router.delete(api.actions.delete + '/:id', likes.deleteLikeInfoById)
+router.delete(api.actions.delete + '/:id', likesController.deleteLikeInfoById)
 
-router.delete(api.actions.delete, likes.deleteLikeInfo)
+router.delete(api.actions.delete, likesController.deleteLikeInfo)
 
 module.exports = router;

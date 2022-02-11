@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const comments = require('../controllers/comments.controller');
+const commentsController = require('../controllers/comments.controller');
 const api = require("../utils/api-routes")
 
 // router.get('/', likes.getAllComments)
 
-router.delete(api.actions.delete + '/:id', comments.deleteCommentInfoById)
+router.delete(api.actions.delete + '/:id', commentsController.deleteCommentInfoById)
 
-router.delete(api.actions.delete, comments.deleteCommentInfo)
+router.delete(api.actions.delete, commentsController.deleteCommentInfo)
 
 module.exports = router;

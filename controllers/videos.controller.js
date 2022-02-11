@@ -2,8 +2,8 @@ const fs = require('fs')
 const mongoose = require('mongoose');
 
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
-const { compressVideo, videoConvertToAudio, restrictVideoName } = require('../utils/videos-handlers')
-const { audioRecognition, musicIncluded } = require('./audio-recoginition.controller')
+const { compressVideo, converVideoToAudio, restrictVideoName } = require('../utils/videos-handlers')
+const { recogniteAudio, checkIfIncludingMusic } = require('./audio-recoginition.controller')
 const { addLikeToVideo } = require('./likes.controller')
 
 const { Video } = require('../models/video');
@@ -24,7 +24,7 @@ exports.uploadVideo = async function (req, res) {
 	}
 	const body = req.body
 	if (body && file) {
-		audioRecognitionFromVideo(file, function (err, newFilePath, recognizedMusics) {
+		recogniteAudioFromVideo(file, function (err, newFilePath, recognizedMusics) {
 			// apply filter
 			// resize
 			if (err) {
@@ -51,7 +51,7 @@ async function saveVideoToDatabase(newFilePath, body, recognizedMusics, callback
 		url: "test-url",
 		recognition_result: recognizedMusics,
 	}
-	musicIncluded(reqVideo.recognition_result)
+	checkIfIncludingMusic(reqVideo.recognition_result)
 
 	if (newFilePath) {
 		// Save to AWS
@@ -70,12 +70,12 @@ async function saveVideoToDatabase(newFilePath, body, recognizedMusics, callback
 	}
 }
 
-async function audioRecognitionFromVideo(file, callback) {
-	videoAnalysis(file, function (err, videoSavedPath, audioSavedPath) {
+async function recogniteAudioFromVideo(file, callback) {
+	analyzeVideo(file, function (err, videoSavedPath, audioSavedPath) {
 		if (!err) {
 			const bitmap = fs.readFileSync(audioSavedPath);
 			console.log("Audio recogniting...")
-			audioRecognition(Buffer.from(bitmap), function (result) {
+			recogniteAudio(Buffer.from(bitmap), function (result) {
 				console.log("Recognized")
 				callback(null, videoSavedPath, result)
 			})
@@ -87,7 +87,7 @@ async function audioRecognitionFromVideo(file, callback) {
 
 }
 
-async function videoAnalysis(file, callback) {
+async function analyzeVideo(file, callback) {
 	const dataBuffers = file.data
 	const fileName = file.name
 	const name = restrictVideoName(fileName, "617a508f7e3e601cad80531d");
@@ -102,7 +102,7 @@ async function videoAnalysis(file, callback) {
 			console.log("Compressed video")
 			console.log("Converting to " + audioSavedPath)
 			if (!err)
-				videoConvertToAudio(newVideoSavedPath, audioSavedPath, function (err) {
+				converVideoToAudio(newVideoSavedPath, audioSavedPath, function (err) {
 					callback(err, newVideoSavedPath, audioSavedPath)
 				})
 			else

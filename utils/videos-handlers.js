@@ -1,18 +1,18 @@
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 
-async function videoConvertToAudio(input, output) {
+exports.converVideoToAudio = function (input, output) {
 	let nextProgress = 0;
 	return new Promise(async function (resolve, reject) {
 		try {
-			console.log("videoConvertToAudio: input: ", input, ", output: ", output)
+			console.log("converVideoToAudio: input: ", input, ", output: ", output)
 			ffmpeg(input)
 				.output(output)
 
 				.on('progress', (progress) => {
 					if (progress) {
 						if (nextProgress >= 100 || (nextProgress < 100 && progress.percent >= nextProgress)) {
-							console.log("videoConvertToAudio: ", progress.percent, "%")
+							console.log("converVideoToAudio: ", progress.percent, "%")
 							nextProgress += 15;
 						}
 					}
@@ -32,8 +32,6 @@ async function videoConvertToAudio(input, output) {
 
 	});
 }
-
-exports.videoConvertToAudio = videoConvertToAudio
 
 function isVideoHaveAudioTrack(input) {
 	return new Promise(function (resolve, reject) {

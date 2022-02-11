@@ -1,46 +1,46 @@
 const express = require('express');
 const router = express.Router();
-const videos = require('../controllers/new-videos.controller');
-const videoInfos = require('../controllers/video-info.controller');
-const likes = require('../controllers/likes.controller');
-const comments = require('../controllers/comments.controller');
+const videosController = require('../controllers/new-videos.controller');
+const videoInfosController = require('../controllers/video-info.controller');
+const likesController = require('../controllers/likes.controller');
+const commentsController = require('../controllers/comments.controller');
 
 const api = require("../utils/api-routes")
 
-router.get('/users/:author_id', videoInfos.getAllVideoInfosWithUserId)
+router.get('/users/:author_id', videoInfosController.getAllVideoInfosWithUserId)
 
-router.get('/users/:author_id/public', videoInfos.getAllPublicVideoInfosWithUserId)
+router.get('/users/:author_id/public', videoInfosController.getAllPublicVideoInfosWithUserId)
 
-router.get(api.actions.search, videoInfos.search)
+router.get(api.actions.search, videoInfosController.search)
 
-router.get('/public', videoInfos.getAllPublicVideoInfos)
+router.get('/public', videoInfosController.getAllPublicVideoInfos)
 
-router.get('/:id', videoInfos.getVideoInfoById);
+router.get('/:id', videoInfosController.getVideoInfoById);
 
-router.get('/:id/likes', likes.getAllLikesByVideoId)
+router.get('/:id/likes', likesController.getAllLikesByVideoId)
 
-router.get('/:id/comments', comments.getAllCommentsByVideoId)
+router.get('/:id/comments', commentsController.getAllCommentsByVideoId)
 
-router.get('/:id/total-likes', likes.getTotalLikesByVideoId)
+router.get('/:id/total-likes', likesController.getTotalLikesByVideoId)
 
-router.get('/:id/total-comments', comments.getTotalCommentsByVideoId)
+router.get('/:id/total-comments', commentsController.getTotalCommentsByVideoId)
 
-router.get('/:id/total-views', videoInfos.getTotalViewsByVideoId)
+router.get('/:id/total-views', videoInfosController.getTotalViewsByVideoId)
 
-router.post('/like', likes.likeVideo)
+router.post('/like', likesController.likeVideo)
 
-router.post('/comment', comments.commentVideo)
+router.post('/comment', commentsController.commentVideo)
 
-router.post('/comment/delete', comments.deleteCommentFromVideo)
+router.post('/comment/delete', commentsController.deleteCommentFromVideo)
 
-router.get('/stream/:key', videos.getVideoById);
+router.get('/stream/:key', videosController.getVideoById);
 
-router.get('/', videoInfos.getAllVideoInfos)
+router.get('/', videoInfosController.getAllVideoInfos)
 
-router.post(api.actions.upload, videos.uploadVideo);
+router.post(api.actions.upload, videosController.uploadVideo);
 
-router.put(api.actions.update, videoInfos.updateVideoInfo)
+router.put(api.actions.update, videoInfosController.updateVideoInfo)
 
-router.post(api.actions.delete, videoInfos.deleteVideoInfo);
+router.post(api.actions.delete, videoInfosController.deleteVideoInfo);
 
 module.exports = router;

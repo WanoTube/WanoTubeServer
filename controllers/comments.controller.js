@@ -43,7 +43,7 @@ exports.commentVideo = async function (req, res) {
 }
 
 function addComment(author_id, video, content, callback) {
-	var comment = new Comment({ author_id, video_id: video.id, content })
+	const comment = new Comment({ author_id, video_id: video.id, content })
 	comment.save()
 		.then(function (err) {
 			video.comments.push(comment);

@@ -56,7 +56,7 @@ function identify(data, options, cb) {
   }, cb);
 }
 
-function audioRecognition(data) {
+function recogniteAudio(data) {
   return new Promise(function (resolve, reject) {
     try {
       identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
@@ -66,7 +66,7 @@ function audioRecognition(data) {
           if (result) {
             if (result.status.msg == "Success") {
               const data = result.metadata
-              const musics = JSON.parse(JSON.stringify(data.music)) // array
+              let musics = JSON.parse(JSON.stringify(data.music)) // array
               resolve(musics)
             } else {
               console.log("Recognition does not success: " + result.status.msg);
@@ -86,9 +86,9 @@ function audioRecognition(data) {
 
 }
 
-exports.audioRecognition = audioRecognition
+exports.recogniteAudio = recogniteAudio
 
-function musicIncluded(musics) {
+function checkIfIncludingMusic(musics) {
   const first = musics[0]
   const title = first.title
   const album = first.album.name
@@ -100,4 +100,4 @@ function musicIncluded(musics) {
   return jsonResult
 }
 
-exports.musicIncluded = musicIncluded
+exports.checkIfIncludingMusic = checkIfIncludingMusic
