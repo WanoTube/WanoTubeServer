@@ -155,8 +155,7 @@ async function audioRecognitionFromVideo(newVideoSavedPath) {
 			const audioSavedPath = './audios/' + name + '.mp3';
 
 			if (newVideoSavedPath) {
-				let isAudioIncluded = true;
-				isAudioIncluded = await isVideoHaveAudioTrack(newVideoSavedPath);
+				const isAudioIncluded = await isVideoHaveAudioTrack(newVideoSavedPath);
 				if (isAudioIncluded == true) {
 					console.log("Converting to " + audioSavedPath);
 					const convertResult = await videoConvertToAudio(newVideoSavedPath, audioSavedPath)

@@ -66,8 +66,7 @@ function audioRecognition(data) {
           if (result) {
             if (result.status.msg == "Success") {
               const data = result.metadata
-              let musics = JSON.stringify(data.music) // array
-              musics = JSON.parse(musics)
+              const musics = JSON.parse(JSON.stringify(data.music)) // array
               resolve(musics)
             } else {
               console.log("Recognition does not success: " + result.status.msg);
@@ -96,10 +95,7 @@ function musicIncluded(musics) {
   const artists = first.artists // array
   const songArtist = artists[0].name
 
-  let jsonResult = {}
-  jsonResult.title = title
-  jsonResult.album = album
-  jsonResult.songArtist = songArtist
+  const jsonResult = { title, album, songArtist }
   console.log("audioRecognition result: " + JSON.stringify(jsonResult))
   return jsonResult
 }
