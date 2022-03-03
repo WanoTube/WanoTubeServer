@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path');
-const mongoose = require('mongoose');
+const { trackProgress } = require('../configs/socket')
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
 const {
 	compressVideo,
@@ -43,8 +43,13 @@ exports.uploadVideo = async function (req, res) {
 		try {
 			const analizedVideo = await analyzeVideo(file, res.app, body);
 			await uploadToS3(analizedVideo, req.app);
+
+			console.log('uploadToS3')
 			const recognizedMusic = await recogniteAudioFromVideo(analizedVideo);
+			console.log(analizedVideo, recognizedMusic)
+			console.log('analyzed')
 			const saveDBResult = await saveVideoToDatabase(analizedVideo, body, recognizedMusic)
+			console.log('save to db')
 			if (saveDBResult) res.status(200).json(saveDBResult)
 			else res.status(400).json("Cannot save DB");
 			await removeRedundantFiles('./videos');
@@ -69,7 +74,6 @@ async function removeRedundantFiles(directory) {
 }
 
 function uploadToS3(newFilePath, app) {
-	const io = app.get('socketio');
 
 	return new Promise(function (resolve, reject) {
 		try {
@@ -87,7 +91,7 @@ function uploadToS3(newFilePath, app) {
 				uploadFile(fileName, fileStream)
 					.on('httpUploadProgress', function (progress) {
 						const progressPercentage = Math.round(progress.loaded / progress.total * 100);
-						io.emit('Upload to S3', progressPercentage);
+						trackProgress(progressPercentage, 'Upload to S3')
 					});
 				resolve(reqVideo);
 			}
@@ -98,6 +102,8 @@ function uploadToS3(newFilePath, app) {
 }
 
 async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
+	console.log('saving video ...')
+	console.log({ newFilePath, body, recognizedMusics })
 	return new Promise(async function (resolve, reject) {
 		try {
 			if (recognizedMusics) {
@@ -108,14 +114,15 @@ async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
 			}
 			const fileSize = fs.statSync(newFilePath).size;
 			const { base } = path.parse(newFilePath);
+			const fileTitle = newFilePath.split('/')[2].split('.')[0]
 			const reqVideo = {
-				title: body.title,
+				title: fileTitle,
 				size: fileSize,
 				description: body.description,
 				duration: body.duration,
 				url: base,
 				recognition_result: recognizedMusics,
-				visibility: body.privacy
+				visibility: 1	//first set private
 			}
 
 			if (newFilePath) {
@@ -196,6 +203,8 @@ async function recogniteAudioFromVideo(newVideoSavedPath) {
 }
 
 async function analyzeVideo(file, app, body) {
+	console.log("Analyze")
+
 	const dataBuffers = file.data;
 	const fileName = file.name;
 	const { ext } = path.parse(fileName);

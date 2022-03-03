@@ -1,5 +1,7 @@
 const socketIo = require("socket.io")
 
+let io;
+
 const corsOptions = {
   cors: {
     origin: "http://localhost:" + 8080,
@@ -10,11 +12,11 @@ const corsOptions = {
 }
 
 async function connectSocket(server) {
-  const io = await socketIo(server, corsOptions);
+  io = await socketIo(server, corsOptions);
 
-  console.log("Connect to socket io")
+  console.log("Connect to socket io");
   io.on("connection", function (socket) {
-    socket.emit("user_connected")
+    socket.emit("user_connected");
 
     console.log("a user connected: ", socket.id);
     socket.on("disconnect", function () {
@@ -23,4 +25,8 @@ async function connectSocket(server) {
   })
 }
 
-module.exports = { connectSocket }
+function trackProgress(progress, message) {
+  io.emit(message, progress);
+}
+
+module.exports = { connectSocket, trackProgress }

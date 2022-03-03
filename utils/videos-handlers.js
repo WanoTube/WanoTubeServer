@@ -1,6 +1,8 @@
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 
+const { trackProgress } = require('../configs/socket')
+
 exports.converVideoToAudio = function (input, output) {
 	let nextProgress = 0;
 	return new Promise(async function (resolve, reject) {
@@ -53,7 +55,7 @@ function isVideoHaveAudioTrack(input) {
 exports.isVideoHaveAudioTrack = isVideoHaveAudioTrack;
 
 async function compressVideo(input, output, app) {
-	const io = app.get('socketio');
+	// const io = app.get('socketio');
 	let nextProgress = 0;
 	return new Promise(function (resolve, reject) {
 		try {
@@ -67,7 +69,7 @@ async function compressVideo(input, output, app) {
 				.on('progress', (progress) => {
 					if (progress) {
 						if (nextProgress >= 100 || (nextProgress < 100 && progress.percent >= nextProgress)) {
-							io.emit('Compress video', progress);
+							trackProgress(progress, 'Compress video');
 							nextProgress += 15;
 						}
 					}
@@ -103,7 +105,7 @@ function convertToWebmFormat(input, output, app) {
 				.on('progress', (progress) => {
 					if (progress) {
 						if (nextProgress >= 100 || (nextProgress < 100 && progress.percent >= nextProgress)) {
-							io.emit('Convert to Webm Format', progress);
+							trackProgress(progress, 'Convert to Webm Format');
 							nextProgress += 15;
 						}
 					}

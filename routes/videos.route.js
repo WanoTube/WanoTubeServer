@@ -5,13 +5,11 @@ const videoInfosController = require('../controllers/video-info.controller');
 const likesController = require('../controllers/likes.controller');
 const commentsController = require('../controllers/comments.controller');
 
-const api = require("../utils/api-routes")
-
 router.get('/users/:author_id', videoInfosController.getAllVideoInfosWithUserId)
 
 router.get('/users/:author_id/public', videoInfosController.getAllPublicVideoInfosWithUserId)
 
-router.get(api.actions.search, videoInfosController.search)
+router.get('/search', videoInfosController.search)
 
 router.get('/public', videoInfosController.getAllPublicVideoInfos)
 
@@ -37,10 +35,10 @@ router.get('/stream/:key', videosController.getVideoById);
 
 router.get('/', videoInfosController.getAllVideoInfos)
 
-router.post(api.actions.upload, videosController.uploadVideo);
+router.post('/upload', videosController.uploadVideo);
 
-router.put(api.actions.update, videoInfosController.updateVideoInfo)
+router.put('/update', videoInfosController.updateVideoInfo)
 
-router.post(api.actions.delete, videoInfosController.deleteVideoInfo);
+router.post('/delete', videoInfosController.deleteVideoInfo);
 
 module.exports = router;

@@ -1,6 +1,5 @@
 const S3 = require('aws-sdk/clients/s3');
 const fs = require('fs');
-const path = require('path');
 
 const { AWS_BUCKET_NAME, AWS_BUCKET_REGION, AWS_ACCESS_KEY, AWS_SECRET_KEY } = process.env
 

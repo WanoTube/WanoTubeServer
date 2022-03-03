@@ -54,3 +54,5 @@ Project Structure:
       app.js
       package-lock.json
       package.json
+
+Database Design is here: https://dbdiagram.io/d/6216d27e485e433543094f7c
