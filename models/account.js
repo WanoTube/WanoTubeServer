@@ -1,8 +1,10 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-const schemaOptions = {
-	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
-};
+
+const { schemaOptions } = require('../constants/schemaOptions')
+const { strikeSchema } = require('./strike')
+
+//Channel Schema
 const Account = new mongoose.Schema({
 	username: {
 		type: String,
@@ -23,7 +25,8 @@ const Account = new mongoose.Schema({
 		max: 255
 	},
 	is_admin: { type: Boolean, default: false },
-	user_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
+	user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+	strikes: [strikeSchema],
 }, schemaOptions);
 
 module.exports = mongoose.model('Account', Account)

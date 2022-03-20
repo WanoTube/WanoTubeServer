@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema
-const schemaOptions = {
-	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
-};
+
+const { schemaOptions } = require('../constants/schemaOptions')
 
 const likeSchema = new Schema({
-	author_id: { type: Schema.Types.ObjectId, ref: "User" },
-	target_id: { type: Schema.Types.ObjectId, ref: "Video" }, //postId or commentId.
+	author_id: { type: Schema.Types.ObjectId, ref: 'User' },
+	target_id: { type: Schema.Types.ObjectId, ref: 'Video' }, //postId or commentId.
 }, schemaOptions);
 
 //Some points you need to consider:
