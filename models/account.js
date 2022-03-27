@@ -2,10 +2,9 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const { schemaOptions } = require('../constants/schemaOptions')
-const { strikeSchema } = require('./strike')
 
 //Channel Schema
-const Account = new mongoose.Schema({
+const Account = new Schema({
 	username: {
 		type: String,
 		required: true,
@@ -26,7 +25,9 @@ const Account = new mongoose.Schema({
 	},
 	is_admin: { type: Boolean, default: false },
 	user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-	strikes: [strikeSchema],
-}, schemaOptions);
+	followers: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
+	followings: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
+	watched_history: [{ type: Schema.Types.ObjectId, ref: 'Video', default: [] }],
+}, schemaOptions)
 
 module.exports = mongoose.model('Account', Account)

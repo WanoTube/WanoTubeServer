@@ -5,6 +5,11 @@ const { commentSchema } = require('./comment.js')
 const { likeSchema } = require('./like.js')
 const { schemaOptions } = require('../constants/schemaOptions')
 
+const VideoType = {
+	SHORT: 'SHORT',
+	NORMAL: 'NORMAL'
+}
+
 const videoSchema = new Schema({
 	title: { type: String, required: true },
 	url: { type: String, required: true },
@@ -18,7 +23,14 @@ const videoSchema = new Schema({
 	total_comments: { type: Number, default: 0, required: true },
 	total_views: { type: Number, default: 0, required: true },
 	visibility: { type: Number, default: 0, required: true }, // 0: public, 1: private, 2: unpublic, 3: blocked
-	duration: { type: String }
-}, schemaOptions);
+	duration: { type: String },
+	type: { type: String, enum: VideoType, default: VideoType.NORMAL },
+	blocked_accounts: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
+	members: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 
-module.exports.Video = mongoose.model('Video', videoSchema)
+}, schemaOptions)
+
+module.exports = {
+	Video: mongoose.model('Video', videoSchema),
+	VideoType
+}
