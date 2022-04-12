@@ -16,17 +16,15 @@ const videoSchema = new Schema({
 	size: { type: Number, required: true },
 	description: { type: String },
 	recognition_result: { type: Schema.Types.Mixed },
-	author_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-	comments: [commentSchema],
-	likes: [likeSchema],
-	total_likes: { type: Number, default: 0, required: true },
-	total_comments: { type: Number, default: 0, required: true },
-	total_views: { type: Number, default: 0, required: true },
-	visibility: { type: Number, default: 0, required: true }, // 0: public, 1: private, 2: unpublic, 3: blocked
-	duration: { type: String },
+	author_id: { type: Schema.Types.ObjectId, ref: 'User', default: [] },
+	comments: [{ type: Schema.Types.ObjectId, ref: 'Comment', default: [] }],
+	likes: [{ type: Schema.Types.ObjectId, ref: 'Like', default: [] }],
+	total_likes: { type: Number, default: 0 },
+	total_comments: { type: Number, default: 0 },
+	total_views: { type: Number, default: 0 },
+	visibility: { type: Number, default: 1 }, // 0: public, 1: private, 2: unpublic, 3: blocked
+	duration: { type: Number },
 	type: { type: String, enum: VideoType, default: VideoType.NORMAL },
-	blocked_accounts: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
-	members: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 
 }, schemaOptions)
 

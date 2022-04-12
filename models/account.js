@@ -27,7 +27,10 @@ const Account = new Schema({
 	user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 	followers: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 	followings: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
+	members: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
+	blocked_accounts: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 	watched_history: [{ type: Schema.Types.ObjectId, ref: 'Video', default: [] }],
+	strike_id: { type: Schema.Types.ObjectId, ref: 'Strike' },
 }, schemaOptions)
 
 module.exports = mongoose.model('Account', Account)

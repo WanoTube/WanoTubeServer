@@ -5,6 +5,7 @@ const { trackProgress } = require('../configs/socket')
 
 exports.converVideoToAudio = function (input, output) {
 	let nextProgress = 0;
+	console.log({ input })
 	return new Promise(async function (resolve, reject) {
 		try {
 			console.log("converVideoToAudio: input: ", input, ", output: ", output)
@@ -28,6 +29,7 @@ exports.converVideoToAudio = function (input, output) {
 					resolve(output)
 				})
 				.run();
+			console.log({ output })
 		} catch (error) {
 			reject(error)
 		}
@@ -36,6 +38,8 @@ exports.converVideoToAudio = function (input, output) {
 }
 
 function isVideoHaveAudioTrack(input) {
+
+	console.log({ input })
 	return new Promise(function (resolve, reject) {
 		try {
 			ffmpeg(input)

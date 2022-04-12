@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path');
 const { trackProgress } = require('../configs/socket')
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
+
 const {
 	compressVideo,
 	converVideoToAudio,
@@ -15,7 +16,6 @@ const { createVideoInfos } = require('./video-info.controller')
 
 const { Video } = require('../models/video');
 const httpStatus = require('../utils/http-status')
-
 
 exports.getVideoById = async function (req, res) {
 	const key = req.params.key;
@@ -52,8 +52,8 @@ exports.uploadVideo = async function (req, res) {
 			console.log('save to db')
 			if (saveDBResult) res.status(200).json(saveDBResult)
 			else res.status(400).json("Cannot save DB");
-			await removeRedundantFiles('./videos');
-			await removeRedundantFiles('./audios');
+			// await removeRedundantFiles('./videos');
+			// await removeRedundantFiles('./audios');
 		} catch (error) {
 			console.log("error: ", error)
 			if (error.message) res.status(400).json(error.message)
@@ -74,7 +74,6 @@ async function removeRedundantFiles(directory) {
 }
 
 function uploadToS3(newFilePath, app) {
-
 	return new Promise(function (resolve, reject) {
 		try {
 			// reqVideo is redundant
@@ -106,11 +105,13 @@ async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
 	console.log({ newFilePath, body, recognizedMusics })
 	return new Promise(async function (resolve, reject) {
 		try {
+			let recognizedResult;
 			if (recognizedMusics) {
 				console.log("recognizedMusics: ", recognizedMusics);
 				recognizedMusics = recognizedMusics.recognizeResult;
-				if (recognizedMusics)
-					checkIfIncludingMusic(recognizedMusics)
+				if (recognizedMusics) {
+					recognizedResult = checkIfIncludingMusic(recognizedMusics);
+				}
 			}
 			const fileSize = fs.statSync(newFilePath).size;
 			const { base } = path.parse(newFilePath);
@@ -121,7 +122,7 @@ async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
 				description: body.description,
 				duration: body.duration,
 				url: base,
-				recognition_result: recognizedMusics,
+				recognition_result: recognizedResult,
 				visibility: 1	//first set private
 			}
 
@@ -155,19 +156,21 @@ async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
 }
 
 async function recogniteAudioFromVideo(newVideoSavedPath) {
+	console.log('hello')
 	return new Promise(async function (resolve, reject) {
 		try {
+
 			const { name } = path.parse(newVideoSavedPath);
-			console.log("NAME: " + name);
 			const audioSavedPath = './audios/' + name + '.mp3';
 
 			if (newVideoSavedPath) {
 				const isAudioIncluded = await isVideoHaveAudioTrack(newVideoSavedPath);
-				if (isAudioIncluded == true) {
-					console.log("Converting to " + audioSavedPath);
+				console.log({ isAudioIncluded })
+				if (isAudioIncluded) {
+					console.log('isAudioIncluded===================================')
 					const convertResult = await converVideoToAudio(newVideoSavedPath, audioSavedPath)
+					console.log({ convertResult })
 					if (convertResult) {
-						console.log("Converted music")
 					} else {
 						throw new Error("Cannot convert music")
 					}
@@ -175,7 +178,6 @@ async function recogniteAudioFromVideo(newVideoSavedPath) {
 
 					//TO-DO: Split to multiple audios for recognize quicker and easier to track the song name from timestamp?
 
-					console.log("Audio recogniting...");
 					const recognizeResultACR = await recogniteAudio(Buffer.from(bitmap));
 					const recognizeResult = {
 						savedName: newVideoSavedPath,
@@ -209,7 +211,6 @@ async function analyzeVideo(file, app, body) {
 	const fileName = file.name;
 	const { ext } = path.parse(fileName);
 	const name = restrictVideoName(fileName, body.author_id);
-	console.log("New name: ", name);
 
 	const videoSavedPath = './videos/' + fileName;
 	const newVideoSavedPath = './videos/' + name + ext;
@@ -219,9 +220,7 @@ async function analyzeVideo(file, app, body) {
 		try {
 			// Because if webm we will not compress video. But if we compress video, we need to have 2 paths
 			let willSavePath = (ext == ".webm") ? newVideoSavedPath : videoSavedPath;
-			console.log("willSavePath: ", willSavePath);
 			fs.writeFileSync(willSavePath, dataBuffers)
-			console.log("Saved " + willSavePath);
 			if (ext.localeCompare(".webm") != 0) {
 				await compressVideo(videoSavedPath, newVideoSavedPath, app);
 				await convertToWebmFormat(newVideoSavedPath, newVideoSavedPathWebm, app);
