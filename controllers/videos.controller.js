@@ -108,3 +108,11 @@ async function analyzeVideo(file, callback) {
 
 	})
 }
+
+exports.registerCopyright = function () {
+
+}
+
+exports.approveCopyrightRegistration = function () {
+
+}
