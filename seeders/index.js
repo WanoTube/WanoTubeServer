@@ -33,13 +33,14 @@ const seedUser = async function () {
     });
 
     for (let video of videos) {
-      const { title, url, size, description, duration } = video;
+      const { title, url, size, description, duration, visibility } = video;
       await Video.create({
         title,
         url,
         size,
         duration,
         description,
+        visibility,
         author_id: createdUser._id
       });
     }

@@ -52,8 +52,8 @@ exports.uploadVideo = async function (req, res) {
 			console.log('save to db')
 			if (saveDBResult) res.status(200).json(saveDBResult)
 			else res.status(400).json("Cannot save DB");
-			// await removeRedundantFiles('./videos');
-			// await removeRedundantFiles('./audios');
+			await removeRedundantFiles('./videos');
+			await removeRedundantFiles('./audios');
 		} catch (error) {
 			console.log("error: ", error)
 			if (error.message) res.status(400).json(error.message)
