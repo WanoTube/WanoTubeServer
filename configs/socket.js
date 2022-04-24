@@ -1,10 +1,12 @@
 const socketIo = require("socket.io")
 
+const { SOCKET_URL } = process.env;
+
 let io;
 
 const corsOptions = {
   cors: {
-    origin: "http://localhost:" + 8080,
+    origin: SOCKET_URL,
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     allowedHeaders: ["my-custom-header"],
     credentials: true

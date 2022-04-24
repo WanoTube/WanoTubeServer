@@ -2,7 +2,6 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const express = require('express');
 const morgan = require('morgan');
-const path = require('path');
 const fileUpload = require('express-fileupload');
 const http = require('http')
 require('dotenv').config()
