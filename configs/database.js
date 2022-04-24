@@ -10,7 +10,8 @@ let mongoUri;
 if (NODE_ENV === "development") {
   mongoUri = 'mongodb://127.0.0.1:27017/watch-out-server';
 }
-else mongoUri = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE_NAME}`
+else mongoUri = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE_NAME}?authSource=admin`
+console.log({ MONGO_USERNAME, MONGO_PASSWORD, MONGO_HOST, MONGO_PORT, MONGO_DATABASE_NAME, NODE_ENV })
 
 async function connectToMongoDb() {
   const connection = await mongoose.connect(mongoUri);
