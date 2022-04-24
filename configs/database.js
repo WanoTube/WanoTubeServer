@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const { MONGO_URL, MONGO_DATABASE_NAME } = process.env;
 // const mongoUri = `${MONGO_URL}/${MONGO_DATABASE_NAME}`;
 
-const mongoUri = 'mongodb://127.0.0.1:27017/watch-out-server';
+// const mongoUri = 'mongodb://127.0.0.1:27017/watch-out-server';
+const mongoUri = 'mongodb://root:gu123451@srv-captain--mongodb:27017/watch-out-server'
 
 async function connectToMongoDb() {
   const connection = await mongoose.connect(mongoUri);

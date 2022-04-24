@@ -5,7 +5,7 @@ let io;
 const corsOptions = {
   cors: {
     origin: "http://localhost:" + 8080,
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     allowedHeaders: ["my-custom-header"],
     credentials: true
   },
