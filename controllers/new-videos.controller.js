@@ -56,7 +56,7 @@ exports.uploadVideo = async function (req, res) {
 			await removeRedundantFiles('./audios');
 		} catch (error) {
 			console.log("error: ", error)
-			if (error.message) res.status(400).json(error.message)
+			if (error.msg) res.status(400).json(error.msg)
 			else res.status(400).json(error)
 		}
 
@@ -159,7 +159,6 @@ async function recogniteAudioFromVideo(newVideoSavedPath) {
 	console.log('hello')
 	return new Promise(async function (resolve, reject) {
 		try {
-
 			const { name } = path.parse(newVideoSavedPath);
 			const audioSavedPath = './audios/' + name + '.mp3';
 
@@ -205,8 +204,6 @@ async function recogniteAudioFromVideo(newVideoSavedPath) {
 }
 
 async function analyzeVideo(file, app, body) {
-	console.log("Analyze")
-
 	const dataBuffers = file.data;
 	const fileName = file.name;
 	const { ext } = path.parse(fileName);
@@ -225,7 +222,6 @@ async function analyzeVideo(file, app, body) {
 				await compressVideo(videoSavedPath, newVideoSavedPath, app);
 				await convertToWebmFormat(newVideoSavedPath, newVideoSavedPathWebm, app);
 				willSavePath = newVideoSavedPathWebm;
-				console.log("Compressed video");
 			}
 			resolve(willSavePath);
 		} catch (error) {

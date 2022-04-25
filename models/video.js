@@ -1,8 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const { commentSchema } = require('./comment.js')
-const { likeSchema } = require('./like.js')
 const { schemaOptions } = require('../constants/schemaOptions')
 
 const VideoType = {
@@ -13,6 +11,7 @@ const VideoType = {
 const videoSchema = new Schema({
 	title: { type: String, required: true },
 	url: { type: String, required: true },
+	thumbnail_url: { type: String, required: true },
 	size: { type: Number, required: true },
 	description: { type: String },
 	recognition_result: { type: Schema.Types.Mixed },

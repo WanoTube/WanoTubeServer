@@ -13,6 +13,8 @@ const defaultOptions = {
   access_secret: ACRCLOUD_SECRET_KEY
 };
 
+console.log({ defaultOptions })
+
 function buildStringToSign(method, uri, accessKey, dataType, signatureVersion, timestamp) {
   return [method, uri, accessKey, dataType, signatureVersion, timestamp].join('\n');
 }
@@ -45,9 +47,9 @@ function identify(data, options, cb) {
     access_key: options.access_key,
     data_type: options.data_type,
     signature_version: options.signature_version,
-    signature: signature,
     sample_bytes: data.length,
-    timestamp: timestamp,
+    signature,
+    timestamp,
   }
   request.post({
     url: "http://" + options.host + options.endpoint,
@@ -57,32 +59,25 @@ function identify(data, options, cb) {
 }
 
 function recogniteAudio(data) {
-  console.log({ recognized: data })
   return new Promise(function (resolve, reject) {
-    try {
-      identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
-        if (err) console.log(err);
-        else {
-          const result = JSON.parse(body);
-          if (result) {
-            if (result.status.msg == "Success") {
-              const data = result.metadata
-              let musics = JSON.parse(JSON.stringify(data.music)) // array
-              resolve(musics)
-            } else {
-              console.log("Recognition does not success: " + result.status.msg);
-              resolve(null);
-            }
+    identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
+      console.log({ err, httpResponse, body })
+      if (err) reject(err.msg);
+      else {
+        const result = JSON.parse(body);
+        if (result) {
+          if (result.status.msg == "Success") {
+            const data = result.metadata
+            let musics = JSON.parse(JSON.stringify(data.music)) // array
+            resolve(musics)
           } else {
-            console.log("Cannot recognize music");
-            resolve(null);
+            reject(result.status.msg);
           }
+        } else {
+          reject("Cannot recognize music");
         }
-      });
-    } catch (error) {
-      console.log(error)
-      resolve(null)
-    }
+      }
+    });
   })
 
 }

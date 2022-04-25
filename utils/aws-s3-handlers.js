@@ -23,10 +23,8 @@ exports.uploadFile = function (fileName, fileStream) {
 	};
 	return s3.upload(uploadParams, function (err, data) {
 		if (err) {
-			console.log('There was an error uploading your file: ', err);
 			return false;
 		}
-		console.log('Successfully uploaded file.', data);
 		return true;
 	});
 }
@@ -58,7 +56,6 @@ exports.getFileStream = async function (fileKey) {
 }
 
 exports.deleteFile = function (fileKey) {
-	// fileKey = fileKey + '.webm';
 	const deleteParams = {
 		Key: fileKey,
 		Bucket: AWS_BUCKET_NAME
