@@ -44,18 +44,13 @@ exports.uploadVideo = async function (req, res) {
 			const analizedVideo = await analyzeVideo(file, res.app, body);
 			await uploadToS3(analizedVideo, req.app);
 
-			console.log('uploadToS3')
 			const recognizedMusic = await recogniteAudioFromVideo(analizedVideo);
-			console.log(analizedVideo, recognizedMusic)
-			console.log('analyzed')
 			const saveDBResult = await saveVideoToDatabase(analizedVideo, body, recognizedMusic)
-			console.log('save to db')
 			if (saveDBResult) res.status(200).json(saveDBResult)
 			else res.status(400).json("Cannot save DB");
 			await removeRedundantFiles('./videos');
 			await removeRedundantFiles('./audios');
 		} catch (error) {
-			console.log("error: ", error)
 			if (error.msg) res.status(400).json(error.msg)
 			else res.status(400).json(error)
 		}
@@ -101,18 +96,8 @@ function uploadToS3(newFilePath, app) {
 }
 
 async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
-	console.log('saving video ...')
-	console.log({ newFilePath, body, recognizedMusics })
 	return new Promise(async function (resolve, reject) {
 		try {
-			let recognizedResult;
-			if (recognizedMusics) {
-				console.log("recognizedMusics: ", recognizedMusics);
-				recognizedMusics = recognizedMusics.recognizeResult;
-				if (recognizedMusics) {
-					recognizedResult = checkIfIncludingMusic(recognizedMusics);
-				}
-			}
 			const fileSize = fs.statSync(newFilePath).size;
 			const { base } = path.parse(newFilePath);
 			const fileTitle = newFilePath.split('/')[2].split('.')[0]
@@ -122,7 +107,7 @@ async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
 				description: body.description,
 				duration: body.duration,
 				url: base,
-				recognition_result: recognizedResult,
+				recognition_result: recognizedMusics,
 				visibility: 1	//first set private
 			}
 
@@ -135,10 +120,8 @@ async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
 				if (author_id) {
 					newVideo.author_id = author_id
 
-					console.log("Begin to create video in DB")
 					const videoAfterCreatedInDB = await createVideoInfos(newVideo);
 					if (videoAfterCreatedInDB) {
-						console.log("videoAfterCreatedInDB: " + videoAfterCreatedInDB)
 						resolve(videoAfterCreatedInDB)
 					}
 					else reject("Cannot save video to DB")
@@ -156,7 +139,6 @@ async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
 }
 
 async function recogniteAudioFromVideo(newVideoSavedPath) {
-	console.log('hello')
 	return new Promise(async function (resolve, reject) {
 		try {
 			const { name } = path.parse(newVideoSavedPath);
@@ -164,11 +146,8 @@ async function recogniteAudioFromVideo(newVideoSavedPath) {
 
 			if (newVideoSavedPath) {
 				const isAudioIncluded = await isVideoHaveAudioTrack(newVideoSavedPath);
-				console.log({ isAudioIncluded })
 				if (isAudioIncluded) {
-					console.log('isAudioIncluded===================================')
 					const convertResult = await converVideoToAudio(newVideoSavedPath, audioSavedPath)
-					console.log({ convertResult })
 					if (convertResult) {
 					} else {
 						throw new Error("Cannot convert music")
@@ -183,14 +162,11 @@ async function recogniteAudioFromVideo(newVideoSavedPath) {
 						recognizeResult: recognizeResultACR
 					};
 					if (recognizeResult && recognizeResultACR) {
-						console.log("Recognized")
 						resolve(recognizeResult)
 					} else {
-						console.log("Cannot recognize result")
-						resolve(null)
+						resolve("Cannot recognize result")
 					}
 				} else {
-					console.log("Video does not contain audio");
 					resolve(null)
 				}
 			} else {

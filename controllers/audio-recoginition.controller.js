@@ -61,38 +61,29 @@ function identify(data, options, cb) {
 function recogniteAudio(data) {
   return new Promise(function (resolve, reject) {
     identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
-      console.log({ err, httpResponse, body })
       if (err) reject(err.msg);
       else {
         const result = JSON.parse(body);
         if (result) {
-          if (result.status.msg == "Success") {
-            const data = result.metadata
-            let musics = JSON.parse(JSON.stringify(data.music)) // array
-            resolve(musics)
-          } else {
-            reject(result.status.msg);
-          }
+          resolve(result);
         } else {
           reject("Cannot recognize music");
         }
       }
     });
   })
-
 }
 
 exports.recogniteAudio = recogniteAudio
 
-function checkIfIncludingMusic(musics) {
-  const first = musics[0]
+function checkIfIncludingMusic(data) {
+  const first = data.musics[0]
   const title = first.title
   const album = first.album.name
   const artists = first.artists // array
   const songArtist = artists[0].name
 
   const jsonResult = { title, album, songArtist }
-  console.log("audioRecognition result: " + JSON.stringify(jsonResult))
   return jsonResult
 }
 

@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
+const defaultThumbnail = "https://unica.vn/upload/landingpage/045402_toi-uu-kich-thuoc-thumbnail-youtube-nhanh-gon-voi-vai-cu-click-chuot_thumb.jpg";
+
 const { schemaOptions } = require('../constants/schemaOptions')
 
 const VideoType = {
@@ -11,7 +13,7 @@ const VideoType = {
 const videoSchema = new Schema({
 	title: { type: String, required: true },
 	url: { type: String, required: true },
-	thumbnail_url: { type: String, required: true },
+	thumbnail_url: { type: String, default: defaultThumbnail },
 	size: { type: Number, required: true },
 	description: { type: String },
 	recognition_result: { type: Schema.Types.Mixed },
