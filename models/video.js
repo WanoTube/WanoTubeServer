@@ -1,18 +1,18 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const { commentSchema } = require('./comment.js')
-const { likeSchema } = require('./like.js')
-const { schemaOptions } = require('../constants/schemaOptions')
+const { schemaOptions } = require('../constants/schemaOptions');
 
+const defaultThumbnail = "https://unica.vn/upload/landingpage/045402_toi-uu-kich-thuoc-thumbnail-youtube-nhanh-gon-voi-vai-cu-click-chuot_thumb.jpg";
 const VideoType = {
 	SHORT: 'SHORT',
 	NORMAL: 'NORMAL'
-}
+};
 
 const videoSchema = new Schema({
 	title: { type: String, required: true },
 	url: { type: String, required: true },
+	thumbnail_key: { type: String, default: defaultThumbnail },
 	size: { type: Number, required: true },
 	description: { type: String },
 	recognition_result: { type: Schema.Types.Mixed },
@@ -26,9 +26,9 @@ const videoSchema = new Schema({
 	duration: { type: Number },
 	type: { type: String, enum: VideoType, default: VideoType.NORMAL },
 
-}, schemaOptions)
+}, schemaOptions);
 
 module.exports = {
 	Video: mongoose.model('Video', videoSchema),
 	VideoType
-}
+};

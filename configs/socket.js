@@ -4,7 +4,7 @@ const { SOCKET_URL } = process.env;
 
 let io;
 
-const corsOptions = {
+const socketOptions = {
   cors: {
     origin: SOCKET_URL,
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
@@ -14,7 +14,7 @@ const corsOptions = {
 }
 
 async function connectSocket(server) {
-  io = await socketIo(server, corsOptions);
+  io = await socketIo(server, socketOptions);
 
   console.log("Connect to socket io");
   io.on("connection", function (socket) {

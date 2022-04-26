@@ -20,6 +20,7 @@
   "homepage": "https://github.com/nguyendacthienngan/WatchOutServer#readme",
   "dependencies": {
     "aws-sdk": "^2.1042.0",
+    "axios": "^0.26.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

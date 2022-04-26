@@ -45,9 +45,9 @@ function identify(data, options, cb) {
     access_key: options.access_key,
     data_type: options.data_type,
     signature_version: options.signature_version,
-    signature: signature,
     sample_bytes: data.length,
-    timestamp: timestamp,
+    signature,
+    timestamp,
   }
   request.post({
     url: "http://" + options.host + options.endpoint,
@@ -57,47 +57,31 @@ function identify(data, options, cb) {
 }
 
 function recogniteAudio(data) {
-  console.log({ recognized: data })
   return new Promise(function (resolve, reject) {
-    try {
-      identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
-        if (err) console.log(err);
-        else {
-          const result = JSON.parse(body);
-          if (result) {
-            if (result.status.msg == "Success") {
-              const data = result.metadata
-              let musics = JSON.parse(JSON.stringify(data.music)) // array
-              resolve(musics)
-            } else {
-              console.log("Recognition does not success: " + result.status.msg);
-              resolve(null);
-            }
-          } else {
-            console.log("Cannot recognize music");
-            resolve(null);
-          }
+    identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
+      if (err) reject(err.msg);
+      else {
+        const result = JSON.parse(body);
+        if (result) {
+          resolve(result);
+        } else {
+          reject("Cannot recognize music");
         }
-      });
-    } catch (error) {
-      console.log(error)
-      resolve(null)
-    }
+      }
+    });
   })
-
 }
 
 exports.recogniteAudio = recogniteAudio
 
-function checkIfIncludingMusic(musics) {
-  const first = musics[0]
+function checkIfIncludingMusic(data) {
+  const first = data.musics[0]
   const title = first.title
   const album = first.album.name
   const artists = first.artists // array
   const songArtist = artists[0].name
 
   const jsonResult = { title, album, songArtist }
-  console.log("audioRecognition result: " + JSON.stringify(jsonResult))
   return jsonResult
 }
 
