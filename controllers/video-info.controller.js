@@ -1,5 +1,5 @@
 const { Video } = require('../models/video');
-const { deleteFile } = require('../utils/aws-s3-handlers')
+const { deleteFile, getSignedUrl } = require('../utils/aws-s3-handlers')
 
 const mongoose = require('mongoose');
 
@@ -20,42 +20,71 @@ exports.createVideoInfos = function (video) {
 
 exports.getAllVideoInfos = function (req, res) {
 	Video.find()
-		.then(function (doc) {
-			res.json(doc)
+		.then(function (docs) {
+			const formattedDocs = docs.map(function (doc) {
+				const formmattedDoc = { ...doc._doc };
+				formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
+				formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
+				delete formmattedDoc.thumbnail_key;
+				return formmattedDoc;
+			})
+			res.json(formattedDocs)
 		})
 }
 
 exports.getAllVideoInfosWithUserId = function (req, res) {
 	const authId = new mongoose.mongo.ObjectId(req.params.author_id)
 	Video.find({ author_id: authId })
-		.then(function (doc) {
-			res.json(doc)
+		.then(function (docs) {
+			const formattedDocs = docs.map(function (doc) {
+				const formmattedDoc = { ...doc._doc };
+				formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
+				formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
+				delete formmattedDoc.thumbnail_key;
+				return formmattedDoc;
+			})
+			res.json(formattedDocs)
 		})
 }
 
 exports.getAllPublicVideoInfosWithUserId = function (req, res) {
 	const authId = new mongoose.mongo.ObjectId(req.params.author_id)
 	Video.find({ author_id: authId, visibility: 0 })
-		.then(function (doc) {
-			res.json(doc)
+		.then(function (docs) {
+			const formattedDocs = docs.map(function (doc) {
+				const formmattedDoc = { ...doc._doc };
+				formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
+				formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
+				delete formmattedDoc.thumbnail_key;
+				return formmattedDoc;
+			})
+			res.json(formattedDocs)
 		})
 }
 
 exports.getAllPublicVideoInfos = function (req, res) {
 	Video.find({ visibility: 0 })
-		.then(function (doc) {
-			res.json(doc)
+		.then(function (docs) {
+			const formattedDocs = docs.map(function (doc) {
+				const formmattedDoc = { ...doc._doc };
+				formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
+				formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
+				delete formmattedDoc.thumbnail_key;
+				return formmattedDoc;
+			})
+			res.json(formattedDocs)
 		})
 }
 
 exports.getVideoInfoById = function (req, res) {
 	const id = req.params.id
 	Video.findById(id)
-		.exec(function (err, result) {
-			if (!err)
-				res.json(result)
-			else
-				res.json(err)
+		.then(function (doc) {
+			const formmattedDoc = { ...doc._doc };
+			formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
+			formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
+			delete formmattedDoc.thumbnail_key;
+			res.json(formmattedDoc)
 		})
 };
 

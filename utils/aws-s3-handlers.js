@@ -21,7 +21,7 @@ exports.uploadFile = function (fileName, fileStream) {
 	const uploadParams = {
 		Bucket: AWS_BUCKET_NAME,
 		Body: fileStream,
-		Key: folder + '/' + fileName
+		Key: `uploads/${folder}/${fileName}`
 	};
 	return s3.upload(uploadParams, function (err, data) {
 		if (err) {
