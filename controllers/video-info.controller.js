@@ -4,7 +4,6 @@ const { deleteFile } = require('../utils/aws-s3-handlers')
 const mongoose = require('mongoose');
 
 exports.createVideoInfos = function (video) {
-	console.log({ video })
 	return new Promise(async function (resolve, reject) {
 		try {
 			const videoSaved = await video.save();

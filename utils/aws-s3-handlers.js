@@ -16,10 +16,12 @@ exports.uploadFile = function (fileName, fileStream) {
 	// const fileName = base;
 	// const newFileBuffer = fs.readFileSync(newFilePath);
 	// const fileStream  = Buffer.from(newFileBuffer, 'binary');
+	const extension = fileName.split('.')[fileName.split('.').length - 1];
+	const folder = extension === 'mp3' ? 'audios' : extension === 'mp4' ? 'videos' : 'thumbnails';
 	const uploadParams = {
 		Bucket: AWS_BUCKET_NAME,
 		Body: fileStream,
-		Key: fileName
+		Key: folder + '/' + fileName
 	};
 	return s3.upload(uploadParams, function (err, data) {
 		if (err) {
@@ -78,4 +80,13 @@ exports.deleteFile = function (fileKey) {
 			reject(error);
 		}
 	});
+}
+
+exports.getSignedUrl = function ({ key, expires }) {
+	const signedUrl = s3.getSignedUrl('getObject', {
+		Key: key,
+		Bucket: AWS_BUCKET_NAME,
+		Expires: expires || 900000, // S3 default is 900 seconds (15 minutes)
+	})
+	return signedUrl;
 }

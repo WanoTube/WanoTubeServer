@@ -1,19 +1,19 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const { schemaOptions } = require('../constants/schemaOptions');
+const { getSignedUrl } = require('../utils/aws-s3-handlers');
 
 const defaultThumbnail = "https://unica.vn/upload/landingpage/045402_toi-uu-kich-thuoc-thumbnail-youtube-nhanh-gon-voi-vai-cu-click-chuot_thumb.jpg";
-
-const { schemaOptions } = require('../constants/schemaOptions')
-
 const VideoType = {
 	SHORT: 'SHORT',
 	NORMAL: 'NORMAL'
-}
+};
 
 const videoSchema = new Schema({
 	title: { type: String, required: true },
 	url: { type: String, required: true },
-	thumbnail_url: { type: String, default: defaultThumbnail },
+	thumbnail_key: { type: String, default: defaultThumbnail },
 	size: { type: Number, required: true },
 	description: { type: String },
 	recognition_result: { type: Schema.Types.Mixed },
@@ -27,9 +27,16 @@ const videoSchema = new Schema({
 	duration: { type: Number },
 	type: { type: String, enum: VideoType, default: VideoType.NORMAL },
 
-}, schemaOptions)
+}, schemaOptions);
+
+videoSchema.post('find', function (records) {
+	records = records.map(function (record) {
+		return getSignedUrl({ key: record.thumbnail_key });
+	})
+	// record.thumbnail_url = getSignedUrl({ key: record.thumbnail_key });
+});
 
 module.exports = {
 	Video: mongoose.model('Video', videoSchema),
 	VideoType
-}
+};

@@ -13,8 +13,6 @@ const defaultOptions = {
   access_secret: ACRCLOUD_SECRET_KEY
 };
 
-console.log({ defaultOptions })
-
 function buildStringToSign(method, uri, accessKey, dataType, signatureVersion, timestamp) {
   return [method, uri, accessKey, dataType, signatureVersion, timestamp].join('\n');
 }

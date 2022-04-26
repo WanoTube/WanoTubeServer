@@ -3,33 +3,27 @@ const path = require('path');
 
 const { trackProgress } = require('../configs/socket')
 
-exports.converVideoToAudio = function (input, output) {
+const converVideoToAudio = function (input, output) {
 	let nextProgress = 0;
-	console.log({ input })
 	return new Promise(async function (resolve, reject) {
 		try {
-			console.log("converVideoToAudio: input: ", input, ", output: ", output)
 			ffmpeg(input)
 				.output(output)
 
 				.on('progress', (progress) => {
 					if (progress) {
 						if (nextProgress >= 100 || (nextProgress < 100 && progress.percent >= nextProgress)) {
-							console.log("converVideoToAudio: ", progress.percent, "%")
 							nextProgress += 15;
 						}
 					}
 				})
 				.on('error', function (err) {
-					console.log('error: ', err);
 					reject(err)
 				})
 				.on('end', function () {
-					console.log('conversion ended');
 					resolve(output)
 				})
 				.run();
-			console.log({ output })
 		} catch (error) {
 			reject(error)
 		}
@@ -38,8 +32,6 @@ exports.converVideoToAudio = function (input, output) {
 }
 
 function isVideoHaveAudioTrack(input) {
-
-	console.log({ input })
 	return new Promise(function (resolve, reject) {
 		try {
 			ffmpeg(input)
@@ -56,16 +48,12 @@ function isVideoHaveAudioTrack(input) {
 		}
 	})
 }
-exports.isVideoHaveAudioTrack = isVideoHaveAudioTrack;
 
 async function compressVideo(input, output, app) {
-	// const io = app.get('socketio');
 	let nextProgress = 0;
 	return new Promise(function (resolve, reject) {
 		try {
 			ffmpeg(input)
-				// .setStartTime(2) //Can be in "HH:MM:SS" format also
-				// .setDuration(10) 
 				.addOutputOption(["-vcodec libx265"])
 				.on("start", function (commandLine) {
 					console.log("Spawned FFmpeg with command: " + commandLine);
@@ -83,7 +71,6 @@ async function compressVideo(input, output, app) {
 					resolve('conversion ended')
 				})
 				.on('error', function (err) {
-					console.log('error: ', err);
 					reject(err)
 				}).save(output)
 		} catch (error) {
@@ -92,8 +79,6 @@ async function compressVideo(input, output, app) {
 
 	});
 }
-
-exports.compressVideo = compressVideo
 
 function convertToWebmFormat(input, output, app) {
 	const io = app.get('socketio');
@@ -126,15 +111,49 @@ function convertToWebmFormat(input, output, app) {
 		} catch (error) {
 			reject(error)
 		}
-
 	});
 }
-exports.convertToWebmFormat = convertToWebmFormat;
 
-function restrictVideoName(fileName, userId) {
+function generateThumbnail(videoFilePath) {
+	let thumbsFilePath = "";
+	return new Promise(function (resolve, reject) {
+		try {
+			ffmpeg(videoFilePath)
+				.on('filenames', function (filenames) {
+					console.log('Will generate ' + filenames.join(', '))
+					thumbsFilePath = "uploads/thumbnails/" + filenames[0];
+				})
+				.on('end', function () {
+					console.log('Screenshots taken');
+					resolve(thumbsFilePath);
+				})
+				.screenshots({
+					// Will take screens at 20%, 40%, 60% and 80% of the video
+					count: 1,
+					folder: 'uploads/thumbnails',
+					size: '320x240',
+					// %b input basename ( filename w/o extension )
+					filename: 'thumbnail-%b.png'
+				});
+		}
+		catch (err) {
+			reject(err);
+		}
+	})
+}
+
+function encodeFileName(fileName, userId) {
 	const timeStamp = Math.floor(Date.now() / 1000);
 	let { name } = path.parse(fileName);
 	name = name.replace(/[^a-z0-9/]/gi, '_').toLowerCase();
 	return name + "_" + userId + "_" + timeStamp
 }
-exports.restrictVideoName = restrictVideoName
+
+module.exports = {
+	encodeFileName,
+	convertToWebmFormat,
+	compressVideo,
+	isVideoHaveAudioTrack,
+	converVideoToAudio,
+	generateThumbnail
+}

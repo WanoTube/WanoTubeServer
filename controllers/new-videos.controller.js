@@ -1,21 +1,19 @@
 const fs = require('fs')
 const path = require('path');
 const { trackProgress } = require('../configs/socket')
-const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
+const { uploadFile, getFileStream, getSignedUrl } = require('../utils/aws-s3-handlers')
 
 const {
-	compressVideo,
 	converVideoToAudio,
-	restrictVideoName,
+	encodeFileName,
 	isVideoHaveAudioTrack,
-	convertToWebmFormat
+	generateThumbnail,
 } = require('../utils/videos-handlers')
 
-const { recogniteAudio, checkIfIncludingMusic } = require('./audio-recoginition.controller')
+const { recogniteAudio } = require('./audio-recoginition.controller')
 const { createVideoInfos } = require('./video-info.controller')
 
 const { Video } = require('../models/video');
-const httpStatus = require('../utils/http-status')
 
 exports.getVideoById = async function (req, res) {
 	const key = req.params.key;
@@ -31,31 +29,40 @@ exports.getVideoById = async function (req, res) {
 
 exports.uploadVideo = async function (req, res) {
 	let file = req.files;
-	const body = req.body
-
+	const { body } = req;
 	if (req.files) {
-		file = file.video
+		file = file.video;
 	} else {
-		res.status(400).json("No file")
-		return
+		console.log('No file');
+		res.status(400).json("No file");
+		return;
 	}
 	if (body && file) {
 		try {
-			const analizedVideo = await analyzeVideo(file, res.app, body);
-			await uploadToS3(analizedVideo, req.app);
+			const { title, videoPath: videoKey } = await generateVideoFile(file, body);
+			await uploadToS3(videoKey);
 
-			const recognizedMusic = await recogniteAudioFromVideo(analizedVideo);
-			const saveDBResult = await saveVideoToDatabase(analizedVideo, body, recognizedMusic)
+			const recognizedMusic = await recogniteAudioFromVideo(videoKey);
+			const thumbnailKey = await generateThumbnail(videoKey);
+			await uploadToS3(thumbnailKey);
+
+			const saveDBResult = await saveVideoToDatabase(videoKey, { ...body, title, recognition_result: recognizedMusic, thumbnail_key: thumbnailKey })
 			if (saveDBResult) res.status(200).json(saveDBResult)
-			else res.status(400).json("Cannot save DB");
-			await removeRedundantFiles('./videos');
-			await removeRedundantFiles('./audios');
+			else {
+				console.log('Cannot save DB');
+				res.status(500).json("Cannot save DB");
+			}
+			await removeRedundantFiles('uploads/videos');
+			await removeRedundantFiles('uploads/audios');
+			await removeRedundantFiles('uploads/thumbnails');
 		} catch (error) {
+			console.log(error)
 			if (error.msg) res.status(400).json(error.msg)
 			else res.status(400).json(error)
 		}
 
 	} else {
+		console.log('No body')
 		res.status(400).json("No body")
 	}
 }
@@ -68,7 +75,7 @@ async function removeRedundantFiles(directory) {
 	}
 }
 
-function uploadToS3(newFilePath, app) {
+function uploadToS3(newFilePath) {
 	return new Promise(function (resolve, reject) {
 		try {
 			// reqVideo is redundant
@@ -95,28 +102,27 @@ function uploadToS3(newFilePath, app) {
 	});
 }
 
-async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
+async function saveVideoToDatabase(videoPath, body) {
 	return new Promise(async function (resolve, reject) {
 		try {
-			const fileSize = fs.statSync(newFilePath).size;
-			const { base } = path.parse(newFilePath);
-			const fileTitle = newFilePath.split('/')[2].split('.')[0]
+			const fileSize = fs.statSync(videoPath).size;
+			const { title, description, duration, author_id, recognition_result, thumbnail_key } = body;
 			const reqVideo = {
-				title: fileTitle,
+				title: title,
 				size: fileSize,
-				description: body.description,
-				duration: body.duration,
-				url: base,
-				recognition_result: recognizedMusics,
-				visibility: 1	//first set private
+				description: description,
+				duration: duration,
+				url: videoPath,
+				visibility: 1,	//first set private
+				recognition_result,
+				thumbnail_key
 			}
 
-			if (newFilePath) {
+			if (videoPath) {
 				// Save to AWS
 				const newVideo = new Video(reqVideo);
 
 				// TO-DO: UserID is hardcoded
-				const author_id = body.author_id;
 				if (author_id) {
 					newVideo.author_id = author_id
 
@@ -138,16 +144,16 @@ async function saveVideoToDatabase(newFilePath, body, recognizedMusics) {
 
 }
 
-async function recogniteAudioFromVideo(newVideoSavedPath) {
+async function recogniteAudioFromVideo(videoPath) {
 	return new Promise(async function (resolve, reject) {
 		try {
-			const { name } = path.parse(newVideoSavedPath);
-			const audioSavedPath = './audios/' + name + '.mp3';
+			const { name } = path.parse(videoPath);
+			const audioSavedPath = 'uploads/audios/' + name + '.mp3';
 
-			if (newVideoSavedPath) {
-				const isAudioIncluded = await isVideoHaveAudioTrack(newVideoSavedPath);
+			if (videoPath) {
+				const isAudioIncluded = await isVideoHaveAudioTrack(videoPath);
 				if (isAudioIncluded) {
-					const convertResult = await converVideoToAudio(newVideoSavedPath, audioSavedPath)
+					const convertResult = await converVideoToAudio(videoPath, audioSavedPath)
 					if (convertResult) {
 					} else {
 						throw new Error("Cannot convert music")
@@ -158,7 +164,7 @@ async function recogniteAudioFromVideo(newVideoSavedPath) {
 
 					const recognizeResultACR = await recogniteAudio(Buffer.from(bitmap));
 					const recognizeResult = {
-						savedName: newVideoSavedPath,
+						savedName: videoPath,
 						recognizeResult: recognizeResultACR
 					};
 					if (recognizeResult && recognizeResultACR) {
@@ -179,29 +185,22 @@ async function recogniteAudioFromVideo(newVideoSavedPath) {
 
 }
 
-async function analyzeVideo(file, app, body) {
-	const dataBuffers = file.data;
-	const fileName = file.name;
+async function generateVideoFile(file, body) {
+	const { data: dataBuffers, name: fileName } = file;
 	const { ext } = path.parse(fileName);
-	const name = restrictVideoName(fileName, body.author_id);
+	const name = encodeFileName(fileName, body.author_id);
+	const videoPath = 'uploads/videos/' + name + ext;
 
-	const videoSavedPath = './videos/' + fileName;
-	const newVideoSavedPath = './videos/' + name + ext;
-	const newVideoSavedPathWebm = './videos/' + name + '.webm';
-
-	return new Promise(async function (resolve, reject) {
+	return new Promise(function (resolve, reject) {
 		try {
-			// Because if webm we will not compress video. But if we compress video, we need to have 2 paths
-			let willSavePath = (ext == ".webm") ? newVideoSavedPath : videoSavedPath;
-			fs.writeFileSync(willSavePath, dataBuffers)
-			if (ext.localeCompare(".webm") != 0) {
-				await compressVideo(videoSavedPath, newVideoSavedPath, app);
-				await convertToWebmFormat(newVideoSavedPath, newVideoSavedPathWebm, app);
-				willSavePath = newVideoSavedPathWebm;
-			}
-			resolve(willSavePath);
-		} catch (error) {
-			reject(error);
+			fs.writeFileSync(videoPath, dataBuffers);
+			resolve({
+				title: fileName,
+				videoPath
+			});
+		}
+		catch (err) {
+			reject(err);
 		}
 	})
 }
