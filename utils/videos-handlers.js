@@ -131,7 +131,7 @@ function generateThumbnail(videoFilePath) {
 					// Will take screens at 20%, 40%, 60% and 80% of the video
 					count: 1,
 					folder: 'uploads/thumbnails',
-					size: '720x480',
+					size: '1280x720',
 					// %b input basename ( filename w/o extension )
 					filename: 'thumbnail-%b.png'
 				});
@@ -149,11 +149,19 @@ function encodeFileName(fileName, userId) {
 	return name + "_" + userId + "_" + timeStamp
 }
 
+function seperateTitleAndExtension(fileName) {
+	const fileNameSplittedArray = fileName.split('.');
+	const extension = fileNameSplittedArray.pop();
+	const title = fileNameSplittedArray.join('.');
+	return { title, extension };
+}
+
 module.exports = {
 	encodeFileName,
 	convertToWebmFormat,
 	compressVideo,
 	isVideoHaveAudioTrack,
 	converVideoToAudio,
-	generateThumbnail
+	generateThumbnail,
+	seperateTitleAndExtension
 }

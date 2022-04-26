@@ -10,7 +10,7 @@ const s3 = new S3({
 });
 
 // uploads a file to s3
-exports.uploadFile = function (fileName, fileStream) {
+exports.uploadFile = function (fileName, fileStream, resolve, reject) {
 	// Binary data base64
 	// const { base } = path.parse(newFilePath);
 	// const fileName = base;
@@ -25,9 +25,9 @@ exports.uploadFile = function (fileName, fileStream) {
 	};
 	return s3.upload(uploadParams, function (err, data) {
 		if (err) {
-			return false;
+			reject(err);
 		}
-		return true;
+		resolve();
 	});
 }
 

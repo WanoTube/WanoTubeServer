@@ -125,7 +125,6 @@ exports.updateVideoInfo = async function (req, res) {
 exports.deleteVideoInfo = async function (req, res) {
 	const id = req.body.id
 	const url = req.body.url
-	console.log(req.body)
 	try {
 		await deleteFile(url)
 

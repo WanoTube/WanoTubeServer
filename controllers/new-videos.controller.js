@@ -8,6 +8,7 @@ const {
 	encodeFileName,
 	isVideoHaveAudioTrack,
 	generateThumbnail,
+	seperateTitleAndExtension
 } = require('../utils/videos-handlers')
 
 const { recogniteAudio } = require('./audio-recoginition.controller')
@@ -40,13 +41,14 @@ exports.uploadVideo = async function (req, res) {
 	if (body && file) {
 		try {
 			const { title, videoPath: videoKey } = await generateVideoFile(file, body);
-			await uploadToS3(videoKey);
 
 			const recognizedMusic = await recogniteAudioFromVideo(videoKey);
 			const thumbnailKey = await generateThumbnail(videoKey);
 			await uploadToS3(thumbnailKey);
 
-			const saveDBResult = await saveVideoToDatabase(videoKey, { ...body, title, recognition_result: recognizedMusic, thumbnail_key: thumbnailKey })
+			await uploadToS3(videoKey);
+
+			const saveDBResult = await saveVideoToDatabase(videoKey, { ...body, title, recognition_result: recognizedMusic.recognizeResult, thumbnail_key: thumbnailKey })
 			if (saveDBResult) res.status(200).json(saveDBResult)
 			else {
 				console.log('Cannot save DB');
@@ -57,8 +59,8 @@ exports.uploadVideo = async function (req, res) {
 			await removeRedundantFiles('uploads/thumbnails');
 		} catch (error) {
 			console.log(error)
-			if (error.msg) res.status(400).json(error.msg)
-			else res.status(400).json(error)
+			if (error.msg) return res.status(400).json(error.msg);
+			else return res.status(400).json(error);
 		}
 
 	} else {
@@ -89,12 +91,11 @@ function uploadToS3(newFilePath) {
 				const fileName = base;
 				const newFileBuffer = fs.readFileSync(newFilePath);
 				const fileStream = Buffer.from(newFileBuffer, 'binary');
-				uploadFile(fileName, fileStream)
+				uploadFile(fileName, fileStream, () => resolve(reqVideo), (err) => reject(err))
 					.on('httpUploadProgress', function (progress) {
 						const progressPercentage = Math.round(progress.loaded / progress.total * 100);
 						trackProgress(progressPercentage, 'Upload to S3')
-					});
-				resolve(reqVideo);
+					})
 			}
 		} catch (error) {
 			reject(error)
@@ -188,14 +189,15 @@ async function recogniteAudioFromVideo(videoPath) {
 async function generateVideoFile(file, body) {
 	const { data: dataBuffers, name: fileName } = file;
 	const { ext } = path.parse(fileName);
-	const name = encodeFileName(fileName, body.author_id);
-	const videoPath = 'uploads/videos/' + name + ext;
+	const encodedFileName = encodeFileName(fileName, body.author_id);
+	const { title } = seperateTitleAndExtension(fileName);
+	const videoPath = 'uploads/videos/' + encodedFileName + ext;
 
 	return new Promise(function (resolve, reject) {
 		try {
 			fs.writeFileSync(videoPath, dataBuffers);
 			resolve({
-				title: fileName,
+				title,
 				videoPath
 			});
 		}
