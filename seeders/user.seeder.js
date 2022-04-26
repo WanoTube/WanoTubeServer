@@ -26,7 +26,8 @@ exports.userSeeder = async function () {
         videos: [
           {
             title: 'Big Buck Bunny',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,
@@ -34,7 +35,8 @@ exports.userSeeder = async function () {
           },
           {
             title: 'Elephant Dream',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,
@@ -42,7 +44,8 @@ exports.userSeeder = async function () {
           },
           {
             title: 'For Bigger Blazes',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,
@@ -50,7 +53,8 @@ exports.userSeeder = async function () {
           },
           {
             title: 'For Bigger Escape',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,
@@ -58,7 +62,8 @@ exports.userSeeder = async function () {
           },
           {
             title: 'For Bigger Fun',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,
@@ -66,7 +71,8 @@ exports.userSeeder = async function () {
           },
           {
             title: 'For Bigger Escape',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,
@@ -92,7 +98,8 @@ exports.userSeeder = async function () {
         videos: [
           {
             title: 'For Bigger Fun',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,
@@ -100,7 +107,8 @@ exports.userSeeder = async function () {
           },
           {
             title: 'For Bigger Escape',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,
@@ -108,7 +116,8 @@ exports.userSeeder = async function () {
           },
           {
             title: 'For Bigger Fun',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,
@@ -134,7 +143,8 @@ exports.userSeeder = async function () {
         videos: [
           {
             title: 'For Bigger Escape',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,
@@ -142,7 +152,8 @@ exports.userSeeder = async function () {
           },
           {
             title: 'For Bigger Fun',
-            url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            url: 'song.mp4',
+            thumbnailKey: 'thumbnail.png',
             size: 596,
             duration: 596,
             visibility: 0,

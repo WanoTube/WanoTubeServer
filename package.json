@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "seed": "node seeders/index.js"
+    "seed": "NODE_ENV=development node seeders/index.js"
   },
   "repository": {
     "type": "git",
