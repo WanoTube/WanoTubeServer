@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 const { Video } = require('../models/video');
 const Account = require('../models/account')
 const { deleteFile, getSignedUrl } = require('../utils/aws-s3-handlers')
@@ -85,7 +87,7 @@ exports.getVideoInfoById = function (req, res) {
 			formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
 			formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
 			delete formmattedDoc.thumbnail_key;
-			res.json(formmattedDoc)
+			res.json(formmattedDoc);
 		})
 };
 
@@ -117,7 +119,7 @@ exports.updateVideoInfo = async function (req, res) {
 		});
 		res.json(video);
 	} catch (error) {
-		res.json(error);
+		res.status(500).json(error);
 	}
 }
 
@@ -125,19 +127,24 @@ exports.increaseView = async function (req, res) {
 	const { _id: viewerId } = req.user;
 	const { id: videoId } = req.params
 
-	const video = await Video.findOneAndUpdate(
-		{ _id: videoId },
-		{ $addToSet: { views: viewerId } },
-		{ new: true }
-	);
+	try {
+		const video = await Video.findOneAndUpdate(
+			{ _id: videoId },
+			{ $addToSet: { views: viewerId } },
+			{ new: true }
+		);
 
-	await Account.findOneAndUpdate(
-		{ user_id: viewerId },
-		{ $addToSet: { watched_history: videoId } },
-		{ new: true }
-	)
+		await Account.findOneAndUpdate(
+			{ user_id: viewerId },
+			{ $addToSet: { watched_history: videoId } },
+			{ new: true }
+		)
 
-	res.json({ video });
+		res.json({ video });
+	}
+	catch (error) {
+		res.status(500).json(error);
+	}
 }
 
 exports.deleteVideoInfo = async function (req, res) {
@@ -152,7 +159,7 @@ exports.deleteVideoInfo = async function (req, res) {
 		const data = await Video.deleteOne({ _id: id });
 		res.status(200).json(data);
 	} catch (error) {
-		res.json(error);
+		res.status(500).json(error);
 	}
 }
 
@@ -164,6 +171,32 @@ exports.getTotalViewsByVideoId = async function (req, res) {
 			res.status(200).json(JSON.stringify(video.total_views));
 		}
 	} catch (error) {
-		res.status(400).json(error);
+		res.status(500).json(error);
+	}
+}
+
+exports.getWatchHistory = async function (req, res) {
+	const { _id: userId } = req.user;
+
+	try {
+		const account = await Account.findOne({ user_id: userId }).populate({
+			path: 'watched_history',
+			populate: 'author_id'
+		});
+
+		const watchedHistory = account.watched_history.map(function (doc) {
+			const formmattedDoc = { ...doc._doc };
+			formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
+			formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
+			delete formmattedDoc.thumbnail_key;
+			return formmattedDoc;
+		})
+
+		const watchedHistoryByWeek = _.groupBy(watchedHistory, (d) => new Date(d.created_at));
+		res.status(200).json({ watchedHistory: watchedHistoryByWeek });
+	}
+	catch (error) {
+		console.log(error)
+		res.status(500).json(error);
 	}
 }

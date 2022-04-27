@@ -15,6 +15,8 @@ router.get('/search', videoInfosController.search)
 
 router.get('/public', videoInfosController.getAllPublicVideoInfos)
 
+router.get('/history', requireAuth, videoInfosController.getWatchHistory)
+
 router.get('/:id', videoInfosController.getVideoInfoById);
 
 router.get('/:id/likes', likesController.getAllLikesByVideoId)
