@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
+
 const videosController = require('../controllers/new-videos.controller');
 const videoInfosController = require('../controllers/video-info.controller');
 const likesController = require('../controllers/likes.controller');
 const commentsController = require('../controllers/comments.controller');
+const { requireAuth } = require('../middlewares/verifyToken.middleware');
 
 router.get('/users/:author_id', videoInfosController.getAllVideoInfosWithUserId)
 
@@ -16,6 +18,8 @@ router.get('/public', videoInfosController.getAllPublicVideoInfos)
 router.get('/:id', videoInfosController.getVideoInfoById);
 
 router.get('/:id/likes', likesController.getAllLikesByVideoId)
+
+router.patch('/:id/view', requireAuth, videoInfosController.increaseView)
 
 router.get('/:id/comments', commentsController.getAllCommentsByVideoId)
 
@@ -37,7 +41,7 @@ router.get('/', videoInfosController.getAllVideoInfos)
 
 router.post('/upload', videosController.uploadVideo);
 
-router.put('/update', videoInfosController.updateVideoInfo)
+router.patch('/update', videoInfosController.updateVideoInfo)
 
 router.post('/delete', videoInfosController.deleteVideoInfo);
 

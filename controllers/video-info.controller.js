@@ -1,4 +1,5 @@
 const { Video } = require('../models/video');
+const Account = require('../models/account')
 const { deleteFile, getSignedUrl } = require('../utils/aws-s3-handlers')
 
 const mongoose = require('mongoose');
@@ -89,7 +90,6 @@ exports.getVideoInfoById = function (req, res) {
 };
 
 exports.search = function (req, res) {
-	console.log("Searching..")
 	const searchKey = req.query.search_query
 	// TO-DO: SEARCH IN TITLE, not whole title
 	Video.
@@ -105,16 +105,15 @@ exports.search = function (req, res) {
 };
 
 exports.updateVideoInfo = async function (req, res) {
-	const body = req.body
+	const { title, description, url, size, privacy, duration } = req.body;
 	try {
 		const video = await Video.updateOne({ _id: body.id }, {
-			total_views: body.totalViews,
-			title: body.title,
-			description: body.description,
-			url: body.url,
-			size: body.size,
-			visibility: body.privacy,
-			duration: body.duration
+			title,
+			description,
+			url,
+			size,
+			duration,
+			visibility: privacy
 		});
 		res.json(video);
 	} catch (error) {
@@ -122,14 +121,32 @@ exports.updateVideoInfo = async function (req, res) {
 	}
 }
 
+exports.increaseView = async function (req, res) {
+	const { _id: viewerId } = req.user;
+	const { id: videoId } = req.params
+
+	const video = await Video.findOneAndUpdate(
+		{ _id: videoId },
+		{ $addToSet: { views: viewerId } },
+		{ new: true }
+	);
+
+	await Account.findOneAndUpdate(
+		{ user_id: viewerId },
+		{ $addToSet: { watched_history: videoId } },
+		{ new: true }
+	)
+
+	res.json({ video });
+}
+
 exports.deleteVideoInfo = async function (req, res) {
-	const id = req.body.id
-	const url = req.body.url
+	const { id, url } = req.body
 	try {
 		await deleteFile(url)
 
 	} catch (error) {
-		console.log(error)
+		throw error
 	}
 	try {
 		const data = await Video.deleteOne({ _id: id });

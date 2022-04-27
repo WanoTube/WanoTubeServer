@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const usersController = require('../controllers/users.controller');
-const verifyToken = require('./../middlewares/verifyToken.middleware');
 const api = require("../utils/api-routes")
 
 router.get(api.actions.search, usersController.getUserByUsername)
@@ -10,7 +9,7 @@ router.get('/:id', usersController.getUserById);
 
 router.get('/account/:user_id', usersController.getAccountByUserId);
 
-router.get('/', verifyToken, usersController.getAllUsers);
+router.get('/', usersController.getAllUsers);
 
 router.post('/', usersController.createUser);
 
