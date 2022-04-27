@@ -1,10 +1,10 @@
 const _ = require('lodash');
+const mongoose = require('mongoose');
 
 const { Video } = require('../models/video');
-const Account = require('../models/account')
-const { deleteFile, getSignedUrl } = require('../utils/aws-s3-handlers')
-
-const mongoose = require('mongoose');
+const Account = require('../models/account');
+const WatchHistoryDate = require('../models/watchHistoryDate');
+const { deleteFile, getSignedUrl } = require('../utils/aws-s3-handlers');
 
 exports.createVideoInfos = function (video) {
 	return new Promise(async function (resolve, reject) {
@@ -75,6 +75,7 @@ exports.getAllPublicVideoInfos = function (req, res) {
 				delete formmattedDoc.thumbnail_key;
 				return formmattedDoc;
 			})
+
 			res.json(formattedDocs)
 		})
 }
@@ -123,30 +124,6 @@ exports.updateVideoInfo = async function (req, res) {
 	}
 }
 
-exports.increaseView = async function (req, res) {
-	const { _id: viewerId } = req.user;
-	const { id: videoId } = req.params
-
-	try {
-		const video = await Video.findOneAndUpdate(
-			{ _id: videoId },
-			{ $addToSet: { views: viewerId } },
-			{ new: true }
-		);
-
-		await Account.findOneAndUpdate(
-			{ user_id: viewerId },
-			{ $addToSet: { watched_history: videoId } },
-			{ new: true }
-		)
-
-		res.json({ video });
-	}
-	catch (error) {
-		res.status(500).json(error);
-	}
-}
-
 exports.deleteVideoInfo = async function (req, res) {
 	const { id, url } = req.body
 	try {
@@ -175,25 +152,74 @@ exports.getTotalViewsByVideoId = async function (req, res) {
 	}
 }
 
+exports.increaseView = async function (req, res) {
+	const { _id: viewerId } = req.user;
+	const { id: videoId } = req.params
+	const today = new Date(Date.now())
+	const formattedToday = `${today.getDate()}/${today.getMonth()}/${today.getFullYear()}`
+
+	try {
+		const foundAccount = await Account.findOne(
+			{ user_id: viewerId }
+		);
+
+
+		const foundWatchHistoryDate = await WatchHistoryDate.findOne(
+			{ account_id: foundAccount._id, date: formattedToday }
+		)
+
+		if (!foundWatchHistoryDate) {
+			console.log('if')
+			const newWatchHistoryDate = await WatchHistoryDate.create({
+				account_id: foundAccount._id, date: formattedToday, videos: [videoId]
+			});
+			await Account.updateOne(
+				{ _id: foundAccount._id },
+				{ $addToSet: { watched_history: newWatchHistoryDate } },
+				{ new: true }
+			);
+			res.status(200).json({ watchHistoryDate: newWatchHistoryDate });
+		}
+		else {
+			const updatedWatchHistoryDate = await WatchHistoryDate.findOneAndUpdate(
+				{ account_id: foundAccount._id, date: formattedToday },
+				{ $addToSet: { videos: videoId } }
+			)
+			res.status(200).json({ watchHistoryDate: updatedWatchHistoryDate })
+		}
+	}
+	catch (error) {
+		res.status(500).json(error);
+	}
+}
+
 exports.getWatchHistory = async function (req, res) {
 	const { _id: userId } = req.user;
 
 	try {
 		const account = await Account.findOne({ user_id: userId }).populate({
 			path: 'watched_history',
-			populate: 'author_id'
+			populate: {
+				path: 'videos',
+				populate: 'author_id'
+			}
 		});
 
-		const watchedHistory = account.watched_history.map(function (doc) {
-			const formmattedDoc = { ...doc._doc };
-			formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
-			formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
-			delete formmattedDoc.thumbnail_key;
-			return formmattedDoc;
+		const watchedHistoryDates = account.watched_history.map(function (historyDateDoc) {
+			const formattedHistoryDateDoc = { ...historyDateDoc._doc };
+			formattedHistoryDateDoc.videos = formattedHistoryDateDoc.videos.map(function (videoDoc) {
+				const formattedVideoDoc = { ...videoDoc._doc }
+				formattedVideoDoc.thumbnail_url = getSignedUrl({ key: formattedVideoDoc.thumbnail_key });
+				formattedVideoDoc.url = getSignedUrl({ key: formattedVideoDoc.url });
+				delete formattedVideoDoc.thumbnail_key;
+				formattedVideoDoc.author = formattedVideoDoc.author_id;
+				delete formattedVideoDoc.author_id;
+				return formattedVideoDoc;
+			})
+			return formattedHistoryDateDoc;
 		})
 
-		const watchedHistoryByWeek = _.groupBy(watchedHistory, (d) => new Date(d.created_at));
-		res.status(200).json({ watchedHistory: watchedHistoryByWeek });
+		res.status(200).json({ watchedHistoryDates });
 	}
 	catch (error) {
 		console.log(error)

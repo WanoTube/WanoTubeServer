@@ -57,7 +57,7 @@ exports.createUser = async function (request, response) {
 };
 
 exports.login = async function (request, response) {
-	const account = await Account.findOne({ email: request.body.email });
+	const account = await Account.findOne({ email: request.body.email }).select('+password').exec();
 	if (!account) return response.status(422).json('Email is not correct');
 	const checkPassword = await bcrypt.compare(request.body.password, account.password);
 	if (!checkPassword) return response.status(422).json('Password is not correct');

@@ -19,6 +19,7 @@ const Account = new Schema({
 	},
 	password: {
 		type: String,
+		select: false,
 		required: true,
 		min: 6,
 		max: 255
@@ -29,7 +30,7 @@ const Account = new Schema({
 	followings: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 	members: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 	blocked_accounts: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
-	watched_history: [{ type: Schema.Types.ObjectId, ref: 'Video', default: [] }],
+	watched_history: [{ type: Schema.Types.ObjectId, ref: 'WatchHistoryDate', default: [] }],
 	strike_id: { type: Schema.Types.ObjectId, ref: 'Strike' },
 }, schemaOptions)
 
