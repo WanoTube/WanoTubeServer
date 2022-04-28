@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 exports.getAllCommentsByVideoId = function (req, res) {
 	const id = req.params.id
 	Video.findById(id)
+		.populate('comments')
 		.exec(function (err, result) {
 			if (!err) {
 				if (result) res.json(result.comments)
