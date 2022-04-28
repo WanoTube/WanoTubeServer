@@ -1,5 +1,6 @@
-const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
+const fs = require('fs');
+const ffmpeg = require('fluent-ffmpeg');
 
 const { trackProgress } = require('../configs/socket')
 
@@ -156,6 +157,27 @@ function seperateTitleAndExtension(fileName) {
 	return { title, extension };
 }
 
+async function generateVideoFile(file, body) {
+	const { data: dataBuffers, name: fileName } = file;
+	const { ext } = path.parse(fileName);
+	const encodedFileName = encodeFileName(fileName, body.author_id);
+	const { title } = seperateTitleAndExtension(fileName);
+	const videoPath = 'uploads/videos/' + encodedFileName + ext;
+
+	return new Promise(function (resolve, reject) {
+		try {
+			fs.writeFileSync(videoPath, dataBuffers);
+			resolve({
+				title,
+				videoPath
+			});
+		}
+		catch (err) {
+			reject(err);
+		}
+	})
+}
+
 module.exports = {
 	encodeFileName,
 	convertToWebmFormat,
@@ -163,5 +185,6 @@ module.exports = {
 	isVideoHaveAudioTrack,
 	converVideoToAudio,
 	generateThumbnail,
-	seperateTitleAndExtension
+	seperateTitleAndExtension,
+	generateVideoFile
 }
