@@ -46,7 +46,7 @@ exports.uploadVideo = async function (req, res) {
 
 			await uploadToS3(videoKey, (val => val / 2 + 50));
 
-			const saveDBResult = await saveVideoToDatabase(videoKey, { ...body, title, recognition_result: recognizedMusic.recognizeResult, thumbnail_key: thumbnailKey })
+			const saveDBResult = await saveVideoToDatabase(videoKey, { ...body, title, recognition_result: recognizedMusic?.recognizeResult, thumbnail_key: thumbnailKey })
 			if (saveDBResult) res.status(200).json(saveDBResult)
 			else {
 				console.log('Cannot save DB');
@@ -113,7 +113,7 @@ async function saveVideoToDatabase(videoPath, body) {
 				duration: duration,
 				url: videoPath,
 				visibility: 1,	//first set private
-				recognition_result,
+				recognition_result: recognition_result.status === 0 ? recognition_result : null,
 				thumbnail_key
 			}
 
@@ -172,6 +172,7 @@ async function recogniteAudioFromVideo(videoPath) {
 						resolve("Cannot recognize result")
 					}
 				} else {
+					console.log('null nef me')
 					resolve(null)
 				}
 			} else {

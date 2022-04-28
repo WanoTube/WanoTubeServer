@@ -109,8 +109,9 @@ exports.search = function (req, res) {
 
 exports.updateVideoInfo = async function (req, res) {
 	const { title, description, url, size, privacy, duration } = req.body;
+	console.log(req.body)
 	try {
-		const video = await Video.updateOne({ _id: body.id }, {
+		const video = await Video.updateOne({ _id: req.body.id }, {
 			title,
 			description,
 			url,
@@ -120,18 +121,13 @@ exports.updateVideoInfo = async function (req, res) {
 		});
 		res.json(video);
 	} catch (error) {
+		console.log(error)
 		res.status(500).json(error);
 	}
 }
 
 exports.deleteVideoInfo = async function (req, res) {
 	const { id, url } = req.body
-	try {
-		await deleteFile(url)
-
-	} catch (error) {
-		throw error
-	}
 	try {
 		const data = await Video.deleteOne({ _id: id });
 		res.status(200).json(data);

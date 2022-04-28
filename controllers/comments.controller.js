@@ -29,12 +29,12 @@ exports.commentVideo = async function (req, res) {
 	// const video_id = body.video_id // video_id: the video being liked
 	// const userId = body.author_id // userId : the person like video
 	// const content = body.content // content of the comment
-	const { video_id, userId, content } = body
+	const { video_id, author_id, content } = body
 
 	try {
 		const video = await Video.findById(video_id)
 		if (video) {
-			addComment(userId, video, content, function (err, comment) {
+			addComment(author_id, video, content, function (err, comment) {
 				res.json(comment);
 			})
 		}
