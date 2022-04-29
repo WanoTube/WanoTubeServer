@@ -19,7 +19,6 @@ const videoSchema = new Schema({
 	author_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 	comments: [{ type: Schema.Types.ObjectId, ref: 'Comment', default: [] }],
 	likes: [{ type: Schema.Types.ObjectId, ref: 'Like', default: [] }],
-	views: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 	total_likes: { type: Number, default: 0 },
 	total_comments: { type: Number, default: 0 },
 	total_views: { type: Number, default: 0 },
@@ -28,11 +27,6 @@ const videoSchema = new Schema({
 	type: { type: String, enum: VideoType, default: VideoType.NORMAL },
 
 }, schemaOptions);
-
-videoSchema.post('findOneAndUpdate', function (doc) {
-	doc.total_views = doc.views.length;
-	doc.save();
-})
 
 module.exports = {
 	Video: mongoose.model('Video', videoSchema),

@@ -159,7 +159,6 @@ exports.increaseView = async function (req, res) {
 			{ user_id: viewerId }
 		);
 
-
 		const foundWatchHistoryDate = await WatchHistoryDate.findOne(
 			{ account_id: foundAccount._id, date: formattedToday }
 		)
@@ -177,12 +176,17 @@ exports.increaseView = async function (req, res) {
 			res.status(200).json({ watchHistoryDate: newWatchHistoryDate });
 		}
 		else {
-			const updatedWatchHistoryDate = await WatchHistoryDate.findOneAndUpdate(
+			const updatedWatchHistoryDate = await WatchHistoryDate.updateOne(
 				{ account_id: foundAccount._id, date: formattedToday },
 				{ $addToSet: { videos: videoId } }
 			)
 			res.status(200).json({ watchHistoryDate: updatedWatchHistoryDate })
 		}
+		await Video.updateOne(
+			{ _id: videoId },
+			{ $inc: { total_views: 1 } },
+			{ new: true }
+		)
 	}
 	catch (error) {
 		res.status(500).json(error);
@@ -201,19 +205,22 @@ exports.getWatchHistory = async function (req, res) {
 			}
 		});
 
-		const watchedHistoryDates = account.watched_history.map(function (historyDateDoc) {
+		const watchedHistoryDates = await Promise.all(account.watched_history.map(async function (historyDateDoc) {
 			const formattedHistoryDateDoc = { ...historyDateDoc._doc };
-			formattedHistoryDateDoc.videos = formattedHistoryDateDoc.videos.map(function (videoDoc) {
+			formattedHistoryDateDoc.videos = await Promise.all(formattedHistoryDateDoc.videos.map(async function (videoDoc) {
 				const formattedVideoDoc = { ...videoDoc._doc }
 				formattedVideoDoc.thumbnail_url = getSignedUrl({ key: formattedVideoDoc.thumbnail_key });
 				formattedVideoDoc.url = getSignedUrl({ key: formattedVideoDoc.url });
 				delete formattedVideoDoc.thumbnail_key;
-				formattedVideoDoc.author = formattedVideoDoc.author_id;
+
+				const authorAccount = await Account.findOne({ user_id: formattedVideoDoc.author_id });
+				formattedVideoDoc.author = { ...formattedVideoDoc.author_id, username: authorAccount.username };
+
 				delete formattedVideoDoc.author_id;
 				return formattedVideoDoc;
-			})
+			}))
 			return formattedHistoryDateDoc;
-		})
+		}))
 
 		res.status(200).json({ watchedHistoryDates });
 	}
