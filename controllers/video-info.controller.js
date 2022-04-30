@@ -1,6 +1,7 @@
 const _ = require('lodash');
 
 const { Video } = require('../models/video');
+const User = require('../models/user');
 const Account = require('../models/account');
 const WatchHistoryDate = require('../models/watchHistoryDate');
 const { getSignedUrl } = require('../utils/aws-s3-handlers');
@@ -119,7 +120,6 @@ exports.increaseView = async function (req, res) {
 		)
 
 		if (!foundWatchHistoryDate) {
-			console.log('if')
 			const newWatchHistoryDate = await WatchHistoryDate.create({
 				account_id: foundAccount._id, date: formattedToday, videos: [videoId]
 			});
@@ -169,7 +169,8 @@ exports.getWatchHistory = async function (req, res) {
 				delete formattedVideoDoc.thumbnail_key;
 
 				const authorAccount = await Account.findOne({ user_id: formattedVideoDoc.author_id });
-				formattedVideoDoc.author = { ...formattedVideoDoc.author_id, username: authorAccount.username };
+				const authorUserInfo = await User.findOne({ _id: formattedVideoDoc.author_id });
+				formattedVideoDoc.user = { ...formattedVideoDoc.author_id, username: authorAccount.username, _id: authorAccount._id, avatar: authorUserInfo.avatar };
 
 				delete formattedVideoDoc.author_id;
 				return formattedVideoDoc;
