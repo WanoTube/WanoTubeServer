@@ -1,10 +1,9 @@
 const _ = require('lodash');
-const mongoose = require('mongoose');
 
 const { Video } = require('../models/video');
 const Account = require('../models/account');
 const WatchHistoryDate = require('../models/watchHistoryDate');
-const { deleteFile, getSignedUrl } = require('../utils/aws-s3-handlers');
+const { getSignedUrl } = require('../utils/aws-s3-handlers');
 
 exports.createVideoInfos = function (video) {
 	return new Promise(async function (resolve, reject) {
@@ -21,50 +20,6 @@ exports.createVideoInfos = function (video) {
 	});
 }
 
-exports.getAllVideoInfos = function (req, res) {
-	Video.find()
-		.then(function (docs) {
-			const formattedDocs = docs.map(function (doc) {
-				const formmattedDoc = { ...doc._doc };
-				formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
-				formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
-				delete formmattedDoc.thumbnail_key;
-				return formmattedDoc;
-			})
-			res.json(formattedDocs)
-		})
-}
-
-exports.getAllVideoInfosWithUserId = function (req, res) {
-	const authId = new mongoose.mongo.ObjectId(req.params.author_id)
-	Video.find({ author_id: authId })
-		.then(function (docs) {
-			const formattedDocs = docs.map(function (doc) {
-				const formmattedDoc = { ...doc._doc };
-				formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
-				formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
-				delete formmattedDoc.thumbnail_key;
-				return formmattedDoc;
-			})
-			res.json(formattedDocs)
-		})
-}
-
-exports.getAllPublicVideoInfosWithUserId = function (req, res) {
-	const authId = new mongoose.mongo.ObjectId(req.params.author_id)
-	Video.find({ author_id: authId, visibility: 0 })
-		.then(function (docs) {
-			const formattedDocs = docs.map(function (doc) {
-				const formmattedDoc = { ...doc._doc };
-				formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
-				formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
-				delete formmattedDoc.thumbnail_key;
-				return formmattedDoc;
-			})
-			res.json(formattedDocs)
-		})
-}
-
 exports.getAllPublicVideoInfos = function (req, res) {
 	Video.find({ visibility: 0 })
 		.then(function (docs) {
@@ -76,7 +31,7 @@ exports.getAllPublicVideoInfos = function (req, res) {
 				return formmattedDoc;
 			})
 
-			res.json(formattedDocs)
+			res.json(formattedDocs);
 		})
 }
 
@@ -101,16 +56,17 @@ exports.search = function (req, res) {
 		})
 		.exec(function (err, result) {
 			if (!err)
-				res.json(result)
+				res.json(result);
 			else
-				res.json(err)
+				res.json(err);
 		})
 };
 
 exports.updateVideoInfo = async function (req, res) {
 	const { title, description, url, size, privacy, duration } = req.body;
+	console.log(req.body)
 	try {
-		const video = await Video.updateOne({ _id: body.id }, {
+		const video = await Video.updateOne({ _id: req.body.id }, {
 			title,
 			description,
 			url,
@@ -120,18 +76,13 @@ exports.updateVideoInfo = async function (req, res) {
 		});
 		res.json(video);
 	} catch (error) {
+		console.log(error);
 		res.status(500).json(error);
 	}
 }
 
 exports.deleteVideoInfo = async function (req, res) {
 	const { id, url } = req.body
-	try {
-		await deleteFile(url)
-
-	} catch (error) {
-		throw error
-	}
 	try {
 		const data = await Video.deleteOne({ _id: id });
 		res.status(200).json(data);
@@ -141,7 +92,7 @@ exports.deleteVideoInfo = async function (req, res) {
 }
 
 exports.getTotalViewsByVideoId = async function (req, res) {
-	const id = req.params.id
+	const { id } = req.params;
 	try {
 		const video = await Video.findById(id);
 		if (video) {
@@ -163,7 +114,6 @@ exports.increaseView = async function (req, res) {
 			{ user_id: viewerId }
 		);
 
-
 		const foundWatchHistoryDate = await WatchHistoryDate.findOne(
 			{ account_id: foundAccount._id, date: formattedToday }
 		)
@@ -181,12 +131,17 @@ exports.increaseView = async function (req, res) {
 			res.status(200).json({ watchHistoryDate: newWatchHistoryDate });
 		}
 		else {
-			const updatedWatchHistoryDate = await WatchHistoryDate.findOneAndUpdate(
+			const updatedWatchHistoryDate = await WatchHistoryDate.updateOne(
 				{ account_id: foundAccount._id, date: formattedToday },
 				{ $addToSet: { videos: videoId } }
 			)
 			res.status(200).json({ watchHistoryDate: updatedWatchHistoryDate })
 		}
+		await Video.updateOne(
+			{ _id: videoId },
+			{ $inc: { total_views: 1 } },
+			{ new: true }
+		)
 	}
 	catch (error) {
 		res.status(500).json(error);
@@ -205,19 +160,22 @@ exports.getWatchHistory = async function (req, res) {
 			}
 		});
 
-		const watchedHistoryDates = account.watched_history.map(function (historyDateDoc) {
+		const watchedHistoryDates = await Promise.all(account.watched_history.map(async function (historyDateDoc) {
 			const formattedHistoryDateDoc = { ...historyDateDoc._doc };
-			formattedHistoryDateDoc.videos = formattedHistoryDateDoc.videos.map(function (videoDoc) {
+			formattedHistoryDateDoc.videos = await Promise.all(formattedHistoryDateDoc.videos.map(async function (videoDoc) {
 				const formattedVideoDoc = { ...videoDoc._doc }
 				formattedVideoDoc.thumbnail_url = getSignedUrl({ key: formattedVideoDoc.thumbnail_key });
 				formattedVideoDoc.url = getSignedUrl({ key: formattedVideoDoc.url });
 				delete formattedVideoDoc.thumbnail_key;
-				formattedVideoDoc.author = formattedVideoDoc.author_id;
+
+				const authorAccount = await Account.findOne({ user_id: formattedVideoDoc.author_id });
+				formattedVideoDoc.author = { ...formattedVideoDoc.author_id, username: authorAccount.username };
+
 				delete formattedVideoDoc.author_id;
 				return formattedVideoDoc;
-			})
+			}))
 			return formattedHistoryDateDoc;
-		})
+		}))
 
 		res.status(200).json({ watchedHistoryDates });
 	}

@@ -1,7 +1,8 @@
-const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
+const fs = require('fs');
+const ffmpeg = require('fluent-ffmpeg');
 
-const { trackProgress } = require('../configs/socket')
+const { trackProgress } = require('../configs/socket');
 
 const converVideoToAudio = function (input, output) {
 	let nextProgress = 0;
@@ -116,12 +117,21 @@ function convertToWebmFormat(input, output, app) {
 
 function generateThumbnail(videoFilePath) {
 	let thumbsFilePath = "";
+	let nextProgress = 0;
 	return new Promise(function (resolve, reject) {
 		try {
 			ffmpeg(videoFilePath)
 				.on('filenames', function (filenames) {
 					console.log('Will generate ' + filenames.join(', '))
 					thumbsFilePath = "uploads/thumbnails/" + filenames[0];
+				})
+				.on('progress', (progress) => {
+					if (progress) {
+						if (nextProgress >= 100 || (nextProgress < 100 && progress.percent >= nextProgress)) {
+							trackProgress(progress / 4 + 25, 'Upload to S3');
+							nextProgress += 15;
+						}
+					}
 				})
 				.on('end', function () {
 					console.log('Screenshots taken');
@@ -156,6 +166,27 @@ function seperateTitleAndExtension(fileName) {
 	return { title, extension };
 }
 
+async function generateVideoFile(file, body) {
+	const { data: dataBuffers, name: fileName } = file;
+	const { ext } = path.parse(fileName);
+	const encodedFileName = encodeFileName(fileName, body.author_id);
+	const { title } = seperateTitleAndExtension(fileName);
+	const videoPath = 'uploads/videos/' + encodedFileName + ext;
+
+	return new Promise(function (resolve, reject) {
+		try {
+			fs.writeFileSync(videoPath, dataBuffers);
+			resolve({
+				title,
+				videoPath
+			});
+		}
+		catch (err) {
+			reject(err);
+		}
+	})
+}
+
 module.exports = {
 	encodeFileName,
 	convertToWebmFormat,
@@ -163,5 +194,6 @@ module.exports = {
 	isVideoHaveAudioTrack,
 	converVideoToAudio,
 	generateThumbnail,
-	seperateTitleAndExtension
+	seperateTitleAndExtension,
+	generateVideoFile
 }

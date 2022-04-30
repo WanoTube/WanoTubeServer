@@ -1,19 +1,17 @@
-const fs = require('fs')
+const fs = require('fs');
 const path = require('path');
-const { trackProgress } = require('../configs/socket')
-const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers')
 
+const { trackProgress } = require('../configs/socket');
+const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers');
 const {
 	converVideoToAudio,
-	encodeFileName,
 	isVideoHaveAudioTrack,
 	generateThumbnail,
-	seperateTitleAndExtension
-} = require('../utils/videos-handlers')
+	generateVideoFile
+} = require('../utils/videos-handlers');
 
-const { recogniteAudio } = require('./audio-recoginition.controller')
-const { createVideoInfos } = require('./video-info.controller')
-
+const { recogniteAudio } = require('./audio-recoginition.controller');
+const { createVideoInfos } = require('./video-info.controller');
 const { Video } = require('../models/video');
 
 exports.getVideoById = async function (req, res) {
@@ -44,11 +42,11 @@ exports.uploadVideo = async function (req, res) {
 
 			const recognizedMusic = await recogniteAudioFromVideo(videoKey);
 			const thumbnailKey = await generateThumbnail(videoKey);
-			await uploadToS3(thumbnailKey);
+			await uploadToS3(thumbnailKey, (val) => val / 4 + 50);
 
-			await uploadToS3(videoKey);
+			await uploadToS3(videoKey, (val => val / 4 + 75));
 
-			const saveDBResult = await saveVideoToDatabase(videoKey, { ...body, title, recognition_result: recognizedMusic.recognizeResult, thumbnail_key: thumbnailKey })
+			const saveDBResult = await saveVideoToDatabase(videoKey, { ...body, title, recognition_result: recognizedMusic?.recognizeResult, thumbnail_key: thumbnailKey })
 			if (saveDBResult) res.status(200).json(saveDBResult)
 			else {
 				console.log('Cannot save DB');
@@ -77,7 +75,7 @@ async function removeRedundantFiles(directory) {
 	}
 }
 
-function uploadToS3(newFilePath) {
+function uploadToS3(newFilePath, customPercentageFn = val => val) {
 	return new Promise(function (resolve, reject) {
 		try {
 			// reqVideo is redundant
@@ -94,7 +92,7 @@ function uploadToS3(newFilePath) {
 				uploadFile(fileName, fileStream, () => resolve(reqVideo), (err) => reject(err))
 					.on('httpUploadProgress', function (progress) {
 						const progressPercentage = Math.round(progress.loaded / progress.total * 100);
-						trackProgress(progressPercentage, 'Upload to S3')
+						trackProgress(customPercentageFn(progressPercentage), 'Upload to S3');
 					})
 			}
 		} catch (error) {
@@ -115,7 +113,7 @@ async function saveVideoToDatabase(videoPath, body) {
 				duration: duration,
 				url: videoPath,
 				visibility: 1,	//first set private
-				recognition_result,
+				recognition_result: recognition_result.status.code === 0 ? recognition_result : null,
 				thumbnail_key
 			}
 
@@ -153,17 +151,20 @@ async function recogniteAudioFromVideo(videoPath) {
 
 			if (videoPath) {
 				const isAudioIncluded = await isVideoHaveAudioTrack(videoPath);
+				trackProgress(10, 'Upload to S3');
 				if (isAudioIncluded) {
-					const convertResult = await converVideoToAudio(videoPath, audioSavedPath)
+					const convertResult = await converVideoToAudio(videoPath, audioSavedPath);
+					trackProgress(18, 'Upload to S3');
 					if (convertResult) {
 					} else {
-						throw new Error("Cannot convert music")
+						throw new Error("Cannot convert music");
 					}
 					const bitmap = fs.readFileSync(audioSavedPath);
 
 					//TO-DO: Split to multiple audios for recognize quicker and easier to track the song name from timestamp?
 
 					const recognizeResultACR = await recogniteAudio(Buffer.from(bitmap));
+					trackProgress(20, 'Upload to S3');
 					const recognizeResult = {
 						savedName: videoPath,
 						recognizeResult: recognizeResultACR
@@ -174,8 +175,10 @@ async function recogniteAudioFromVideo(videoPath) {
 						resolve("Cannot recognize result")
 					}
 				} else {
+					console.log('null nef me')
 					resolve(null)
 				}
+				trackProgress(25, 'Upload to S3');
 			} else {
 				throw new Error("file required");
 			}
@@ -186,23 +189,3 @@ async function recogniteAudioFromVideo(videoPath) {
 
 }
 
-async function generateVideoFile(file, body) {
-	const { data: dataBuffers, name: fileName } = file;
-	const { ext } = path.parse(fileName);
-	const encodedFileName = encodeFileName(fileName, body.author_id);
-	const { title } = seperateTitleAndExtension(fileName);
-	const videoPath = 'uploads/videos/' + encodedFileName + ext;
-
-	return new Promise(function (resolve, reject) {
-		try {
-			fs.writeFileSync(videoPath, dataBuffers);
-			resolve({
-				title,
-				videoPath
-			});
-		}
-		catch (err) {
-			reject(err);
-		}
-	})
-}
