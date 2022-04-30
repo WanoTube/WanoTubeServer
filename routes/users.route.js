@@ -3,8 +3,6 @@ const router = express.Router();
 const usersController = require('../controllers/users.controller');
 const api = require("../utils/api-routes")
 
-router.get(api.actions.search, usersController.getUserByUsername)
-
 router.get('/:id', usersController.getUserById);
 
 router.get('/account/:user_id', usersController.getAccountByUserId);

@@ -7,9 +7,7 @@ const User = require('../models/user');
 const Account = require('../models/account');
 const { registerValidator } = require('../validations/auth');
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers');
-const account = require('../models/account');
 const { restrictImageName } = require('../utils/image-handlers')
-const user = require('../models/user');
 
 exports.createUser = async function (request, response) {
 	const { error } = registerValidator(request.body);
@@ -39,7 +37,7 @@ exports.createUser = async function (request, response) {
 
 	try {
 		const { username, is_admin } = account
-		const newAccount = await account.save();
+		await account.save();
 		const newUser = await user.save();
 		const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
 		const result = {
@@ -64,14 +62,15 @@ exports.login = async function (request, response) {
 	try {
 		const user = await User.findOne({ _id: account.user_id });
 		if (user) {
-			const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
+			const token = jwt.sign({ _id: user._id, channelId: account._id }, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
 			const result = {
 				token: token,
 				user: {
 					_id: user._id,
 					username: account.username,
 					is_admin: account.is_admin,
-					avatar: user.avatar
+					avatar: user.avatar,
+					channelId: account._id
 				}
 			}
 			response.header('auth-token', token).json(result);
@@ -79,7 +78,8 @@ exports.login = async function (request, response) {
 			response.status(400).json("Cannot find user");
 		}
 	} catch (error) {
-		response.status(400).json(err);
+		console.log(error);
+		response.status(500).json(error);
 	}
 }
 
@@ -139,29 +139,6 @@ exports.getAccountByUserId = function (req, res) {
 			res.json(400, err);
 		} else {
 			res.json(account);
-		}
-	});
-};
-
-
-exports.getUserByUsername = function (req, res) {
-	const username = req.query.username;
-	Account.find({ username: username }).exec(function (err, account) {
-		if (err) {
-			res.status(400).json(err);
-		} else {
-			if (account) {
-				const userId = account[0].user_id;
-				User.findById(userId).exec(function (error, user) {
-					if (err) {
-						res.status(400).json(error);
-					} else {
-						res.status(200).json(user);
-					}
-				})
-			} else {
-				res.json(400, "Cannot find account")
-			}
 		}
 	});
 };

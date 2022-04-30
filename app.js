@@ -16,7 +16,7 @@ const {
 
 const app = express();
 const server = http.createServer(app);
-const PORT = process.env.PORT || 8000
+const PORT = process.env.PORT || 8000;
 
 async function initServer() {
   await connectToMongoDb();

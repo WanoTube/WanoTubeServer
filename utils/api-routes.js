@@ -6,6 +6,7 @@ const apiRoutes = {
 		likes: "/likes",
 		users: "/users",
 		videos: "/videos",
+		channels: "/channels",
 	},
 	actions:
 	{
