@@ -1,0 +1,18 @@
+const { SYSTEM_URL, PORT } = process.env
+
+module.exports = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Library API",
+      version: "1.0.0",
+      description: "A simple Express Library API",
+    },
+    servers: [
+      {
+        url: `${SYSTEM_URL}/${PORT}`,
+      },
+    ],
+  },
+  apis: ["./routes/*.js", "./swagger/schemas/*,js", "./swagger/tags/*,js"],
+};
