@@ -32,7 +32,7 @@ exports.getAllPublicVideoInfos = function (req, res) {
 				return formmattedDoc;
 			})
 
-			res.json(formattedDocs);
+			res.json({ "videos": formattedDocs});
 		})
 }
 
@@ -44,7 +44,7 @@ exports.getVideoInfoById = function (req, res) {
 			formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
 			formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
 			delete formmattedDoc.thumbnail_key;
-			res.json(formmattedDoc);
+			res.json({ "video": formmattedDoc });
 		})
 };
 
