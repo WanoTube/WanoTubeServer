@@ -21,7 +21,7 @@ router.post('/comment/delete', commentsController.deleteCommentFromVideo);
 
 router.get('/stream/:key', videosController.getVideoById);
 
-router.post('/upload', videosController.uploadVideo);
+router.post('/upload', requireAuth, videosController.uploadVideo);
 
 router.patch('/update', videoInfosController.updateVideoInfo)
 

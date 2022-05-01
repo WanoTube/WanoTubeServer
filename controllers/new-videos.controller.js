@@ -28,7 +28,8 @@ exports.getVideoById = async function (req, res) {
 
 exports.uploadVideo = async function (req, res) {
 	let file = req.files;
-	const { body } = req;
+	const { body, user } = req;
+	body.author_id = user._id
 	if (req.files) {
 		file = file.video;
 	} else {
