@@ -11,13 +11,16 @@ exports.getAllLikes = function (req, res) {
 
 exports.getAllLikesByVideoId = function (req, res) {
 	const id = req.params.id
+	console.log(id)
 	Video.findById(id)
 		.exec(function (err, result) {
 			if (!err) {
 				if (result) res.json(result.likes)
 				else res.json("Cannot find video")
-			} else
+			} else {
 				res.json(err)
+			}
+
 		})
 };
 

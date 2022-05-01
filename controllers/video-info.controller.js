@@ -36,16 +36,19 @@ exports.getAllPublicVideoInfos = function (req, res) {
 		})
 }
 
-exports.getVideoInfoById = function (req, res) {
-	const id = req.params.id
-	Video.findById(id)
-		.then(function (doc) {
-			const formmattedDoc = { ...doc._doc };
-			formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
-			formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
-			delete formmattedDoc.thumbnail_key;
-			res.json(formmattedDoc);
-		})
+exports.getVideoInfoById = async function (req, res) {
+	const { id } = req.params;
+	const video = await Video.findById(id);
+	const formmattedDoc = { ...video._doc };
+	formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
+	formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
+	delete formmattedDoc.thumbnail_key;
+
+	const channelAccount = await Account.findOne({ user_id: video.author_id }).populate("user_id");
+	formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username };
+	delete formmattedDoc.author_id;
+
+	res.json(formmattedDoc);
 };
 
 exports.search = function (req, res) {
@@ -65,7 +68,6 @@ exports.search = function (req, res) {
 
 exports.updateVideoInfo = async function (req, res) {
 	const { title, description, url, size, privacy, duration } = req.body;
-	console.log(req.body)
 	try {
 		const video = await Video.updateOne({ _id: req.body.id }, {
 			title,
