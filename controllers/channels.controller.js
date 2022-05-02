@@ -34,10 +34,11 @@ async function getAllChannelVideos(req, res) {
 }
 
 async function getAllChannelPublicVideos(req, res) {
-  const { authorId } = req.params;
+  const { id } = req.params;
 
   try {
-    const videos = await Video.find({ author_id: authorId, visibility: 0 }) // 0: public
+    const foundChannel = await Account.findOne({ _id: id });
+    const videos = await Video.find({ author_id: foundChannel.user_id, visibility: 0 }) // 0: public
     const formattedVideoDocs = videos.map(function (videoDoc) {
       return formatVideoDocument(videoDoc);
     })

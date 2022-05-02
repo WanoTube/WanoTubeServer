@@ -45,7 +45,7 @@ exports.getVideoInfoById = async function (req, res) {
 	delete formmattedDoc.thumbnail_key;
 
 	const channelAccount = await Account.findOne({ user_id: video.author_id }).populate("user_id");
-	formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username };
+	formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username, channel_id: channelAccount._id };
 	delete formmattedDoc.author_id;
 
 	res.json({ video: formmattedDoc });
@@ -110,17 +110,18 @@ exports.increaseView = async function (req, res) {
 	const { _id: viewerId } = req.user;
 	const { id: videoId } = req.params
 	const today = new Date(Date.now())
-	const formattedToday = `${today.getDate()}/${today.getMonth()}/${today.getFullYear()}`
+	const formattedToday = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`
 
 	try {
 		const foundAccount = await Account.findOne(
 			{ user_id: viewerId }
 		);
+		if (!foundAccount) return res.status(401).json("Channel does not exist")
 
 		const foundWatchHistoryDate = await WatchHistoryDate.findOne(
 			{ account_id: foundAccount._id, date: formattedToday }
 		)
-
+		let watchHistoryDate;
 		if (!foundWatchHistoryDate) {
 			const newWatchHistoryDate = await WatchHistoryDate.create({
 				account_id: foundAccount._id, date: formattedToday, videos: [videoId]
@@ -130,22 +131,26 @@ exports.increaseView = async function (req, res) {
 				{ $addToSet: { watched_history: newWatchHistoryDate } },
 				{ new: true }
 			);
-			res.status(200).json({ watchHistoryDate: newWatchHistoryDate });
+			watchHistoryDate = newWatchHistoryDate;
 		}
 		else {
 			const updatedWatchHistoryDate = await WatchHistoryDate.updateOne(
 				{ account_id: foundAccount._id, date: formattedToday },
 				{ $addToSet: { videos: videoId } }
 			)
-			res.status(200).json({ watchHistoryDate: updatedWatchHistoryDate })
+			watchHistoryDate = updatedWatchHistoryDate;
 		}
-		await Video.updateOne(
+		await Video.findOneAndUpdate(
 			{ _id: videoId },
-			{ $inc: { total_views: 1 } },
+			{
+				$addToSet: { views: foundAccount._id }
+			},
 			{ new: true }
-		)
+		).select('+views')
+		res.status(200).json({ watchHistoryDate });
 	}
 	catch (error) {
+		console.log(error)
 		res.status(500).json(error);
 	}
 }
@@ -172,13 +177,14 @@ exports.getWatchHistory = async function (req, res) {
 
 				const authorAccount = await Account.findOne({ user_id: formattedVideoDoc.author_id });
 				const authorUserInfo = await User.findOne({ _id: formattedVideoDoc.author_id });
-				formattedVideoDoc.user = { ...formattedVideoDoc.author_id, username: authorAccount.username, _id: authorAccount._id, avatar: authorUserInfo.avatar };
+				formattedVideoDoc.user = { ...formattedVideoDoc.author_id, username: authorAccount.username, channel_id: authorAccount._id, avatar: authorUserInfo.avatar };
 
 				delete formattedVideoDoc.author_id;
 				return formattedVideoDoc;
 			}))
 			return formattedHistoryDateDoc;
 		}))
+		watchedHistoryDates.sort((a, b) => b.created_at - a.created_at)
 
 		res.status(200).json({ watchedHistoryDates });
 	}

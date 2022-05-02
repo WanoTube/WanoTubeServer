@@ -29,6 +29,12 @@ const videoSchema = new Schema({
 		default: [],
 		select: false,
 	},
+	views: {
+		type: [Schema.Types.ObjectId],
+		ref: 'User',
+		default: [],
+		select: false,
+	},
 	total_likes: { type: Number, default: 0 },
 	total_comments: { type: Number, default: 0 },
 	total_views: { type: Number, default: 0 },
@@ -37,6 +43,11 @@ const videoSchema = new Schema({
 	type: { type: String, enum: VideoType, default: VideoType.NORMAL },
 
 }, schemaOptions);
+
+videoSchema.post("findOneAndUpdate", function (data) {
+	data.total_views = data.views.length;
+	data.save()
+})
 
 module.exports = {
 	Video: mongoose.model('Video', videoSchema),

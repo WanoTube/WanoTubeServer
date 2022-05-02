@@ -39,7 +39,7 @@ exports.createUser = async function (request, response) {
 		const { username, is_admin } = account
 		await account.save();
 		const newUser = await user.save();
-		const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
+		const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 * 60 }); //outdated in 60 days
 		const result = {
 			token: token,
 			user: {
@@ -62,7 +62,7 @@ exports.login = async function (request, response) {
 	try {
 		const user = await User.findOne({ _id: account.user_id });
 		if (user) {
-			const token = jwt.sign({ _id: user._id, channelId: account._id }, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 }); //outdated in 1 day
+			const token = jwt.sign({ _id: user._id, channelId: account._id }, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 * 60 }); //outdated in 60 days
 			const result = {
 				token: token,
 				user: {
@@ -114,6 +114,7 @@ exports.getAllUsers = async function (req, res) {
 };
 
 exports.getUserById = async function (req, res) {
+	console.log("getUserById")
 	const userId = new mongoose.mongo.ObjectId(req.params.id)
 	try {
 		const user = await User.findById(userId);
@@ -121,6 +122,7 @@ exports.getUserById = async function (req, res) {
 			const account = await Account.findOne({ user_id: user._id });
 			const result = {
 				user: user,
+				channel_id: account._id,
 				username: account.username
 			}
 			res.json(result);
@@ -133,6 +135,7 @@ exports.getUserById = async function (req, res) {
 };
 
 exports.getAccountByUserId = function (req, res) {
+	console.log("getAccountByUserId")
 	const userId = new mongoose.mongo.ObjectId(req.params.user_id)
 	Account.find({ user_id: userId }).exec(function (err, account) {
 		if (err) {

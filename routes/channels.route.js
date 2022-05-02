@@ -22,7 +22,7 @@ const { requireAuth } = require('../middlewares/verifyToken.middleware');
 
 router.get('/videos', requireAuth, channelsController.getAllChannelVideos);
 
-router.get('/author/:authorId/videos', channelsController.getAllChannelPublicVideos);
+router.get('/:id/videos', channelsController.getAllChannelPublicVideos);
 
 router.get('/:id/info', channelsController.getChannelPublicInformation);
 
