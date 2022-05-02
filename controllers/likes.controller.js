@@ -36,92 +36,28 @@ exports.getTotalLikesByVideoId = async function (req, res) {
 	}
 };
 
-exports.likeVideo = function (req, res) {
+exports.likeVideo = async function (req, res) {
 	const body = req.body
 	const video_id = body.target_id // video_id: the video being liked
 	const userId = body.author_id // userId : the person like video
 
-	Video.findById(video_id)
-		.exec(async function (err, result) {
-			if (result && !err) {
-				if (result.total_likes <= 0) {
-					// find if like is null => add
-					try {
-						const video = await addLikeToVideo(userId, result);
-						res.json(video)
-					} catch (error) {
-						res.json(error)
-					}
-				} else {
-					// else => unlike => remove like from video
-					// remove likes have this userId 
-					try {
-						const video = await removeLikeFromVideo(userId, result);
-						if (video) res.json(video);
-						else res.json("Cannot remove");
-					} catch (error) {
-						res.json(error)
-					}
-				}
-			} else {
-				if (!result) res.json("Cannot find video")
-				else res.json(err)
-			}
-		})
-}
+	try {
+		const updatedVideo = await Video.findById(video_id);
+		if (!updatedVideo) return res.status(404).json("Cannot find video");
 
-function addLikeToVideo(author_id, video) {
-	return new Promise(function (resolve, reject) {
-		try {
-			const like = new Like({ "author_id": author_id, "target_id": video.id });
-			like.save()
-				.then(async function (savedData) {
-					if (savedData) {
-						video.total_likes += 1;
-						video.likes.push(like);
-						const videoSaved = await video.save();
-						if (videoSaved) {
-							console.log(video);
-							resolve(video);
-						} else {
-							throw new Error('Cannot save video')
-						}
-					} else {
-						throw new Error('Cannot save like')
-					}
-				})
-				.catch(function (error) {
-					throw new Error(error)
-				})
-		} catch (error) {
-			reject(error);
+		if (updatedVideo.total_likes <= 0) {
+			updatedVideo.total_likes += 1;
 		}
-	});
-}
-
-exports.addLikeToVideo = addLikeToVideo
-
-function removeLikeFromVideo(author_id, video) {
-	return new Promise(async function (resolve, reject) {
-		try {
-			const total_likes = video.total_likes - 1;
-			await Video.findByIdAndUpdate(video.id, {
-				total_likes: total_likes,
-				$pull: {
-					likes: { author_id: author_id }
-				},
-			})
-			await Like.deleteOne({
-				author_id: author_id,
-				target_id: video.id
-			});
-			resolve(video);
-		} catch (error) {
-			reject(error);
+		else {
+			updatedVideo.total_likes -= 1;
 		}
-	});
+		await updatedVideo.save();
+		res.json({})
+	}
+	catch (err) {
+		res.status(500).json("Somethin went wrong");
+	}
 }
-exports.removeLikeFromVideo = removeLikeFromVideo
 
 exports.deleteLikeInfoById = function (req, res) {
 	const id = req.params.id

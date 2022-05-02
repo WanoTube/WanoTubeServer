@@ -1,5 +1,6 @@
 const { Video } = require('../models/video');
 const { Comment } = require('../models/comment');
+const Account = require("../models/account");
 const mongoose = require('mongoose');
 
 exports.getAllCommentsByVideoId = function (req, res) {
@@ -7,8 +8,10 @@ exports.getAllCommentsByVideoId = function (req, res) {
 	Video.findById(id)
 		.populate('comments')
 		.exec(function (err, result) {
+			const comments = result.comments;
+			comments.sort((a, b) => b.created_at - a.created_at);
 			if (!err) {
-				if (result) res.json(result.comments)
+				if (result) res.json(comments)
 				else res.json("Cannot find video")
 			} else
 				res.json(err)
@@ -26,14 +29,18 @@ exports.getTotalCommentsByVideoId = async function (req, res) {
 };
 
 exports.commentVideo = async function (req, res) {
-	const body = req.body
-	const { video_id, author_id, content } = body
+	const body = req.body;
+	const { video_id, author_id, content } = body;
 
 	try {
-		const video = await Video.findById(video_id)
+		const video = await Video.findOne({ _id: video_id }).select("+comments");
+
 		if (video) {
-			addComment(author_id, video, content, function (err, comment) {
-				res.json(comment);
+			addComment(author_id, video, content, async function (comment) {
+				const account = await Account.findOne({ user_id: author_id });
+				const commentDoc = { ...comment._doc, user: account };
+				delete commentDoc.author_id;
+				res.json(commentDoc);
 			})
 		}
 	} catch (error) {
@@ -41,16 +48,13 @@ exports.commentVideo = async function (req, res) {
 	}
 }
 
-function addComment(author_id, video, content, callback) {
-	const comment = new Comment({ author_id, video_id: video.id, content })
-	comment.save()
-		.then(function (err) {
-			video.comments.push(comment);
-			video.total_comments += 1;
-			video.save().then(function (err) {
-				callback(err, comment)
-			});
-		});
+async function addComment(author_id, video, content, callback) {
+	const comment = new Comment({ author_id, video_id: video.id, content });
+	const newComment = await comment.save();
+	video.comments.push(comment);
+	video.total_comments += 1;
+	await video.save();
+	callback(newComment);
 }
 
 exports.deleteCommentFromVideo = function (req, res) {

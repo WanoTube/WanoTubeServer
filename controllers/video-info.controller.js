@@ -32,7 +32,7 @@ exports.getAllPublicVideoInfos = function (req, res) {
 				return formmattedDoc;
 			})
 
-			res.json({ "videos": formattedDocs});
+			res.json({ videos: formattedDocs });
 		})
 }
 
@@ -48,7 +48,7 @@ exports.getVideoInfoById = async function (req, res) {
 	formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username };
 	delete formmattedDoc.author_id;
 
-	res.json({ "video": formmattedDoc });
+	res.json({ video: formmattedDoc });
 };
 
 exports.search = function (req, res) {

@@ -17,19 +17,18 @@ const videoSchema = new Schema({
 	description: { type: String },
 	recognition_result: { type: Schema.Types.Mixed },
 	author_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-	comments: [{
-		type: Schema.Types.ObjectId,
+	comments: {
+		type: [Schema.Types.ObjectId],
 		ref: 'Comment',
 		default: [],
 		select: false,
-	}],
-	likes: [{
-		type: Schema.Types.ObjectId,
+	},
+	likes: {
+		type: [Schema.Types.ObjectId],
 		ref: 'Like',
 		default: [],
-
 		select: false,
-	}],
+	},
 	total_likes: { type: Number, default: 0 },
 	total_comments: { type: Number, default: 0 },
 	total_views: { type: Number, default: 0 },
