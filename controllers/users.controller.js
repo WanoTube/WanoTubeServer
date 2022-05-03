@@ -39,13 +39,14 @@ exports.createUser = async function (request, response) {
 		const { username, is_admin } = account
 		await account.save();
 		const newUser = await user.save();
-		const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 * 60 }); //outdated in 60 days
+		const token = jwt.sign({ _id: user._id, channelId: account._id }, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 * 24 * 60 }); //outdated in 60 days
 		const result = {
 			token: token,
 			user: {
 				_id: newUser._id,
 				username,
-				is_admin
+				is_admin,
+				channelId: account._id
 			}
 		}
 		response.header('auth-token', token).json(result);
