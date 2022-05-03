@@ -150,6 +150,8 @@ async function saveVideoToDatabase(videoPath, body) {
 async function recogniteAudioFromVideo(videoPath) {
 	return new Promise(async function (resolve, reject) {
 		try {
+			console.log("videoPath")
+			console.log(videoPath)
 			const { name } = path.parse(videoPath);
 			const audioSavedPath = 'uploads/audios/' + name + '.mp3';
 
