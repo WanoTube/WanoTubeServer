@@ -39,9 +39,12 @@ exports.uploadVideo = async function (req, res) {
 	}
 	if (body && file) {
 		try {
+			console.log("Begin")
 			const { title, videoPath: videoKey } = await generateVideoFile(file, body);
 
+			console.log("recogniteAudioFromVideo")
 			const recognizedMusic = await recogniteAudioFromVideo(videoKey);
+			console.log("generateThumbnail")
 			const thumbnailKey = await generateThumbnail(videoKey);
 			await uploadToS3(thumbnailKey, (val) => val / 4 + 50);
 
