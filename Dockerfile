@@ -6,6 +6,10 @@ COPY package.json /app
 
 RUN yarn install
 
+RUN apk update
+RUN apk add
+RUN apk add ffmpeg
+
 COPY . /app
 
 EXPOSE 8080
