@@ -6,9 +6,8 @@ COPY package.json /app
 
 RUN yarn install
 
-RUN apk update
-RUN apk add
-RUN apk add ffmpeg
+RUN apt-get -y update
+RUN apt-get install -y ffmpeg
 
 COPY . /app
 
