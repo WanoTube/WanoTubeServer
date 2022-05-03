@@ -39,12 +39,9 @@ exports.uploadVideo = async function (req, res) {
 	}
 	if (body && file) {
 		try {
-			console.log("Begin")
 			const { title, videoPath: videoKey } = await generateVideoFile(file, body);
 
-			console.log("recogniteAudioFromVideo")
 			const recognizedMusic = await recogniteAudioFromVideo(videoKey);
-			console.log("generateThumbnail")
 			const thumbnailKey = await generateThumbnail(videoKey);
 			await uploadToS3(thumbnailKey, (val) => val / 4 + 50);
 
@@ -150,11 +147,9 @@ async function saveVideoToDatabase(videoPath, body) {
 async function recogniteAudioFromVideo(videoPath) {
 	return new Promise(async function (resolve, reject) {
 		try {
-			console.log("videoPath")
-			console.log(videoPath)
-			const { name } = path.parse(videoPath);
+			const name = videoPath.split("/")[2].split(".")[0];
 			const audioSavedPath = 'uploads/audios/' + name + '.mp3';
-
+			console.log({ audioSavedPath })
 			if (videoPath) {
 				const isAudioIncluded = await isVideoHaveAudioTrack(videoPath);
 				trackProgress(10, 'Upload to S3');
