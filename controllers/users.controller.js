@@ -51,7 +51,7 @@ exports.createUser = async function (request, response) {
 		}
 		response.header('auth-token', token).json(result);
 	} catch (err) {
-		response.status(400).json(err);
+		response.status(500).json(err);
 	}
 };
 
