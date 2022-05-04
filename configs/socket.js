@@ -6,9 +6,10 @@ let io;
 
 const socketOptions = {
   cors: {
-    origin: "*",
+    origin: SOCKET_URL,
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-    allowedHeaders: "*",
+    transports: ['polling', 'websocket'],
+    allowedHeaders: ["my-custom-header"],
     credentials: true
   },
 }
