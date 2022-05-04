@@ -124,7 +124,6 @@ function generateThumbnail(videoFilePath) {
 			ffmpeg(videoFilePath)
 				.on('filenames', function (filenames) {
 					console.log("filesname")
-					console.log(filesname)
 					console.log('Will generate ' + filenames.join(', '))
 					thumbsFilePath = "uploads/thumbnails/" + filenames[0];
 				})
