@@ -90,6 +90,7 @@ function uploadToS3(newFilePath, customPercentageFn = val => val) {
 			if (newFilePath) {
 				// Save to AWS
 				const { base } = path.parse(newFilePath);
+				console.log({ newFilePath }, path.parse(base));
 				const fileName = base;
 				const newFileBuffer = fs.readFileSync(newFilePath);
 				const fileStream = Buffer.from(newFileBuffer, 'binary');
