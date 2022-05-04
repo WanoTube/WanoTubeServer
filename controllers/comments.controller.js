@@ -89,11 +89,9 @@ function removeCommentFromVideo(author_id, video, callback) {
 exports.deleteCommentInfo = function (req, res) {
 	const author_id = new mongoose.mongo.ObjectId(req.query.author_id)
 	const video_id = new mongoose.mongo.ObjectId(req.query.video_id)
-	console.log(req.query)
 	if (author_id && video_id) {
 		Comment.deleteOne({ author_id, video_id }) //delete the first one it found
 			.then(function (data) {
-				console.log(data)
 				res.status(200).json(data)
 			})
 	} else {

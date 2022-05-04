@@ -50,7 +50,7 @@ function isVideoHaveAudioTrack(input) {
 	})
 }
 
-async function compressVideo(input, output, app) {
+async function compressVideo(input, output) {
 	let nextProgress = 0;
 	return new Promise(function (resolve, reject) {
 		try {
@@ -115,25 +115,22 @@ function convertToWebmFormat(input, output, app) {
 	});
 }
 
-function generateThumbnail(videoFilePath) {
+function generateThumbnail(videoFilePath, channelId) {
 	let thumbsFilePath = "";
 	let nextProgress = 0;
-	console.log({ videoFilePath })
 	console.log("begin generate thumbnail")
 	return new Promise(function (resolve, reject) {
 		try {
 			ffmpeg(videoFilePath)
 				.on('filenames', function (filenames) {
-					console.log("filesname")
 					console.log('Will generate ' + filenames.join(', '))
 					thumbsFilePath = "uploads/thumbnails/" + filenames[0];
 				})
 				.on('progress', (progress) => {
 					if (progress) {
 						console.log("progress")
-						console.log(progress)
 						if (nextProgress >= 100 || (nextProgress < 100 && progress.percent >= nextProgress)) {
-							trackProgress(progress / 4 + 25, 'Upload to S3');
+							trackProgress(progress / 4 + 25, 'Upload to S3', channelId);
 							nextProgress += 15;
 						}
 					}
@@ -173,7 +170,6 @@ function seperateTitleAndExtension(fileName) {
 
 async function generateVideoFile(file, body) {
 	const { data: dataBuffers, name: fileName } = file;
-	console.log(file, body)
 	const { ext } = path.parse(fileName);
 	const encodedFileName = encodeFileName(fileName, body.author_id);
 	const { title } = seperateTitleAndExtension(fileName);

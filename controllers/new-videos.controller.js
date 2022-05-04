@@ -30,6 +30,8 @@ exports.uploadVideo = async function (req, res) {
 	let file = req.files;
 	const { body, user } = req;
 	body.author_id = user._id
+	const channelId = user.channelId;
+
 	if (req.files) {
 		file = file.video;
 	} else {
@@ -38,18 +40,17 @@ exports.uploadVideo = async function (req, res) {
 		return;
 	}
 	if (body && file) {
-		console.log(file, body)
 		try {
 			const { title, videoPath: videoKey } = await generateVideoFile(file, body);
 
 			console.log("recogniteAudioFromVideo")
-			const recognizedMusic = await recogniteAudioFromVideo(videoKey);
+			const recognizedMusic = await recogniteAudioFromVideo(videoKey, channelId);
 			console.log("generateThumbnail")
-			const thumbnailKey = await generateThumbnail(videoKey);
+			const thumbnailKey = await generateThumbnail(videoKey, channelId);
 			console.log("uploadToS3")
-			await uploadToS3(thumbnailKey, (val) => val / 4 + 50);
+			await uploadToS3(thumbnailKey, val => val / 4 + 50, channelId);
 
-			await uploadToS3(videoKey, (val => val / 4 + 75));
+			await uploadToS3(videoKey, val => val / 4 + 75, channelId);
 
 			const saveDBResult = await saveVideoToDatabase(videoKey, { ...body, title, recognition_result: recognizedMusic?.recognizeResult, thumbnail_key: thumbnailKey })
 			if (saveDBResult) res.status(200).json(saveDBResult)
@@ -57,9 +58,9 @@ exports.uploadVideo = async function (req, res) {
 				console.log('Cannot save DB');
 				res.status(500).json("Cannot save DB");
 			}
-			await removeRedundantFiles('uploads/videos');
-			await removeRedundantFiles('uploads/audios');
-			await removeRedundantFiles('uploads/thumbnails');
+			await removeRedundantFiles(videoKey);
+			await removeRedundantFiles(thumbnailKey);
+			await removeRedundantFiles(recognizedMusic.audioKey);
 		} catch (error) {
 			console.log(error)
 			if (error.msg) return res.status(400).json(error.msg);
@@ -73,17 +74,10 @@ exports.uploadVideo = async function (req, res) {
 }
 
 async function removeRedundantFiles(directory) {
-	const files = await fs.promises.readdir(directory)
-	if (files.length) {
-		const promises = files.map(file => {
-			if (file.split(".")[0] !== "temp")
-				fs.promises.unlink(path.join(directory, file));
-		});
-		await Promise.all(promises)
-	}
+	return fs.promises.unlink(directory);
 }
 
-function uploadToS3(newFilePath, customPercentageFn = val => val) {
+function uploadToS3(newFilePath, customPercentageFn = val => val, channelId) {
 	return new Promise(function (resolve, reject) {
 		try {
 			// reqVideo is redundant
@@ -94,14 +88,13 @@ function uploadToS3(newFilePath, customPercentageFn = val => val) {
 			if (newFilePath) {
 				// Save to AWS
 				const { base } = path.parse(newFilePath);
-				console.log({ newFilePath }, path.parse(base));
 				const fileName = base;
 				const newFileBuffer = fs.readFileSync(newFilePath);
 				const fileStream = Buffer.from(newFileBuffer, 'binary');
 				uploadFile(fileName, fileStream, () => resolve(reqVideo), (err) => reject(err))
 					.on('httpUploadProgress', function (progress) {
 						const progressPercentage = Math.round(progress.loaded / progress.total * 100);
-						trackProgress(customPercentageFn(progressPercentage), 'Upload to S3');
+						trackProgress(customPercentageFn(progressPercentage), 'Upload to S3', channelId);
 					})
 			}
 		} catch (error) {
@@ -153,7 +146,7 @@ async function saveVideoToDatabase(videoPath, body) {
 
 }
 
-async function recogniteAudioFromVideo(videoPath) {
+async function recogniteAudioFromVideo(videoPath, channelId) {
 	return new Promise(async function (resolve, reject) {
 		try {
 			const name = videoPath.split("/")[2].split(".")[0];
@@ -173,9 +166,10 @@ async function recogniteAudioFromVideo(videoPath) {
 					//TO-DO: Split to multiple audios for recognize quicker and easier to track the song name from timestamp?
 
 					const recognizeResultACR = await recogniteAudio(Buffer.from(bitmap));
-					trackProgress(20, 'Upload to S3');
+					trackProgress(20, 'Upload to S3', channelId);
 					const recognizeResult = {
 						savedName: videoPath,
+						audioKey: audioSavedPath,
 						recognizeResult: recognizeResultACR
 					};
 					if (recognizeResult && recognizeResultACR) {
