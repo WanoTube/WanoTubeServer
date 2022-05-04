@@ -156,23 +156,22 @@ async function recogniteAudioFromVideo(videoPath) {
 	return new Promise(async function (resolve, reject) {
 		try {
 			const name = videoPath.split("/")[2].split(".")[0];
-			console.log("..........name....................", name)
 			const audioSavedPath = 'uploads/audios/' + name + '.mp3';
-			console.log("..........name....................", name)
 			if (videoPath) {
 				const isAudioIncluded = await isVideoHaveAudioTrack(videoPath);
-				console.log("..........isAudioIncluded....................", isAudioIncluded)
 				trackProgress(10, 'Upload to S3');
 				if (isAudioIncluded) {
 					const convertResult = await converVideoToAudio(videoPath, audioSavedPath);
 					console.log("..........convertResult....................", convertResult)
 					trackProgress(18, 'Upload to S3');
+					console.log("..........trackProgress....................")
 					if (convertResult) {
 					} else {
 						throw new Error("Cannot convert music");
 					}
 					const bitmap = fs.readFileSync(audioSavedPath);
 
+					console.log("..........bitmap....................", bitmap)
 					//TO-DO: Split to multiple audios for recognize quicker and easier to track the song name from timestamp?
 
 					const recognizeResultACR = await recogniteAudio(Buffer.from(bitmap));

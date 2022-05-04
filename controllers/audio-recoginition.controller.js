@@ -63,6 +63,7 @@ function recogniteAudio(data) {
       if (err) reject(err.msg);
       else {
         const result = JSON.parse(body);
+        console.log(".....................result", result)
         if (result) {
           resolve(result);
         } else {
