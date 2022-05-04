@@ -11,11 +11,6 @@ const s3 = new S3({
 
 // uploads a file to s3
 exports.uploadFile = function (fileName, fileStream, resolve, reject) {
-	// Binary data base64
-	// const { base } = path.parse(newFilePath);
-	// const fileName = base;
-	// const newFileBuffer = fs.readFileSync(newFilePath);
-	// const fileStream  = Buffer.from(newFileBuffer, 'binary');
 	const extension = fileName.split('.')[fileName.split('.').length - 1];
 	const folder = extension === 'mp3' ? 'audios' : extension === 'png' ? 'thumbnails' : 'videos';
 	const uploadParams = {
@@ -58,7 +53,6 @@ exports.getFileStream = async function (fileKey) {
 }
 
 exports.deleteFile = function (fileKey) {
-	console.log(fileKey)
 	const deleteParams = {
 		Key: fileKey,
 		Bucket: AWS_BUCKET_NAME
