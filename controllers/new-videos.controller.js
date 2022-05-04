@@ -38,6 +38,7 @@ exports.uploadVideo = async function (req, res) {
 		return;
 	}
 	if (body && file) {
+		console.log(file, body)
 		try {
 			const { title, videoPath: videoKey } = await generateVideoFile(file, body);
 

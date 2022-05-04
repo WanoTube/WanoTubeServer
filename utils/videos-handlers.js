@@ -160,7 +160,6 @@ function encodeFileName(fileName, userId) {
 	const timeStamp = Math.floor(Date.now() / 1000);
 	let { name } = path.parse(fileName);
 	name = name.replace(/[^a-z0-9/]/gi, '_').toLowerCase();
-	console.log({ fileName }, path.parse(fileName), name);
 	return name + "_" + userId + "_" + timeStamp
 }
 
@@ -173,6 +172,7 @@ function seperateTitleAndExtension(fileName) {
 
 async function generateVideoFile(file, body) {
 	const { data: dataBuffers, name: fileName } = file;
+	console.log(file, body)
 	const { ext } = path.parse(fileName);
 	const encodedFileName = encodeFileName(fileName, body.author_id);
 	const { title } = seperateTitleAndExtension(fileName);
