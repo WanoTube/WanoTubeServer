@@ -158,9 +158,9 @@ function generateThumbnail(videoFilePath) {
 
 function encodeFileName(fileName, userId) {
 	const timeStamp = Math.floor(Date.now() / 1000);
-	console.log({ fileName }, path.parse(fileName));
 	let { name } = path.parse(fileName);
 	name = name.replace(/[^a-z0-9/]/gi, '_').toLowerCase();
+	console.log({ fileName }, path.parse(fileName), name);
 	return name + "_" + userId + "_" + timeStamp
 }
 
