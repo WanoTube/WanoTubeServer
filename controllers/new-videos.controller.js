@@ -158,6 +158,7 @@ async function recogniteAudioFromVideo(videoPath) {
 			const name = videoPath.split("/")[2].split(".")[0];
 			console.log("..........name....................", name)
 			const audioSavedPath = 'uploads/audios/' + name + '.mp3';
+			console.log("..........name....................", name)
 			if (videoPath) {
 				const isAudioIncluded = await isVideoHaveAudioTrack(videoPath);
 				console.log("..........isAudioIncluded....................", isAudioIncluded)
@@ -194,6 +195,7 @@ async function recogniteAudioFromVideo(videoPath) {
 			} else {
 				throw new Error("File required");
 			}
+			console.log("end----------------------------")
 		} catch (error) {
 			reject(error)
 		}
