@@ -156,6 +156,7 @@ async function recogniteAudioFromVideo(videoPath) {
 	return new Promise(async function (resolve, reject) {
 		try {
 			const name = videoPath.split("/")[2].split(".")[0];
+			console.log("..........name....................", name)
 			const audioSavedPath = 'uploads/audios/' + name + '.mp3';
 			if (videoPath) {
 				const isAudioIncluded = await isVideoHaveAudioTrack(videoPath);
