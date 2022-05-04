@@ -118,6 +118,7 @@ function convertToWebmFormat(input, output, app) {
 function generateThumbnail(videoFilePath) {
 	let thumbsFilePath = "";
 	let nextProgress = 0;
+	console.log({ videoFilePath })
 	console.log("begin generate thumbnail")
 	return new Promise(function (resolve, reject) {
 		try {
