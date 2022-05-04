@@ -8,7 +8,6 @@ const socketOptions = {
   cors: {
     origin: SOCKET_URL,
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-    transports: ['polling', 'websocket'],
     allowedHeaders: ["my-custom-header"],
     credentials: true
   },
