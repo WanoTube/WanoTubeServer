@@ -6,7 +6,8 @@ const fileUpload = require('express-fileupload');
 const http = require('http')
 const swaggerUI = require("swagger-ui-express");
 const swaggerJsDoc = require("swagger-jsdoc");
-require('dotenv').config()
+const seedData = require("./seeders")
+require('dotenv').config();
 
 const { connectToMongoDb } = require('./configs/database');
 const { connectSocket } = require('./configs/socket');
@@ -36,6 +37,7 @@ function useMiddleware(app) {
 
 async function bootstrap() {
   await connectToMongoDb();
+  if (process.env.NODE_ENV !== "development") await seedData();
   await connectSocket(server);
 
   useMiddleware(app);

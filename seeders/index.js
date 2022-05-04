@@ -5,7 +5,7 @@ const { Video } = require('../models/video');
 
 const { userSeeder } = require('./user.seeder');
 
-const seedUser = async function () {
+const seedData = async function () {
   const users = await userSeeder();
   for (let user of users) {
     const {
@@ -48,10 +48,4 @@ const seedUser = async function () {
   }
 }
 
-const seed = async function () {
-  await connectToMongoDb();
-  await seedUser();
-  await disconnectDb();
-}
-
-seed();
+module.exports = seedData;
