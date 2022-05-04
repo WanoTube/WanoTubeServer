@@ -57,6 +57,7 @@ function identify(data, options, cb) {
 }
 
 function recogniteAudio(data) {
+  console.log(".....................data", data)
   return new Promise(function (resolve, reject) {
     identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
       if (err) reject(err.msg);
