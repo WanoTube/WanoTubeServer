@@ -57,17 +57,11 @@ function identify(data, options, cb) {
 }
 
 function recogniteAudio(data) {
-  console.log(".....................data", data)
   return new Promise(function (resolve, reject) {
-    console.log({ defaultOptions })
     identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
-      console.log("hello")
-      console.log(err, httpResponse, body)
-      console.log("bye")
       if (err) reject(err.msg);
       else {
         const result = JSON.parse(body);
-        console.log(".....................result", result)
         if (result) {
           resolve(result);
         } else {

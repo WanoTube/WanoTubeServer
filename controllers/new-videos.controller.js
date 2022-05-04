@@ -162,26 +162,21 @@ async function recogniteAudioFromVideo(videoPath) {
 				trackProgress(10, 'Upload to S3');
 				if (isAudioIncluded) {
 					const convertResult = await converVideoToAudio(videoPath, audioSavedPath);
-					console.log("..........convertResult....................", convertResult)
 					trackProgress(18, 'Upload to S3');
-					console.log("..........trackProgress....................")
 					if (convertResult) {
 					} else {
 						throw new Error("Cannot convert music");
 					}
 					const bitmap = fs.readFileSync(audioSavedPath);
 
-					console.log("..........bitmap....................", bitmap)
 					//TO-DO: Split to multiple audios for recognize quicker and easier to track the song name from timestamp?
 
 					const recognizeResultACR = await recogniteAudio(Buffer.from(bitmap));
-					console.log("..........recogniteAudio....................", recognizeResultACR)
 					trackProgress(20, 'Upload to S3');
 					const recognizeResult = {
 						savedName: videoPath,
 						recognizeResult: recognizeResultACR
 					};
-					console.log("..........recognizeResult....................", recognizeResult)
 					if (recognizeResult && recognizeResultACR) {
 						resolve(recognizeResult)
 					} else {
@@ -194,7 +189,6 @@ async function recogniteAudioFromVideo(videoPath) {
 			} else {
 				throw new Error("File required");
 			}
-			console.log("end----------------------------")
 		} catch (error) {
 			reject(error)
 		}

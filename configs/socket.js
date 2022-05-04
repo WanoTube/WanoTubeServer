@@ -6,9 +6,9 @@ let io;
 
 const socketOptions = {
   cors: {
-    origin: SOCKET_URL,
+    origin: "*",
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-    allowedHeaders: ["my-custom-header"],
+    allowedHeaders: "*",
     credentials: true
   },
 }
