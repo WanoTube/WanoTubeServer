@@ -71,7 +71,10 @@ exports.uploadVideo = async function (req, res) {
 async function removeRedundantFiles(directory) {
 	const files = await fs.promises.readdir(directory)
 	if (files.length) {
-		const promises = files.map(e => fs.promises.unlink(path.join(directory, e)));
+		const promises = files.map(file => {
+			if (file.split(".")[0] !== "temp")
+				fs.promises.unlink(path.join(directory, file));
+		});
 		await Promise.all(promises)
 	}
 }
