@@ -60,6 +60,9 @@ function recogniteAudio(data) {
   console.log(".....................data", data)
   return new Promise(function (resolve, reject) {
     identify(Buffer.from(data), defaultOptions, function (err, httpResponse, body) {
+      console.log("hello")
+      console.log(err, httpResponse, body)
+      console.log("bye")
       if (err) reject(err.msg);
       else {
         const result = JSON.parse(body);
