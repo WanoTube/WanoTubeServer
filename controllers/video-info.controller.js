@@ -48,7 +48,7 @@ exports.getVideoInfoById = async function (req, res) {
 	formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username, channel_id: channelAccount._id };
 	delete formmattedDoc.author_id;
 
-	res.json({ video: formmattedDoc });
+	res.json(formmattedDoc);
 };
 
 exports.search = function (req, res) {
@@ -67,14 +67,11 @@ exports.search = function (req, res) {
 };
 
 exports.updateVideoInfo = async function (req, res) {
-	const { title, description, url, size, privacy, duration } = req.body;
+	const { title, description, privacy } = req.body;
 	try {
 		const video = await Video.updateOne({ _id: req.body.id }, {
 			title,
 			description,
-			url,
-			size,
-			duration,
 			visibility: privacy
 		});
 		res.json(video);

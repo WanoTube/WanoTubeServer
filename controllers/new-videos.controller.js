@@ -114,7 +114,7 @@ async function saveVideoToDatabase(videoPath, body) {
 	return new Promise(async function (resolve, reject) {
 		try {
 			const fileSize = fs.statSync(videoPath).size;
-			const { title, description, duration, author_id, recognition_result, thumbnail_key } = body;
+			const { title, description, duration, author_id, recognition_result, thumbnail_key, type } = body;
 			const reqVideo = {
 				title: title,
 				size: fileSize,
@@ -123,7 +123,8 @@ async function saveVideoToDatabase(videoPath, body) {
 				url: videoPath,
 				visibility: 1,	//first set private
 				recognition_result: recognition_result.status.code === 0 ? recognition_result : null,
-				thumbnail_key
+				thumbnail_key,
+				type: type
 			}
 
 			if (videoPath) {
