@@ -47,6 +47,10 @@ exports.getVideoInfoById = async function (req, res, next) {
 		if (!video)
 			return res.status(400).json({ message: "This video isn't available any more" });
 
+		if (video.visibility === 1 && (!req.user || video.author_id.toString() !== req.user._id))
+			return res.status(400).json({ message: "Video unavailable. This video is private" });
+
+
 		const formmattedDoc = { ...video._doc };
 		formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
 		formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });

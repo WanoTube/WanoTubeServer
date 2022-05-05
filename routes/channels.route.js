@@ -20,7 +20,7 @@ const { requireAuth } = require('../middlewares/verifyToken.middleware');
  *                 $ref: '#/components/schemas/Book'
  */
 
-router.get('/videos', requireAuth, channelsController.getAllChannelVideos);
+router.get('/videos', requireAuth(), channelsController.getAllChannelVideos);
 
 router.get('/:id/videos', channelsController.getAllChannelPublicVideos);
 

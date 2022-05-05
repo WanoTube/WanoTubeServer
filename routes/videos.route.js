@@ -11,7 +11,7 @@ router.get('/search', videoInfosController.search);
 
 router.get('/public', videoInfosController.getAllPublicVideoInfos);
 
-router.get('/history', requireAuth, videoInfosController.getWatchHistory);
+router.get('/history', requireAuth(), videoInfosController.getWatchHistory);
 
 router.post('/like', likesController.likeVideo);
 
@@ -21,17 +21,17 @@ router.post('/comment/delete', commentsController.deleteCommentFromVideo);
 
 router.get('/stream/:key', videosController.getVideoById);
 
-router.post('/upload', requireAuth, videosController.uploadVideo);
+router.post('/upload', requireAuth(), videosController.uploadVideo);
 
 router.patch('/update', videoInfosController.updateVideoInfo)
 
 router.post('/delete', videoInfosController.deleteVideoInfo);
 
-router.get('/:id', videoInfosController.getVideoInfoById);
+router.get('/:id', requireAuth(false), videoInfosController.getVideoInfoById);
 
 router.get('/:id/likes', likesController.getAllLikesByVideoId);
 
-router.patch('/:id/view', requireAuth, videoInfosController.increaseView);
+router.patch('/:id/view', requireAuth(), videoInfosController.increaseView);
 
 router.get('/:id/comments', commentsController.getAllCommentsByVideoId);
 
