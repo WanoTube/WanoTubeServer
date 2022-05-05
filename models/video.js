@@ -45,7 +45,8 @@ const videoSchema = new Schema({
 }, schemaOptions);
 
 videoSchema.post("findOneAndUpdate", function (data) {
-	data.total_views = data.views.length;
+	if (data.views) data.total_views = data.views.length;
+	if (data.visibility === 0 && !!data.recognition_result) data.visibility = 3;
 	data.save()
 })
 

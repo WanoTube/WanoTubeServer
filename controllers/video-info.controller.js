@@ -1,4 +1,6 @@
 const _ = require('lodash');
+const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Types;
 
 const { Video } = require('../models/video');
 const User = require('../models/user');
@@ -36,19 +38,30 @@ exports.getAllPublicVideoInfos = function (req, res) {
 		})
 }
 
-exports.getVideoInfoById = async function (req, res) {
-	const { id } = req.params;
-	const video = await Video.findById(id);
-	const formmattedDoc = { ...video._doc };
-	formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
-	formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
-	delete formmattedDoc.thumbnail_key;
+exports.getVideoInfoById = async function (req, res, next) {
+	try {
+		const { id } = req.params;
+		if (!ObjectId.isValid(id))
+			return res.status(400).json({ message: "This video isn't available any more" });
+		const video = await Video.findById(id);
+		if (!video)
+			return res.status(400).json({ message: "This video isn't available any more" });
 
-	const channelAccount = await Account.findOne({ user_id: video.author_id }).populate("user_id");
-	formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username, channel_id: channelAccount._id };
-	delete formmattedDoc.author_id;
+		const formmattedDoc = { ...video._doc };
+		formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
+		formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
+		delete formmattedDoc.thumbnail_key;
 
-	res.json(formmattedDoc);
+		const channelAccount = await Account.findOne({ user_id: video.author_id }).populate("user_id");
+		formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username, channel_id: channelAccount._id };
+		delete formmattedDoc.author_id;
+
+		res.json(formmattedDoc);
+	}
+	catch (err) {
+		console.log("err")
+		next(err);
+	}
 };
 
 exports.search = function (req, res) {
@@ -69,11 +82,15 @@ exports.search = function (req, res) {
 exports.updateVideoInfo = async function (req, res) {
 	const { title, description, privacy } = req.body;
 	try {
-		const video = await Video.updateOne({ _id: req.body.id }, {
+		const video = await Video.findOneAndUpdate({ _id: req.body.id }, {
 			title,
 			description,
 			visibility: privacy
-		});
+		},
+			{
+				new: true
+			}
+		);
 		res.json(video);
 	} catch (error) {
 		console.log(error);
