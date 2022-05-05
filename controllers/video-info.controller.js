@@ -47,6 +47,9 @@ exports.getVideoInfoById = async function (req, res, next) {
 		if (!video)
 			return res.status(400).json({ message: "This video isn't available any more" });
 
+		if (video.visibility === 3 && (!req.user || video.author_id.toString() !== req.user._id))
+			return res.status(400).json({ message: "Video unavailable. This video have copyright claimed" });
+
 		if (video.visibility === 1 && (!req.user || video.author_id.toString() !== req.user._id))
 			return res.status(400).json({ message: "Video unavailable. This video is private" });
 
