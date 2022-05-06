@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 
 const { schemaOptions } = require('../constants/schemaOptions')
 
-const likeSchema = new Schema({
+const LikeSchema = new Schema({
 	author_id: { type: Schema.Types.ObjectId, ref: 'User' },
 	target_id: { type: Schema.Types.ObjectId, ref: 'Video' }, //postId or commentId.
 }, schemaOptions);
@@ -14,5 +14,4 @@ const likeSchema = new Schema({
 // 2.Store likes of comments in comments collection
 // 3.You need to build a mechanism to calculate likes and store in that collection
 
-module.exports.likeSchema = likeSchema
-module.exports.Like = mongoose.model('Like', likeSchema)
+module.exports.Like = mongoose.model('Like', LikeSchema)

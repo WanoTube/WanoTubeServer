@@ -1,5 +1,5 @@
-const { Like } = require('../models/like');
-const { Video } = require('../models/video');
+const Like = require('../models/like');
+const Video = require('../models/video');
 const mongoose = require('mongoose');
 
 exports.getAllLikes = function (req, res) {

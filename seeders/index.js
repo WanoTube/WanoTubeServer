@@ -1,7 +1,6 @@
-const { connectToMongoDb, disconnectDb } = require('../configs/database')
 const Account = require('../models/account');
 const User = require('../models/user');
-const { Video } = require('../models/video');
+const Video = require('../models/video');
 
 const { userSeeder } = require('./user.seeder');
 

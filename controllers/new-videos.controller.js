@@ -7,12 +7,13 @@ const {
 	converVideoToAudio,
 	isVideoHaveAudioTrack,
 	generateThumbnail,
-	generateVideoFile
+	generateVideoFile,
+	handleCopyright
 } = require('../utils/videos-handlers');
 
 const { recogniteAudio } = require('./audio-recoginition.controller');
 const { createVideoInfos } = require('./video-info.controller');
-const { Video } = require('../models/video');
+const Video = require('../models/video');
 
 exports.getVideoById = async function (req, res) {
 	const key = req.params.key;
@@ -45,8 +46,13 @@ exports.uploadVideo = async function (req, res) {
 
 			console.log("recogniteAudioFromVideo")
 			const recognizedMusic = await recogniteAudioFromVideo(videoKey, channelId);
+
+			console.log("check copyright");
+			handleCopyright(recognizedMusic, channelId);
+
 			console.log("generateThumbnail")
 			const thumbnailKey = await generateThumbnail(videoKey, channelId);
+
 			console.log("uploadToS3")
 			await uploadToS3(thumbnailKey, val => val / 4 + 50, channelId);
 
@@ -167,6 +173,7 @@ async function recogniteAudioFromVideo(videoPath, channelId) {
 
 					const recognizeResultACR = await recogniteAudio(Buffer.from(bitmap));
 					trackProgress(20, 'Upload to S3', channelId);
+					if (!recognizeResultACR) resolve(null);
 					const recognizeResult = {
 						savedName: videoPath,
 						audioKey: audioSavedPath,
@@ -175,7 +182,7 @@ async function recogniteAudioFromVideo(videoPath, channelId) {
 					if (recognizeResult && recognizeResultACR) {
 						resolve(recognizeResult)
 					} else {
-						resolve("Cannot recognize result")
+						resolve(null)
 					}
 				} else {
 					resolve(null)

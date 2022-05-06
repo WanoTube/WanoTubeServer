@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 
 const { schemaOptions } = require('../constants/schemaOptions')
 
-const commentSchema = new Schema({
+const CommentSchema = new Schema({
 	content: { type: String, required: true, default: '' },
 	author_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 	video_id: { type: Schema.Types.ObjectId, ref: 'Video', required: true },
@@ -11,9 +11,4 @@ const commentSchema = new Schema({
 	replies: [{ type: Schema.Types.ObjectId, ref: 'Comment', required: true }]
 }, schemaOptions);
 
-const Comment = mongoose.model('Comment', commentSchema)
-
-module.exports = {
-	commentSchema,
-	Comment
-}
+module.exports = mongoose.model('Comment', CommentSchema);
