@@ -2,12 +2,13 @@ const _ = require('lodash');
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
 
-const { Video } = require('../models/video');
+const Video = require('../models/video');
 const User = require('../models/user');
 const Account = require('../models/account');
 const WatchHistoryDate = require('../models/watchHistoryDate');
 const { getSignedUrl } = require('../utils/aws-s3-handlers');
 
+const { task } = require('../utils/cron-job');
 exports.createVideoInfos = function (video) {
 	return new Promise(async function (resolve, reject) {
 		try {
@@ -63,10 +64,11 @@ exports.getVideoInfoById = async function (req, res, next) {
 		formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username, channel_id: channelAccount._id };
 		delete formmattedDoc.author_id;
 
+		task.start();
 		res.json(formmattedDoc);
 	}
 	catch (err) {
-		console.log("err")
+		console.log({ err })
 		next(err);
 	}
 };
@@ -74,10 +76,9 @@ exports.getVideoInfoById = async function (req, res, next) {
 exports.search = function (req, res) {
 	const searchKey = req.query.search_query
 	// TO-DO: SEARCH IN TITLE, not whole title
-	Video.
-		find({
-			title: searchKey,
-		})
+	Video.find({
+		title: searchKey,
+	})
 		.exec(function (err, result) {
 			if (!err)
 				res.json(result);

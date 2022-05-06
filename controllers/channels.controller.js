@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-const { Video } = require('../models/video');
+const Video = require('../models/video');
 const Account = require('../models/account');
 const { getSignedUrl } = require('../utils/aws-s3-handlers');
 

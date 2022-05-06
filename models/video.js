@@ -9,7 +9,7 @@ const VideoType = {
 	NORMAL: 'NORMAL'
 };
 
-const videoSchema = new Schema({
+const VideoSchema = new Schema({
 	title: { type: String, required: true },
 	url: { type: String, required: true },
 	thumbnail_key: { type: String, default: defaultThumbnail },
@@ -44,13 +44,11 @@ const videoSchema = new Schema({
 
 }, schemaOptions);
 
-videoSchema.post("findOneAndUpdate", function (data) {
+VideoSchema.post("findOneAndUpdate", function (data) {
 	if (data.views) data.total_views = data.views.length;
 	if (data.visibility === 0 && !!data.recognition_result) data.visibility = 3;
-	data.save()
+	data.save();
 })
 
-module.exports = {
-	Video: mongoose.model('Video', videoSchema),
-	VideoType
-};
+module.exports = mongoose.model('Video', VideoSchema);
+exports.VideoType = VideoType;

@@ -65,7 +65,7 @@ function recogniteAudio(data) {
         if (result) {
           resolve(result);
         } else {
-          reject("Cannot recognize music");
+          resolve(null);
         }
       }
     });

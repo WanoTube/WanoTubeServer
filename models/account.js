@@ -1,10 +1,12 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const { schemaOptions } = require('../constants/schemaOptions')
+const { schemaOptions } = require('../constants/schemaOptions');
+
+const MAX_ALLOWED_STRIKES = 3;
 
 //Channel Schema
-const Account = new Schema({
+const AccountSchema = new Schema({
 	username: {
 		type: String,
 		required: true,
@@ -31,7 +33,14 @@ const Account = new Schema({
 	members: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 	blocked_accounts: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 	watched_history: [{ type: Schema.Types.ObjectId, ref: 'WatchHistoryDate', default: [] }],
-	strike_id: { type: Schema.Types.ObjectId, ref: 'Strike' },
-}, schemaOptions)
+	strikes: { type: [Schema.Types.ObjectId], ref: 'Strike', default: [], select: false },
+	is_blocked: { type: Boolean, default: false }
+}, schemaOptions);
 
-module.exports = mongoose.model('Account', Account)
+AccountSchema.post("findOneAndUpdate", function (data) {
+	if (!data) return;
+	// if (data.strikes && data.strikes.length >= MAX_ALLOWED_STRIKES) data.is_blocked = true;
+	data.save()
+})
+
+module.exports = mongoose.model('Account', AccountSchema);

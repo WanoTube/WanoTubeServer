@@ -15,7 +15,7 @@ const routes = require('./routes/index.route');
 const {
   errorHandler,
   notFoundErrorHandler,
-} = require("./middlewares/error_handler");
+} = require("./middlewares/errorHandler");
 const swaggerOptions = require("./swagger/swaggerOptions");
 
 const app = express();

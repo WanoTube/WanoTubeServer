@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 
 const { schemaOptions } = require('../constants/schemaOptions')
 
-const userSchema = new Schema({
+const UserSchema = new Schema({
 	first_name: { type: String },
 	last_name: { type: String },
 	gender: { type: String, default: 'Female' },
@@ -14,5 +14,4 @@ const userSchema = new Schema({
 	description: { type: String }
 }, schemaOptions);
 
-module.exports = mongoose.model('User', userSchema)
-module.exports.userSchema = userSchema
+module.exports = mongoose.model('User', UserSchema)

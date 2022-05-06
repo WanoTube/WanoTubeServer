@@ -1,5 +1,5 @@
-const { Video } = require('../models/video');
-const { Comment } = require('../models/comment');
+const Video = require('../models/video');
+const Comment = require('../models/comment');
 const Account = require("../models/account");
 const mongoose = require('mongoose');
 
