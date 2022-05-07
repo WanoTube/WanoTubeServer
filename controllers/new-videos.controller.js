@@ -8,8 +8,8 @@ const {
 	isVideoHaveAudioTrack,
 	generateThumbnail,
 	generateVideoFile,
-	handleCopyright
 } = require('../utils/videos-handlers');
+const { handleCopyright } = require('../utils/copyright-handler');
 
 const { recogniteAudio } = require('./audio-recoginition.controller');
 const { createVideoInfos } = require('./video-info.controller');

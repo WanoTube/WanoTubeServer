@@ -8,6 +8,21 @@ const VideoType = {
 	SHORT: 'SHORT',
 	NORMAL: 'NORMAL'
 };
+const VideoTag = {
+	MUSIC: 'MUSIC',
+	SPORT: 'SPORT',
+	ENTERTAINMENT: 'ENTERTAINMENT',
+	CUISINE: 'CUISINE',
+	GAME: 'GAME',
+	CARTOON: 'CARTOON',
+	TVSHOW: 'TVSHOW',
+	EDUCATION: 'EDUCATION',
+	CULTURE: 'CULTURE',
+	MOVIE: 'MOVIE',
+	NATURE: 'NATURE',
+	HISTORY: 'HISTORY',
+	GEOGRAPHY: 'GEOGRAPHY'
+}
 
 const VideoSchema = new Schema({
 	title: { type: String, required: true },
@@ -40,7 +55,8 @@ const VideoSchema = new Schema({
 	total_views: { type: Number, default: 0 },
 	visibility: { type: Number, default: 1 }, // 0: public, 1: private, 2: unpublic, 3: blocked
 	duration: { type: Number },
-	type: { type: String, enum: VideoType, default: VideoType.NORMAL },
+	type: { type: String, enum: Object.values(VideoType), default: VideoType.NORMAL },
+	tags: { type: [String], enum: Object.values(VideoTag), default: [] }
 
 }, schemaOptions);
 

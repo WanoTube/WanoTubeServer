@@ -6,9 +6,9 @@ const Video = require('../models/video');
 const User = require('../models/user');
 const Account = require('../models/account');
 const WatchHistoryDate = require('../models/watchHistoryDate');
+
 const { getSignedUrl } = require('../utils/aws-s3-handlers');
 
-const { task } = require('../utils/cron-job');
 exports.createVideoInfos = function (video) {
 	return new Promise(async function (resolve, reject) {
 		try {
@@ -64,7 +64,6 @@ exports.getVideoInfoById = async function (req, res, next) {
 		formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username, channel_id: channelAccount._id };
 		delete formmattedDoc.author_id;
 
-		task.start();
 		res.json(formmattedDoc);
 	}
 	catch (err) {

@@ -1,8 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
-const Account = require('../models/account');
-const CopyrightStrike = require('../models/copyrightStrike');
 
 const { trackProgress } = require('../configs/socket');
 
@@ -191,17 +189,6 @@ async function generateVideoFile(file, body) {
 	})
 }
 
-async function handleCopyright(recognizedMusic, channelId) {
-	if (!recognizedMusic || !recognizedMusic.recognizeResult) return;
-
-	const newCopyrightStrike = await CopyrightStrike.create({});
-	await Account.findOneAndUpdate(
-		{ _id: channelId },
-		{ $push: { strikes: newCopyrightStrike._id } },
-		{ new: true }
-	).select('+strikes');
-}
-
 module.exports = {
 	encodeFileName,
 	convertToWebmFormat,
@@ -211,5 +198,4 @@ module.exports = {
 	generateThumbnail,
 	seperateTitleAndExtension,
 	generateVideoFile,
-	handleCopyright
 }

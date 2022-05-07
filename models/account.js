@@ -3,7 +3,13 @@ const Schema = mongoose.Schema;
 
 const { schemaOptions } = require('../constants/schemaOptions');
 
-const MAX_ALLOWED_STRIKES = 3;
+const BlockedStatus = {
+	NONE: 'NONE',
+	TEMPORARILY: 'TEMPORARILY',
+	PERMANENTLY: 'PERMANENTLY'
+}
+
+const MAX_ALLOWED_STRIKES = 2;
 
 //Channel Schema
 const AccountSchema = new Schema({
@@ -34,13 +40,17 @@ const AccountSchema = new Schema({
 	blocked_accounts: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 	watched_history: [{ type: Schema.Types.ObjectId, ref: 'WatchHistoryDate', default: [] }],
 	strikes: { type: [Schema.Types.ObjectId], ref: 'Strike', default: [], select: false },
-	is_blocked: { type: Boolean, default: false }
+	blocked_status: { type: String, enum: Object.values(BlockedStatus), default: BlockedStatus.NONE, }
 }, schemaOptions);
 
 AccountSchema.post("findOneAndUpdate", function (data) {
 	if (!data) return;
-	// if (data.strikes && data.strikes.length >= MAX_ALLOWED_STRIKES) data.is_blocked = true;
-	data.save()
+	if (data.strikes && data.strikes.length > 0) {
+		data.blocked_status = BlockedStatus.TEMPORARILY;
+		if (data.strikes.length > MAX_ALLOWED_STRIKES) data.blocked_status = BlockedStatus.PERMANENTLY;
+	}
+	data.save();
 })
 
 module.exports = mongoose.model('Account', AccountSchema);
+exports.BlockedStatus = BlockedStatus;

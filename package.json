@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js",
-    "seed": "NODE_ENV=development node seeders/index.js"
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -33,6 +32,7 @@
     "joi": "^17.5.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
+    "moment": "^2.29.3",
     "mongoose": "^6.0.14",
     "morgan": "^1.10.0",
     "multer": "^1.4.3",
