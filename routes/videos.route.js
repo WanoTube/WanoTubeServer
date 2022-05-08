@@ -6,6 +6,7 @@ const videoInfosController = require('../controllers/video-info.controller');
 const likesController = require('../controllers/likes.controller');
 const commentsController = require('../controllers/comments.controller');
 const { requireAuth } = require('../middlewares/verifyToken.middleware');
+const { forbidBlockedAccount } = require('../middlewares/forbidBlockedAccount');
 
 router.get('/search', videoInfosController.search);
 
@@ -21,7 +22,7 @@ router.post('/comment/delete', commentsController.deleteCommentFromVideo);
 
 router.get('/stream/:key', videosController.getVideoById);
 
-router.post('/upload', requireAuth(), videosController.uploadVideo);
+router.post('/upload', requireAuth(), forbidBlockedAccount, videosController.uploadVideo);
 
 router.patch('/update', videoInfosController.updateVideoInfo)
 
