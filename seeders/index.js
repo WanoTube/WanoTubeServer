@@ -45,6 +45,7 @@ const seedData = async function () {
       });
     }
   }
+  console.log("Data seeded!");
 }
 
 module.exports = seedData;

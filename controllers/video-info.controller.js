@@ -6,9 +6,9 @@ const Video = require('../models/video');
 const User = require('../models/user');
 const Account = require('../models/account');
 const WatchHistoryDate = require('../models/watchHistoryDate');
+
 const { getSignedUrl } = require('../utils/aws-s3-handlers');
 
-const { task } = require('../utils/cron-job');
 exports.createVideoInfos = function (video) {
 	return new Promise(async function (resolve, reject) {
 		try {
@@ -64,7 +64,6 @@ exports.getVideoInfoById = async function (req, res, next) {
 		formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username, channel_id: channelAccount._id };
 		delete formmattedDoc.author_id;
 
-		task.start();
 		res.json(formmattedDoc);
 	}
 	catch (err) {
@@ -88,9 +87,10 @@ exports.search = function (req, res) {
 };
 
 exports.updateVideoInfo = async function (req, res) {
-	const { title, description, privacy } = req.body;
+	const { id: videoId, title, description, privacy } = req.body;
+	const { _id: userId } = req.user;
 	try {
-		const video = await Video.findOneAndUpdate({ _id: req.body.id }, {
+		const video = await Video.findOneAndUpdate({ _id: videoId, author_id, userId }, {
 			title,
 			description,
 			visibility: privacy
@@ -99,6 +99,9 @@ exports.updateVideoInfo = async function (req, res) {
 				new: true
 			}
 		);
+		if (!video) return res.status(403).json({
+			message: "Not allowed"
+		})
 		res.json(video);
 	} catch (error) {
 		console.log(error);
@@ -107,10 +110,11 @@ exports.updateVideoInfo = async function (req, res) {
 }
 
 exports.deleteVideoInfo = async function (req, res) {
-	const { id, url } = req.body
+	const { id: videoId } = req.body;
+	const { _id: userId } = req.user;
 	try {
-		const data = await Video.deleteOne({ _id: id });
-		res.status(200).json(data);
+		await Video.deleteOne({ _id: videoId, author_id: userId });
+		res.sendStatus(204);
 	} catch (error) {
 		res.status(500).json(error);
 	}

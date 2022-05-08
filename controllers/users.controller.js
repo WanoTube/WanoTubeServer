@@ -7,7 +7,8 @@ const User = require('../models/user');
 const Account = require('../models/account');
 const { registerValidator } = require('../validations/auth');
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers');
-const { restrictImageName } = require('../utils/image-handlers')
+const { restrictImageName } = require('../utils/image-handlers');
+const { BlockedStatus } = require('../constants/user');
 
 exports.createUser = async function (request, response) {
 	const { error } = registerValidator(request.body);
@@ -46,7 +47,8 @@ exports.createUser = async function (request, response) {
 				_id: newUser._id,
 				username,
 				is_admin,
-				channelId: account._id
+				channelId: account._id,
+				is_blocked: account.blocked_status !== BlockedStatus.NONE
 			}
 		}
 		response.header('auth-token', token).json(result);
@@ -71,7 +73,8 @@ exports.login = async function (request, response) {
 					username: account.username,
 					is_admin: account.is_admin,
 					avatar: user.avatar,
-					channelId: account._id
+					channelId: account._id,
+					is_blocked: account.blocked_status !== BlockedStatus.NONE
 				}
 			}
 			response.header('auth-token', token).json(result);
@@ -210,12 +213,12 @@ function uploadToS3(fileName, fileStream, app) {
 
 exports.updateUser = async function (req, res) {
 	const body = req.body
-	const id = body.id;
-	if (body.email) {
+	const { id, first_name, last_name, gender, birth_date, phone_number, description, country } = body;
+	if (email) {
 		try {
-			const checkEmailExist = await Account.findOne({ email: request.body.email });
+			const checkEmailExist = await Account.findOne({ email: email });
 			if (checkEmailExist) res.status(422).json('Email is exist');
-			else await Account.updateOne({ user_id: id }, { email: body.email });
+			else await Account.updateOne({ user_id: id }, { email: email });
 		} catch (error) {
 			res.json(error);
 		}
@@ -223,17 +226,26 @@ exports.updateUser = async function (req, res) {
 	if (body && id) {
 		try {
 			const user = await User.updateOne({ _id: id }, {
-				first_name: body.first_name,
-				last_name: body.last_name,
-				gender: body.gender,
-				birth_date: body.birth_date,
-				phone_number: body.phone_number,
-				description: body.description,
-				country: body.country
+				first_name: first_name,
+				last_name: last_name,
+				gender: gender,
+				birth_date: birth_date,
+				phone_number: phone_number,
+				description: description,
+				country: country
 			});
 			res.json(user);
 		} catch (error) {
 			res.json(error);
 		}
 	}
+}
+
+exports.getCopyrightStatus = async function (req, res) {
+	console.log("getCopyrightStatus");
+	const { channelId } = req.user;
+	const { blocked_status, strikes } = await Account.findById(channelId).populate("blocked_status").populate("strikes");
+	res.json({
+		blocked_status, strikes
+	});
 }

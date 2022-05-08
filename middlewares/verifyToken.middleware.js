@@ -6,7 +6,6 @@ exports.requireAuth = (requireToken = true) => (req, res, next) => {
 	const accessToken = authorizationHeader && authorizationHeader.split(' ')[1];
 
 	if (!accessToken) {
-		console.log('hala madrid')
 		if (requireToken) return res.status(401).json('Access Denied');
 		else return next();
 	}
