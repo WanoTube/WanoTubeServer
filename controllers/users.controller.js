@@ -7,7 +7,8 @@ const User = require('../models/user');
 const Account = require('../models/account');
 const { registerValidator } = require('../validations/auth');
 const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers');
-const { restrictImageName } = require('../utils/image-handlers')
+const { restrictImageName } = require('../utils/image-handlers');
+const { BlockedStatus } = require('../constants/user');
 
 exports.createUser = async function (request, response) {
 	const { error } = registerValidator(request.body);
@@ -46,7 +47,8 @@ exports.createUser = async function (request, response) {
 				_id: newUser._id,
 				username,
 				is_admin,
-				channelId: account._id
+				channelId: account._id,
+				is_blocked: account.blocked_status !== BlockedStatus.NONE
 			}
 		}
 		response.header('auth-token', token).json(result);
@@ -71,7 +73,8 @@ exports.login = async function (request, response) {
 					username: account.username,
 					is_admin: account.is_admin,
 					avatar: user.avatar,
-					channelId: account._id
+					channelId: account._id,
+					is_blocked: account.blocked_status !== BlockedStatus.NONE
 				}
 			}
 			response.header('auth-token', token).json(result);

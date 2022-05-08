@@ -24,9 +24,9 @@ router.get('/stream/:key', videosController.getVideoById);
 
 router.post('/upload', requireAuth(), forbidBlockedAccount, videosController.uploadVideo);
 
-router.patch('/update', videoInfosController.updateVideoInfo)
+router.patch('/update', requireAuth(), forbidBlockedAccount, videoInfosController.updateVideoInfo)
 
-router.post('/delete', videoInfosController.deleteVideoInfo);
+router.post('/delete', requireAuth(), forbidBlockedAccount, videoInfosController.deleteVideoInfo);
 
 router.get('/:id', requireAuth(false), videoInfosController.getVideoInfoById);
 

@@ -28,9 +28,10 @@ async function handleCopyright(title, channelId) {
 
   const duration2 = STRIKE_DURATION;
   setTimeout(() => {
-    console.log("_expireCopyrightStrike");
-    if (updatedAccount.blocked_status !== BlockedStatus.PERMANENTLY)
+    if (updatedAccount.blocked_status !== BlockedStatus.PERMANENTLY) {
+      console.log("_expireCopyrightStrike");
       _expireCopyrightStrike(channelId, newCopyrightStrike._id);
+    }
   }, duration2 * 1000);
 }
 
