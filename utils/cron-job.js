@@ -3,34 +3,41 @@ const Account = require('../models/account');
 const { BlockedStatus } = require('../models/account');
 const CopyrightStrike = require('../models/copyrightStrike');
 
-const STRIKE_DURATION = 30; //days
-const BLOCK_ACCOUNT_DURATION_1 = 7; //days
-const BLOCK_ACCOUNT_DURATION_2 = 14; //days
 
-exports.scheduleEnableBlockedChannel = (channelId, times) => cron.schedule(`* * * */${times === 1 ? BLOCK_ACCOUNT_DURATION_1 : BLOCK_ACCOUNT_DURATION_2} * *`, async () => {
-  await Account.findOneAndUpdate(
-    { _id: channelId },
-    {
-      blocked_status: BlockedStatus.NONE
-    },
-    { new: true }
-  )
-})
+exports.scheduleEnableBlockedChannel = (channelId, duration) => {
+  console.log("XXXXXXXXXXXXXXXXXXXXXXXX");
+  return cron.schedule(`*/10 * * * * *`, async () => {
+    console.log("XXXXXXXXXXXXXXXXXXXXXXXX------------------------");
+    await Account.findOneAndUpdate(
+      { _id: channelId },
+      {
+        blocked_status: BlockedStatus.NONE
+      },
+      { new: true }
+    );
+  }, {
+    scheduled: false
+  });
+}
 
-exports.scheduleCopyrightStrikeExpire = async (channelId, strikeId) => cron.schedule(`* * * */${STRIKE_DURATION} * *`, async () => {
-  await CopyrightStrike.findByIdAndUpdate(
-    { _id: strikeId },
-    {
-      is_expired: true
-    }
-  )
-  await Account.findOneAndUpdate(
-    { _id: channelId },
-    {
-      $pull: { strikes: strikeId },
-    },
-    { new: true }
-  ).select('+strikes');
-}, {
-  scheduled: false
-});
+exports.scheduleCopyrightStrikeExpire = (channelId, duration) => {
+  console.log("oooooooooooooooooooooooooooo")
+  return cron.schedule(`*/20 * * * * *`, async () => {
+    console.log("oooooooooooooooooooooooooooo----------------------")
+    await CopyrightStrike.findByIdAndUpdate(
+      { _id: strikeId },
+      {
+        is_expired: true
+      }
+    );
+    await Account.findOneAndUpdate(
+      { _id: channelId },
+      {
+        $pull: { strikes: strikeId },
+      },
+      { new: true }
+    ).select('+strikes');
+  }, {
+    scheduled: false
+  });
+}

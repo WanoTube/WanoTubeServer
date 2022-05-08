@@ -7,10 +7,9 @@ const {
 	converVideoToAudio,
 	isVideoHaveAudioTrack,
 	generateThumbnail,
-	generateVideoFile,
+	generateVideoFile
 } = require('../utils/videos-handlers');
 const { handleCopyright } = require('../utils/copyright-handler');
-
 const { recogniteAudio } = require('./audio-recoginition.controller');
 const { createVideoInfos } = require('./video-info.controller');
 const Video = require('../models/video');
@@ -48,7 +47,7 @@ exports.uploadVideo = async function (req, res) {
 			const recognizedMusic = await recogniteAudioFromVideo(videoKey, channelId);
 
 			console.log("check copyright");
-			handleCopyright(recognizedMusic, channelId);
+			// handleCopyright(recognizedMusic, channelId);
 
 			console.log("generateThumbnail")
 			const thumbnailKey = await generateThumbnail(videoKey, channelId);
@@ -59,14 +58,18 @@ exports.uploadVideo = async function (req, res) {
 			await uploadToS3(videoKey, val => val / 4 + 75, channelId);
 
 			const saveDBResult = await saveVideoToDatabase(videoKey, { ...body, title, recognition_result: recognizedMusic?.recognizeResult, thumbnail_key: thumbnailKey })
-			if (saveDBResult) res.status(200).json(saveDBResult)
+
+			removeRedundantFiles(videoKey);
+			removeRedundantFiles(thumbnailKey);
+			removeRedundantFiles(recognizedMusic.audioKey);
+			if (saveDBResult) {
+				handleCopyright(title, channelId);
+				res.status(200).json(saveDBResult)
+			}
 			else {
 				console.log('Cannot save DB');
 				res.status(500).json("Cannot save DB");
 			}
-			await removeRedundantFiles(videoKey);
-			await removeRedundantFiles(thumbnailKey);
-			await removeRedundantFiles(recognizedMusic.audioKey);
 		} catch (error) {
 			console.log(error)
 			if (error.msg) return res.status(400).json(error.msg);
@@ -197,4 +200,3 @@ async function recogniteAudioFromVideo(videoPath, channelId) {
 	})
 
 }
-

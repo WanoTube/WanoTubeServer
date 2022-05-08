@@ -2,12 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const { schemaOptions } = require('../constants/schemaOptions');
-
-const BlockedStatus = {
-	NONE: 'NONE',
-	TEMPORARILY: 'TEMPORARILY',
-	PERMANENTLY: 'PERMANENTLY'
-}
+const { BlockedStatus } = require('../constants/user');
 
 const MAX_ALLOWED_STRIKES = 2;
 
@@ -39,8 +34,8 @@ const AccountSchema = new Schema({
 	members: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 	blocked_accounts: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
 	watched_history: [{ type: Schema.Types.ObjectId, ref: 'WatchHistoryDate', default: [] }],
-	strikes: { type: [Schema.Types.ObjectId], ref: 'Strike', default: [], select: false },
-	blocked_status: { type: String, enum: Object.values(BlockedStatus), default: BlockedStatus.NONE, }
+	strikes: { type: [Schema.Types.ObjectId], ref: 'CopyrightStrike', default: [], select: false },
+	blocked_status: { type: String, enum: Object.values(BlockedStatus), default: BlockedStatus.NONE }
 }, schemaOptions);
 
 AccountSchema.post("findOneAndUpdate", function (data) {
@@ -53,4 +48,3 @@ AccountSchema.post("findOneAndUpdate", function (data) {
 })
 
 module.exports = mongoose.model('Account', AccountSchema);
-exports.BlockedStatus = BlockedStatus;
