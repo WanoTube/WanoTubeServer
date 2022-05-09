@@ -170,19 +170,19 @@ function seperateTitleAndExtension(fileName) {
 	return { title, extension };
 }
 
-async function generateVideoFile(file, body) {
+async function generateFileFromBuffer(file, authorId, folder = "videos") {
 	const { data: dataBuffers, name: fileName } = file;
 	const { ext } = path.parse(fileName);
-	const encodedFileName = encodeFileName(fileName, body.author_id);
+	const encodedFileName = encodeFileName(fileName, authorId);
 	const { title } = seperateTitleAndExtension(fileName);
-	const videoPath = 'uploads/videos/' + encodedFileName + ext;
+	const fileKey = `uploads/${folder}/` + encodedFileName + ext;
 
 	return new Promise(function (resolve, reject) {
 		try {
-			fs.writeFileSync(videoPath, dataBuffers);
+			fs.writeFileSync(fileKey, dataBuffers);
 			resolve({
 				title,
-				videoPath
+				fileKey
 			});
 		}
 		catch (err) {
@@ -199,5 +199,5 @@ module.exports = {
 	converVideoToAudio,
 	generateThumbnail,
 	seperateTitleAndExtension,
-	generateVideoFile,
+	generateFileFromBuffer,
 }

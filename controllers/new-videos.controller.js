@@ -2,12 +2,13 @@ const fs = require('fs');
 const path = require('path');
 
 const { trackProgress } = require('../configs/socket');
-const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers');
+const { getFileStream, uploadToS3 } = require('../utils/aws-s3-handlers');
+const { removeRedundantFiles } = require('../utils/file-handler');
 const {
 	converVideoToAudio,
 	isVideoHaveAudioTrack,
 	generateThumbnail,
-	generateVideoFile
+	generateFileFromBuffer
 } = require('../utils/videos-handlers');
 const { handleCopyright } = require('../utils/copyright-handler');
 const { recogniteAudio } = require('./audio-recoginition.controller');
@@ -41,7 +42,7 @@ exports.uploadVideo = async function (req, res) {
 	}
 	if (body && file) {
 		try {
-			const { title, videoPath: videoKey } = await generateVideoFile(file, body);
+			const { title, fileKey: videoKey } = await generateFileFromBuffer(file, body.author_id);
 
 			console.log("recogniteAudioFromVideo")
 			const recognizedMusic = await recogniteAudioFromVideo(videoKey, channelId);
@@ -88,37 +89,6 @@ exports.uploadVideo = async function (req, res) {
 		console.log('No body')
 		res.status(400).json("No body")
 	}
-}
-
-async function removeRedundantFiles(directory) {
-	return fs.promises.unlink(directory);
-}
-
-function uploadToS3(newFilePath, customPercentageFn = val => val, channelId) {
-	console.log(newFilePath)
-	return new Promise(function (resolve, reject) {
-		try {
-			// reqVideo is redundant
-			const reqVideo = {
-				url: "test-url",
-				videoFile: newFilePath
-			}
-			if (newFilePath) {
-				// Save to AWS
-				const { base } = path.parse(newFilePath);
-				const fileName = base;
-				const newFileBuffer = fs.readFileSync(newFilePath);
-				const fileStream = Buffer.from(newFileBuffer, 'binary');
-				uploadFile(fileName, fileStream, () => resolve(reqVideo), (err) => reject(err))
-					.on('httpUploadProgress', function (progress) {
-						const progressPercentage = Math.round(progress.loaded / progress.total * 100);
-						trackProgress(customPercentageFn(progressPercentage), 'Upload to S3', channelId);
-					})
-			}
-		} catch (error) {
-			reject(error)
-		}
-	});
 }
 
 async function saveVideoToDatabase(url, body) {

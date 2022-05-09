@@ -1,5 +1,8 @@
 const S3 = require('aws-sdk/clients/s3');
 const fs = require('fs');
+const path = require('path');
+
+const { trackProgress } = require('../configs/socket');
 
 const { AWS_BUCKET_NAME, AWS_BUCKET_REGION, AWS_ACCESS_KEY, AWS_SECRET_KEY } = process.env
 
@@ -10,7 +13,7 @@ const s3 = new S3({
 });
 
 // uploads a file to s3
-exports.uploadFile = function (fileName, fileStream, resolve, reject) {
+const uploadFile = function (fileName, fileStream, resolve, reject) {
 	const extension = fileName.split('.')[fileName.split('.').length - 1];
 	const folder = extension === 'mp3' ? 'audios' : extension === 'png' ? 'thumbnails' : 'videos';
 	const uploadParams = {
@@ -27,7 +30,7 @@ exports.uploadFile = function (fileName, fileStream, resolve, reject) {
 }
 
 // downloads a file from s3
-exports.getFileStream = async function (fileKey) {
+const getFileStream = async function (fileKey) {
 	const downloadParams = {
 		Key: fileKey,
 		Bucket: AWS_BUCKET_NAME
@@ -52,7 +55,7 @@ exports.getFileStream = async function (fileKey) {
 	});
 }
 
-exports.deleteFile = function (fileKey) {
+const deleteFile = function (fileKey) {
 	const deleteParams = {
 		Key: fileKey,
 		Bucket: AWS_BUCKET_NAME
@@ -77,11 +80,46 @@ exports.deleteFile = function (fileKey) {
 	});
 }
 
-exports.getSignedUrl = function ({ key, expires }) {
+const getSignedUrl = function ({ key, expires }) {
 	const signedUrl = s3.getSignedUrl('getObject', {
 		Key: key,
 		Bucket: AWS_BUCKET_NAME,
 		Expires: expires || 900000, // S3 default is 900 seconds (15 minutes)
 	})
 	return signedUrl;
+}
+
+const uploadToS3 = async function (newFilePath, customPercentageFn = val => val, channelId) {
+	console.log(newFilePath)
+	return new Promise(function (resolve, reject) {
+		try {
+			// reqVideo is redundant
+			const reqVideo = {
+				url: "test-url",
+				videoFile: newFilePath
+			};
+			if (newFilePath) {
+				// Save to AWS
+				const { base } = path.parse(newFilePath);
+				const fileName = base;
+				const newFileBuffer = fs.readFileSync(newFilePath);
+				const fileStream = Buffer.from(newFileBuffer, 'binary');
+				uploadFile(fileName, fileStream, () => resolve(reqVideo), (err) => reject(err))
+					.on('httpUploadProgress', function (progress) {
+						const progressPercentage = Math.round(progress.loaded / progress.total * 100);
+						trackProgress(customPercentageFn(progressPercentage), 'Upload to S3', channelId);
+					})
+			}
+		} catch (error) {
+			reject(error)
+		}
+	});
+}
+
+module.exports = {
+	uploadFile,
+	uploadToS3,
+	deleteFile,
+	getSignedUrl,
+	getFileStream
 }
