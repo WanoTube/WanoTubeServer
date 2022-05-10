@@ -14,6 +14,12 @@ router.get('/public', videoInfosController.getAllPublicVideoInfos);
 
 router.get('/history', requireAuth(), videoInfosController.getWatchHistory);
 
+router.get('/watch-later', requireAuth(), videoInfosController.getWatchLaterVideos);
+
+router.patch('/watch-later/:videoId/remove', requireAuth(), videoInfosController.removeWatchLaterVideo);
+
+router.patch('/watch-later/:videoId', requireAuth(), videoInfosController.watchLater);
+
 router.post('/like', likesController.likeVideo);
 
 router.post('/comment', commentsController.commentVideo);

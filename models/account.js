@@ -29,11 +29,12 @@ const AccountSchema = new Schema({
 	},
 	is_admin: { type: Boolean, default: false },
 	user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-	followers: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
-	followings: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
-	members: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
-	blocked_accounts: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
-	watched_history: [{ type: Schema.Types.ObjectId, ref: 'WatchHistoryDate', default: [] }],
+	followers: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
+	followings: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
+	members: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
+	blocked_accounts: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
+	watched_history: { type: [Schema.Types.ObjectId], ref: 'WatchHistoryDate', default: [] },
+	watch_later_videos: { type: [Schema.Types.ObjectId], ref: 'Video', default: [] },
 	strikes: { type: [Schema.Types.ObjectId], ref: 'CopyrightStrike', default: [], select: false },
 	blocked_status: { type: String, enum: Object.values(BlockedStatus), default: BlockedStatus.NONE }
 }, schemaOptions);

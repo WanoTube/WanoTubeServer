@@ -236,3 +236,67 @@ exports.getWatchHistory = async function (req, res) {
 		res.status(500).json(error);
 	}
 }
+
+exports.getWatchLaterVideos = async function (req, res) {
+	const { channelId } = req.user;
+	console.log('getWatchLaterVideos', channelId);
+
+	try {
+		const channel = await Account.findOne({ _id: channelId }).populate('watch_later_videos');
+		res.json({ videos: channel.watch_later_videos })
+	}
+	catch (error) {
+		console.log(error)
+		res.status(500).json(error);
+	}
+}
+
+exports.watchLater = async function (req, res) {
+	const { channelId } = req.user;
+	const { videoId } = req.params;
+	console.log('getWatchLaterVideos', channelId, videoId);
+
+	try {
+		const foundVideo = await Video.findOne({ _id: videoId });
+		if (!foundVideo) return res.status(400).json({
+			message: "Video id not found"
+		});
+
+		await Account.findOneAndUpdate(
+			{ _id: channelId },
+			{ $addToSet: { watch_later_videos: foundVideo._id } }
+		);
+		return res.json({
+			video: foundVideo
+		})
+	}
+	catch (error) {
+		console.log(error)
+		res.status(500).json(error);
+	}
+}
+
+exports.removeWatchLaterVideo = async function (req, res) {
+	const { channelId } = req.user;
+	const { videoId } = req.params;
+	console.log('removeWatchLaterVideo', channelId, videoId);
+
+	try {
+		const foundVideo = await Video.findOne({ _id: videoId });
+		if (!foundVideo) return res.status(400).json({
+			message: "Video id not found"
+		});
+
+		await Account.findOneAndUpdate(
+			{ _id: channelId },
+			{ $pull: { watch_later_videos: foundVideo._id } }
+		);
+		return res.json({
+			video: foundVideo
+		})
+	}
+	catch (error) {
+		console.log(error)
+		res.status(500).json(error);
+	}
+}
