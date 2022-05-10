@@ -59,9 +59,9 @@ exports.createUser = async function (request, response) {
 
 exports.login = async function (request, response) {
 	const account = await Account.findOne({ email: request.body.email }).select('+password');
-	if (!account) return response.status(422).json('Email is not correct');
+	if (!account) return response.status(422).json('Email does not exist!');
 	const checkPassword = await bcrypt.compare(request.body.password, account.password);
-	if (!checkPassword) return response.status(422).json('Password is not correct');
+	if (!checkPassword) return response.status(422).json('Password is not correct!');
 	try {
 		const user = await User.findOne({ _id: account.user_id });
 		if (user) {
@@ -79,7 +79,7 @@ exports.login = async function (request, response) {
 			}
 			response.header('auth-token', token).json(result);
 		} else {
-			response.status(400).json("Cannot find user");
+			response.status(400).json("Email does not exist!");
 		}
 	} catch (error) {
 		console.log(error);
