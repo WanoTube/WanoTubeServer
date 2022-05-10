@@ -3,27 +3,14 @@ const router = express.Router();
 const channelsController = require('../controllers/channels.controller');
 const { requireAuth } = require('../middlewares/verifyToken.middleware');
 
-/**
- * @swagger
- * /books:
- *   get:
- *     summary: Returns the list of all the books
- *     tags: [Books]
- *     responses:
- *       200:
- *         description: The list of the books
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Book'
- */
-
 router.get('/videos', requireAuth(), channelsController.getAllChannelVideos);
 
 router.get('/:id/videos', channelsController.getAllChannelPublicVideos);
 
 router.get('/:id/info', channelsController.getChannelPublicInformation);
+
+router.patch('/:id/follow', requireAuth(), channelsController.followChannel);
+
+router.patch('/:id/unfollow', requireAuth(), channelsController.unfollowChannel);
 
 module.exports = router;

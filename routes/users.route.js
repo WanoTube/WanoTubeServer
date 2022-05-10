@@ -13,6 +13,8 @@ router.get('/', usersController.getAllUsers);
 
 router.post('/', usersController.createUser);
 
+router.get('/follow-info', requireAuth(), usersController.getFollowInfo);
+
 router.put('/update', usersController.updateUser);
 
 router.get('/avatar/:key', usersController.getAvatar)

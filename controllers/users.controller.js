@@ -236,7 +236,7 @@ exports.updateUser = async function (req, res) {
 			});
 			res.json(user);
 		} catch (error) {
-			res.json(error);
+			res.status(500).json(error);
 		}
 	}
 }
@@ -248,4 +248,16 @@ exports.getCopyrightStatus = async function (req, res) {
 	res.json({
 		blocked_status, strikes
 	});
+}
+
+exports.getFollowInfo = async function (req, res) {
+	const { channelId } = req.user;
+	try {
+		const { number_of_followers, followings } = await Account.findOne({ _id: channelId }).select("+followings");
+		res.json({ number_of_followers, followings });
+	}
+	catch (error) {
+		console.log(error)
+		res.status(500).json(error);
+	}
 }

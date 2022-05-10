@@ -58,8 +58,64 @@ function formatVideoDocument(videoDoc) {
   return formmattedDoc;
 }
 
+async function followChannel(req, res) {
+  console.log("followChannel")
+  const { channelId: followerId } = req.user;
+  const { id: followedId } = req.params;
+  console.log({ followedId, followerId })
+  try {
+    const followedChannel = await Account.findOneAndUpdate(
+      { _id: followedId },
+      { $inc: { number_of_followers: 1 } },
+      { new: true }
+    );
+    if (!followedChannel) return res.status(400).json({ message: "Channel cannot be found!" })
+
+    await Account.findOneAndUpdate(
+      { _id: followerId },
+      { $addToSet: { followings: followedId } },
+      { new: true }
+    ).select("+followings");;
+
+    res.json({ number_of_followers: followedChannel.number_of_followers });
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json(err)
+  }
+}
+
+async function unfollowChannel(req, res) {
+  console.log("unfollowChannel")
+  const { channelId: followerId } = req.user;
+  const { id: followedId } = req.params;
+
+  try {
+    const followedChannel = await Account.findOneAndUpdate(
+      { _id: followedId },
+      { $inc: { number_of_followers: -1 } },
+      { new: true }
+    );
+    if (!followedChannel) return res.status(400).json({ message: "Channel cannot be found!" })
+
+    await Account.findOneAndUpdate(
+      { _id: followerId },
+      { $pull: { followings: followedId } },
+      { new: true }
+    ).select("+followings");
+
+    res.json({ number_of_followers: followedChannel.number_of_followers });
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json(err)
+  }
+}
+
 module.exports = {
   getAllChannelVideos,
   getAllChannelPublicVideos,
-  getChannelPublicInformation
+  getChannelPublicInformation,
+  followChannel,
+  unfollowChannel
 }
