@@ -239,11 +239,17 @@ exports.getWatchHistory = async function (req, res) {
 
 exports.getWatchLaterVideos = async function (req, res) {
 	const { channelId } = req.user;
-	console.log('getWatchLaterVideos', channelId);
 
 	try {
 		const channel = await Account.findOne({ _id: channelId }).populate('watch_later_videos');
-		res.json({ videos: channel.watch_later_videos })
+		const videos = channel.watch_later_videos.map(((videoDoc) => {
+			const formattedVideoDoc = { ...videoDoc._doc }
+			formattedVideoDoc.thumbnail_url = getSignedUrl({ key: formattedVideoDoc.thumbnail_key });
+			formattedVideoDoc.url = getSignedUrl({ key: formattedVideoDoc.url });
+			return formattedVideoDoc;
+		}))
+
+		res.json({ videos })
 	}
 	catch (error) {
 		console.log(error)
@@ -254,7 +260,6 @@ exports.getWatchLaterVideos = async function (req, res) {
 exports.watchLater = async function (req, res) {
 	const { channelId } = req.user;
 	const { videoId } = req.params;
-	console.log('getWatchLaterVideos', channelId, videoId);
 
 	try {
 		const foundVideo = await Video.findOne({ _id: videoId });
@@ -279,7 +284,6 @@ exports.watchLater = async function (req, res) {
 exports.removeWatchLaterVideo = async function (req, res) {
 	const { channelId } = req.user;
 	const { videoId } = req.params;
-	console.log('removeWatchLaterVideo', channelId, videoId);
 
 	try {
 		const foundVideo = await Video.findOne({ _id: videoId });
