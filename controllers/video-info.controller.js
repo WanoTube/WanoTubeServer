@@ -221,7 +221,6 @@ exports.getWatchHistory = async function (req, res) {
 				const authorAccount = await Account.findOne({ user_id: formattedVideoDoc.author_id });
 				const authorUserInfo = await User.findOne({ _id: formattedVideoDoc.author_id });
 				formattedVideoDoc.user = { ...formattedVideoDoc.author_id, username: authorAccount.username, channel_id: authorAccount._id, avatar: authorUserInfo.avatar };
-
 				delete formattedVideoDoc.author_id;
 				return formattedVideoDoc;
 			}))
@@ -241,11 +240,16 @@ exports.getWatchLaterVideos = async function (req, res) {
 	const { channelId } = req.user;
 
 	try {
-		const channel = await Account.findOne({ _id: channelId }).populate('watch_later_videos');
+		const channel = await Account.findOne({ _id: channelId }).populate({
+			path: 'watch_later_videos',
+			populate: 'author_id'
+		});
 		const videos = channel.watch_later_videos.map(((videoDoc) => {
 			const formattedVideoDoc = { ...videoDoc._doc }
 			formattedVideoDoc.thumbnail_url = getSignedUrl({ key: formattedVideoDoc.thumbnail_key });
 			formattedVideoDoc.url = getSignedUrl({ key: formattedVideoDoc.url });
+			formattedVideoDoc.user = { ...formattedVideoDoc.author_id, username: channel.username, channel_id: channel._id, avatar: channel.avatar };
+			delete formattedVideoDoc.author_id;
 			return formattedVideoDoc;
 		}))
 
