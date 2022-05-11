@@ -37,8 +37,7 @@ exports.getTotalLikesByVideoId = async function (req, res) {
 };
 
 exports.likeVideo = async function (req, res) {
-	const body = req.body
-	const video_id = body.target_id // video_id: the video being liked
+	const video_id = req.body.target_id // video_id: the video being liked
 
 	try {
 		const updatedVideo = await Video.findById(video_id);
@@ -51,7 +50,7 @@ exports.likeVideo = async function (req, res) {
 			updatedVideo.total_likes -= 1;
 		}
 		await updatedVideo.save();
-		res.json({})
+		res.json(updatedVideo)
 	}
 	catch (err) {
 		res.status(500).json("Somethin went wrong");
