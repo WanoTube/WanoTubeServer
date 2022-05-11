@@ -39,7 +39,6 @@ exports.getTotalLikesByVideoId = async function (req, res) {
 exports.likeVideo = async function (req, res) {
 	const body = req.body
 	const video_id = body.target_id // video_id: the video being liked
-	const userId = body.author_id // userId : the person like video
 
 	try {
 		const updatedVideo = await Video.findById(video_id);
