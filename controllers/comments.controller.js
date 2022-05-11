@@ -29,9 +29,9 @@ exports.getTotalCommentsByVideoId = async function (req, res) {
 };
 
 exports.commentVideo = async function (req, res) {
-	const body = req.body;
-	const { video_id, author_id, content } = body;
-
+	const { body, user } = req;
+	const { video_id, content } = body;
+	const author_id = user._id
 	try {
 		const video = await Video.findOne({ _id: video_id }).select("+comments");
 

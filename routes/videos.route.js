@@ -22,7 +22,7 @@ router.patch('/watch-later/:videoId', requireAuth(), videoInfosController.watchL
 
 router.post('/like', likesController.likeVideo);
 
-router.post('/comment', commentsController.commentVideo);
+router.post('/comment', requireAuth(), commentsController.commentVideo);
 
 router.post('/comment/delete', commentsController.deleteCommentFromVideo);
 
