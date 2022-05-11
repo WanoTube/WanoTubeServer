@@ -261,3 +261,22 @@ exports.getFollowInfo = async function (req, res) {
 		res.status(500).json(error);
 	}
 }
+
+exports.getFollowingChannels = async function (req, res) {
+	const { channelId } = req.user;
+	try {
+		const { followings, user_id } = await Account.findOne({ _id: channelId }).select("+followings").populate('followings user_id');
+		res.json({
+			followingChannels: followings.map(channel => ({
+				username: channel.username,
+				channelId: channel._id,
+				numberOfFollowers: channel.number_of_followers,
+				avatar: user_id.avatar
+			}))
+		});
+	}
+	catch (error) {
+		console.log(error);
+		res.status(500).json(error);
+	}
+}
