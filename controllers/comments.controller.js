@@ -28,33 +28,27 @@ exports.getTotalCommentsByVideoId = async function (req, res) {
 	}
 };
 
-exports.commentVideo = async function (req, res) {
-	const body = req.body;
-	const { video_id, author_id, content } = body;
+exports.addComment = async function (req, res) {
+	const { _id: author_id } = req.user;
+	const { video_id, content } = req.body;
 
 	try {
 		const video = await Video.findOne({ _id: video_id }).select("+comments");
+		if (!video) return res.status(400).json({
+			message: "Video does not exist!"
+		});
+		const newComment = await Comment.create({ author_id, video_id: video._id, content });
+		video.comments.push(newComment);
+		video.total_comments += 1;
+		await video.save();
 
-		if (video) {
-			addComment(author_id, video, content, async function (comment) {
-				const account = await Account.findOne({ user_id: author_id });
-				const commentDoc = { ...comment._doc, user: account };
-				delete commentDoc.author_id;
-				res.json(commentDoc);
-			})
-		}
+		const account = await Account.findOne({ user_id: author_id });
+		const commentDoc = { ...newComment._doc, user: account };
+		delete commentDoc.author_id;
+		res.json(commentDoc);
 	} catch (error) {
 		res.json(error);
 	}
-}
-
-async function addComment(author_id, video, content, callback) {
-	const comment = new Comment({ author_id, video_id: video.id, content });
-	const newComment = await comment.save();
-	video.comments.push(comment);
-	video.total_comments += 1;
-	await video.save();
-	callback(newComment);
 }
 
 exports.deleteCommentFromVideo = function (req, res) {
