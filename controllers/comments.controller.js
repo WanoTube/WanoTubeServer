@@ -1,19 +1,51 @@
 const Video = require('../models/video');
 const Comment = require('../models/comment');
-const Account = require("../models/account");
+const Account = require('../models/account');
 const mongoose = require('mongoose');
 
 exports.getAllCommentsByVideoId = async function (req, res) {
 	const { id } = req.params;
 	const video = await Video.findById(id).populate({
 		path: 'comments',
-		select: 'is_reply user content created_at video_id author_id',
+		select: 'is_reply replies user content created_at video_id author_id',
 		match: { is_reply: false },
 	});
-	const { comments } = video;
+	const { comments } = video._doc;
 	comments.sort((a, b) => b.created_at - a.created_at);
-	res.json(comments);
+	const commentsWithoutReplies = comments.map(comment => {
+		const commentDoc = ({ ...comment })._doc;
+		commentDoc.number_of_replies = commentDoc.replies.length;
+		delete commentDoc.replies;
+		return commentDoc;
+	});
+	res.json(commentsWithoutReplies);
 };
+
+exports.getCommentReplies = async function (req, res) {
+	const { id } = req.params;
+	try {
+		const mainComment = await Comment.findById(id).populate({
+			path: 'replies',
+			populate: {
+				path: 'author_id',
+				select: 'avatar'
+			}
+		});
+		const replies = await Promise.all(mainComment.replies.map(async (reply) => {
+			const channel = await Account.findOne({ user_id: reply.author_id });
+			const replyDoc = reply._doc;
+			replyDoc.user = { ...replyDoc.author_id._doc, username: channel._doc.username };
+			delete replyDoc.author_id;
+			delete replyDoc.replies;
+			return replyDoc;
+		}));
+		res.json(replies);
+	}
+	catch (error) {
+		console.log(error);
+		res.status(500).json(error);
+	}
+}
 
 exports.getTotalCommentsByVideoId = async function (req, res) {
 	const id = req.params.id
