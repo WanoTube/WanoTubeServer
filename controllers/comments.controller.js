@@ -3,19 +3,16 @@ const Comment = require('../models/comment');
 const Account = require("../models/account");
 const mongoose = require('mongoose');
 
-exports.getAllCommentsByVideoId = function (req, res) {
-	const id = req.params.id
-	Video.findById(id)
-		.populate('comments')
-		.exec(function (err, result) {
-			const comments = result.comments;
-			comments.sort((a, b) => b.created_at - a.created_at);
-			if (!err) {
-				if (result) res.json(comments)
-				else res.json("Cannot find video")
-			} else
-				res.json(err)
-		})
+exports.getAllCommentsByVideoId = async function (req, res) {
+	const { id } = req.params;
+	const video = await Video.findById(id).populate({
+		path: 'comments',
+		select: 'is_reply user content created_at video_id author_id',
+		match: { is_reply: false },
+	});
+	const { comments } = video;
+	comments.sort((a, b) => b.created_at - a.created_at);
+	res.json(comments);
 };
 
 exports.getTotalCommentsByVideoId = async function (req, res) {
