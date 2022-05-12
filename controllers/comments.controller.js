@@ -11,6 +11,7 @@ exports.getAllCommentsByVideoId = async function (req, res) {
 		match: { is_reply: false },
 	});
 	const { comments } = video._doc;
+	comments.sort((a, b) => b.created_at - a.created_at);
 	const commentsWithoutReplies = comments.map(comment => {
 		const commentDoc = ({ ...comment })._doc;
 		commentDoc.number_of_replies = commentDoc.replies.length;
@@ -38,6 +39,7 @@ exports.getCommentReplies = async function (req, res) {
 			delete replyDoc.replies;
 			return replyDoc;
 		}));
+		replies.sort((a, b) => b.created_at - a.created_at);
 		res.json(replies);
 	}
 	catch (error) {
