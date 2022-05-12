@@ -25,7 +25,7 @@ async function getAllChannelVideos(req, res) {
     const formattedVideoDocs = videos.map(function (videoDoc) {
       return formatVideoDocument(videoDoc);
     })
-    res.json({videos: formattedVideoDocs});
+    res.json({ videos: formattedVideoDocs });
   }
   catch (err) {
     console.log(err);
@@ -36,14 +36,13 @@ async function getAllChannelVideos(req, res) {
 async function getAllChannelPublicVideos(req, res) {
   const { id } = req.params;
 
-  console.log("id: ", id)
   try {
     const foundChannel = await Account.findOne({ _id: id });
     const videos = await Video.find({ author_id: foundChannel.user_id, visibility: 0 }) // 0: public
     const formattedVideoDocs = videos.map(function (videoDoc) {
       return formatVideoDocument(videoDoc);
     })
-    res.json(formattedVideoDocs);
+    res.json({ videos: formattedVideoDocs });
   }
   catch (err) {
     console.log(err);
