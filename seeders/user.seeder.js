@@ -1,166 +1,105 @@
 const bcrypt = require('bcryptjs');
+const { faker } = require('@faker-js/faker');
 
+const randomElement = function (items) {
+  return items[items.length * Math.random() | 0];
+}
+
+const thumbnailList = [
+  'book.png',
+  'cat.png',
+  'chelseavsliverpool.png',
+  'dtck.png',
+  'foucs.png',
+  'game.png',
+  'harry-kane-vuot-mat-salah-trong-cuoc-tranh-gianh-vua-pha-luoi-3.png',
+  'kingdomrush.png',
+  'liver-spurs.png',
+  'liverpool-son-heung-min.png',
+  'mern.png',
+  'naruto.png',
+  'thanhpalm.png',
+  'thumbnail.png',
+  'tomandjerry.png'
+]
+
+const videoList = [
+  'ando-trungquoc.mp4',
+  'begin-song.mp4',
+  'cambongfa.mp4',
+  'kingdomrush.mp4',
+  'real-vs-mc.mp4',
+  'song.mp4',
+  'titanic-my-heart-will-go-on.mp4'
+]
+
+generateVideoTitle = function () {
+  const random = Math.floor(Math.random() * 10);
+  switch (random) {
+    case 0: return faker.animal.cat();
+    case 1: return faker.company.companyName();
+    case 2: return faker.commerce.productName();
+    case 3: return faker.name.jobArea();
+    case 4: return faker.animal.bird();
+    case 5: return faker.commerce.department();
+    case 6: return faker.internet.userName();
+    case 7: return faker.address.country();
+    case 8: return faker.animal.insect();
+    default: return faker.music.genre()
+  }
+}
 
 exports.userSeeder = async function () {
   const password = '12345678';
   const salt = await bcrypt.genSalt(10);
   const hashed = await bcrypt.hash(password, salt);
 
-  return (
-    [
-      {
-        first_name: 'Nguyen',
-        last_name: 'Ngan',
-        gender: 'Female',
-        birth_date: new Date('12-01-2000'),
-        phone_number: '123456789',
-        country: 'England',
-        avatar: 'https://api-private.atlassian.com/users/8f525203adb5093c5954b43a5b6420c2/avatar',
-        description: 'This is Thien Ngan',
-        account: {
-          username: 'thienngan',
-          email: 'thienngan@gmail.com',
-          password: hashed,
-          is_admin: false
-        },
-        videos: [
-          {
-            title: 'Big Buck Bunny',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          },
-          {
-            title: 'Elephant Dream',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          },
-          {
-            title: 'For Bigger Blazes',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          },
-          {
-            title: 'For Bigger Escape',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          },
-          {
-            title: 'For Bigger Fun',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          },
-          {
-            title: 'For Bigger Escape',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          }
-        ]
+  const accounts = [];
+  for (let i = 0; i < 10; i++) {
+    const first_name = faker.name.firstName();
+    const last_name = faker.name.lastName();
+    const gender = faker.name.gender();
+    const birth_date = faker.date.past();
+    const phone_number = faker.phone.phoneNumber();
+    const country = faker.address.country();
+    const avatar = faker.image.avatar();
+    const description = faker.lorem.paragraph();
+    const username = faker.internet.userName();
+    const email = `user${i}@gmail.com`;
+    const is_admin = !(i % 4);
+    const videos = [];
+    for (let j = 0; j < 6; j++) {
+      const title = generateVideoTitle();
+      const key = randomElement(videoList);
+      const thumbnailKey = randomElement(thumbnailList);
+      const size = 50;
+      const duration = 50;
+      const visibility = !!(j % 4);
+      const videoDescription = faker.lorem.paragraph();
+      const video = {
+        title, key, thumbnailKey, size, duration, visibility, description: videoDescription
+      };
+      videos.push(video);
+    }
+
+    const account = {
+      first_name,
+      last_name,
+      gender,
+      birth_date,
+      phone_number,
+      country,
+      avatar,
+      description,
+      account: {
+        username,
+        email,
+        password: hashed,
+        is_admin
       },
-      {
-        first_name: 'Tang',
-        last_name: 'Chuong',
-        gender: 'Male',
-        birth_date: new Date('12-01-2000'),
-        phone_number: '123456789',
-        country: 'France',
-        avatar: 'https://api-private.atlassian.com/users/8f525203adb5093c5954b43a5b6420c2/avatar',
-        description: 'This is Khanh Chuong',
-        account: {
-          username: 'khanhchuong',
-          email: 'khanhchuong@gmail.com',
-          password: hashed,
-          is_admin: true,
-        },
-        videos: [
-          {
-            title: 'For Bigger Fun',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          },
-          {
-            title: 'For Bigger Escape',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          },
-          {
-            title: 'For Bigger Fun',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          }
-        ]
-      },
-      {
-        first_name: 'Tuan',
-        last_name: 'Pham',
-        gender: 'Male',
-        birth_date: new Date('12-01-2000'),
-        phone_number: '123456789',
-        country: 'Germany',
-        avatar: 'https://api-private.atlassian.com/users/8f525203adb5093c5954b43a5b6420c2/avatar',
-        description: 'This is Tuan Pham',
-        account: {
-          username: 'tuanpham',
-          email: 'tuanpham@gmail.com',
-          password: hashed,
-          is_admin: false,
-        },
-        videos: [
-          {
-            title: 'For Bigger Escape',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          },
-          {
-            title: 'For Bigger Fun',
-            url: 'song.mp4',
-            thumbnailKey: 'thumbnail.png',
-            size: 50,
-            duration: 50,
-            visibility: 0,
-            description: 'This is test video',
-          }
-        ]
-      }
-    ]
-  )
+      videos
+    };
+    accounts.push(account);
+  }
+  return accounts;
 }
