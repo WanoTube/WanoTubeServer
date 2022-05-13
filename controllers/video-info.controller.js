@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
 
 const Video = require('../models/video');
+const { VideoTag } = require('../constants/video');
 const User = require('../models/user');
 const Account = require('../models/account');
 const WatchHistoryDate = require('../models/watchHistoryDate');
@@ -94,7 +95,8 @@ exports.search = function (req, res) {
 };
 
 exports.updateVideoInfo = async function (req, res) {
-	const { id: videoId, title, description, privacy, thumbnailIndex } = req.body;
+	const { id: videoId, title, description, privacy, thumbnailIndex, tags } = req.body
+	console.log(req.body);
 	const { _id: userId, channelId } = req.user;
 
 	try {
@@ -116,6 +118,7 @@ exports.updateVideoInfo = async function (req, res) {
 		}
 		foundVideo.title = title;
 		foundVideo.description = description;
+		foundVideo.tags = tags.split(",");
 		foundVideo.visibility = privacy;
 
 		const updatedVideo = await foundVideo.save();
@@ -307,4 +310,9 @@ exports.removeWatchLaterVideo = async function (req, res) {
 		console.log(error)
 		res.status(500).json(error);
 	}
+}
+
+exports.getAllVideoTags = async function (req, res) {
+	const videoTags = Object.values(VideoTag);
+	res.json({ tags: videoTags });
 }

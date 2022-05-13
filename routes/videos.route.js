@@ -12,6 +12,8 @@ router.get('/search', videoInfosController.search);
 
 router.get('/public', videoInfosController.getAllPublicVideoInfos);
 
+router.get('/tags', videoInfosController.getAllVideoTags);
+
 router.get('/history', requireAuth(), videoInfosController.getWatchHistory);
 
 router.get('/watch-later', requireAuth(), videoInfosController.getWatchLaterVideos);

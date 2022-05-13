@@ -2,27 +2,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const { schemaOptions } = require('../constants/schemaOptions');
+const { VideoTag, VideoType } = require('../constants/video');
 
 const defaultThumbnail = "https://unica.vn/upload/landingpage/045402_toi-uu-kich-thuoc-thumbnail-youtube-nhanh-gon-voi-vai-cu-click-chuot_thumb.jpg";
-const VideoType = {
-	SHORT: 'SHORT',
-	NORMAL: 'NORMAL'
-};
-const VideoTag = {
-	MUSIC: 'MUSIC',
-	SPORT: 'SPORT',
-	ENTERTAINMENT: 'ENTERTAINMENT',
-	CUISINE: 'CUISINE',
-	GAME: 'GAME',
-	CARTOON: 'CARTOON',
-	TVSHOW: 'TVSHOW',
-	EDUCATION: 'EDUCATION',
-	CULTURE: 'CULTURE',
-	MOVIE: 'MOVIE',
-	NATURE: 'NATURE',
-	HISTORY: 'HISTORY',
-	GEOGRAPHY: 'GEOGRAPHY'
-}
 
 const VideoSchema = new Schema({
 	title: { type: String, required: true },
@@ -57,7 +39,7 @@ const VideoSchema = new Schema({
 	visibility: { type: Number, default: 1 }, // 0: public, 1: private, 2: unpublic, 3: blocked
 	duration: { type: Number },
 	type: { type: String, enum: Object.values(VideoType), default: VideoType.NORMAL },
-	tags: { type: [String], enum: Object.values(VideoTag), default: [] }
+	tags: { type: [String], default: [] }
 
 }, schemaOptions);
 
@@ -68,4 +50,3 @@ VideoSchema.post("findOneAndUpdate", function (data) {
 })
 
 module.exports = mongoose.model('Video', VideoSchema);
-exports.VideoType = VideoType;
