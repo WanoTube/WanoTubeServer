@@ -96,7 +96,6 @@ exports.search = function (req, res) {
 
 exports.updateVideoInfo = async function (req, res) {
 	const { id: videoId, title, description, privacy, thumbnailIndex, tags } = req.body
-	console.log(req.body);
 	const { _id: userId, channelId } = req.user;
 
 	try {
@@ -118,7 +117,7 @@ exports.updateVideoInfo = async function (req, res) {
 		}
 		foundVideo.title = title;
 		foundVideo.description = description;
-		foundVideo.tags = tags.split(",");
+		foundVideo.tags = tags === '' ? [] : tags.split(",");
 		foundVideo.visibility = privacy;
 
 		const updatedVideo = await foundVideo.save();
