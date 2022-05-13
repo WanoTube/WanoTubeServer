@@ -1,5 +1,4 @@
-
-const { connectToMongoDb, disconnectDb } = require('../configs/database')
+const { connectToMongoDb, disconnectDb } = require('../configs/database');
 const Account = require('../models/account');
 const User = require('../models/user');
 const Video = require('../models/video');
@@ -35,10 +34,10 @@ const seedData = async function () {
     });
 
     for (let video of videos) {
-      const { title, url, thumbnailKey, size, description, duration, visibility } = video;
+      const { title, key, thumbnailKey, size, description, duration, visibility } = video;
       await Video.create({
         title,
-        url,
+        url: key,
         thumbnail_key: thumbnailKey,
         size,
         duration,
