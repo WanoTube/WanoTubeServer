@@ -1,6 +1,9 @@
+
+const { connectToMongoDb, disconnectDb } = require('../configs/database')
 const Account = require('../models/account');
 const User = require('../models/user');
 const Video = require('../models/video');
+require('dotenv').config();
 
 const { userSeeder } = require('./user.seeder');
 
@@ -47,5 +50,12 @@ const seedData = async function () {
   }
   console.log("Data seeded!");
 }
+
+const seed = async function () {
+  await connectToMongoDb();
+  await seedData();
+  await disconnectDb();
+}
+if (process.env.NODE_ENV === "seeding") seed();
 
 module.exports = seedData;
