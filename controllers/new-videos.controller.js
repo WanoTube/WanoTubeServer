@@ -32,7 +32,6 @@ exports.uploadVideo = async function (req, res) {
 	const { body, user } = req;
 	body.author_id = user._id
 	const channelId = user.channelId;
-
 	if (req.files) {
 		file = file.video;
 	} else {

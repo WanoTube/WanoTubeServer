@@ -54,8 +54,10 @@ exports.getVideoInfoById = async function (req, res, next) {
 		if (video.visibility === 3 && (!req.user || video.author_id.toString() !== req.user._id))
 			return res.status(400).json({ message: "Video unavailable. This video have copyright claimed" });
 
-		if (video.visibility === 1 && (!req.user || video.author_id.toString() !== req.user._id))
+		if (video.visibility === 1 && (!req.user || video.author_id.toString() !== req.user._id)) {
+			console.log(req.user, video.author_id)
 			return res.status(400).json({ message: "Video unavailable. This video is private" });
+		}
 
 
 		const formmattedDoc = { ...video._doc };
