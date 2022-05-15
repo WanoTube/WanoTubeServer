@@ -317,3 +317,41 @@ exports.getAllVideoTags = async function (req, res) {
 	const videoTags = Object.values(VideoTag);
 	res.json({ tags: videoTags });
 }
+
+exports.getFeed = async function (req, res) {
+	console.log("get feed")
+	const videos = await Video.find({ visibility: 0 });
+	const formattedDocs = await Promise.all(videos.map(async function (videoDoc) {
+		const formmattedDoc = { ...videoDoc._doc };
+		formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
+		formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
+		delete formmattedDoc.thumbnail_key;
+
+		const channelAccount = await Account.findOne({ user_id: videoDoc.author_id }).populate("user_id");
+		formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username, channel_id: channelAccount._id };
+		delete formmattedDoc.author_id;
+
+		return formmattedDoc;
+	}));
+
+	res.json({ videos: formattedDocs });
+}
+
+exports.getVideoSuggestion = async function (req, res) {
+	console.log("get video suggestion")
+	const videos = await Video.find({ visibility: 0 });
+	const formattedDocs = await Promise.all(videos.map(async function (videoDoc) {
+		const formmattedDoc = { ...videoDoc._doc };
+		formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
+		formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
+		delete formmattedDoc.thumbnail_key;
+
+		const channelAccount = await Account.findOne({ user_id: videoDoc.author_id }).populate("user_id");
+		formmattedDoc.user = { ...channelAccount, avatar: channelAccount.user_id.avatar, username: channelAccount.username, channel_id: channelAccount._id };
+		delete formmattedDoc.author_id;
+
+		return formmattedDoc;
+	}));
+
+	res.json({ videos: formattedDocs });
+}

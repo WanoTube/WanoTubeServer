@@ -14,6 +14,9 @@ router.get('/public', videoInfosController.getAllPublicVideoInfos);
 
 router.get('/tags', videoInfosController.getAllVideoTags);
 
+router.get('/feed', requireAuth(false), videoInfosController.getFeed);
+
+
 router.get('/history', requireAuth(), videoInfosController.getWatchHistory);
 
 router.get('/watch-later', requireAuth(), videoInfosController.getWatchLaterVideos);
@@ -37,6 +40,8 @@ router.patch('/update', requireAuth(), forbidBlockedAccount, videoInfosControlle
 router.post('/delete', requireAuth(), forbidBlockedAccount, videoInfosController.deleteVideoInfo);
 
 router.get('/:id', requireAuth(false), videoInfosController.getVideoInfoById);
+
+router.get('/:id/suggestion', requireAuth(false), videoInfosController.getVideoSuggestion);
 
 router.get('/:id/likes', likesController.getAllLikesByVideoId);
 
