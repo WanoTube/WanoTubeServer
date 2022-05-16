@@ -129,8 +129,8 @@ function generateThumbnail(videoFilePath, channelId) {
 					});
 				})
 				.on('progress', (progress) => {
+					console.log('progress')
 					if (progress) {
-						console.log("progress")
 						if (nextProgress >= 100 || (nextProgress < 100 && progress.percent >= nextProgress)) {
 							trackProgress(progress / 4 + 25, 'Upload to S3', channelId);
 							nextProgress += 15;
@@ -151,9 +151,10 @@ function generateThumbnail(videoFilePath, channelId) {
 				});
 		}
 		catch (err) {
+			console.log(err)
 			reject(err);
 		}
-	})
+	});
 }
 
 function encodeFileName(fileName, userId) {
