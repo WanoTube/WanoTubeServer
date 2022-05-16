@@ -22,7 +22,7 @@ async function connectSocket(server) {
     const accessToken = socket.handshake.auth.token;
     if (!accessToken) return next(new Error("Not authorization"));
     try {
-      const { channelId } = jwt.verify(accessToken, process.env.TOKEN_SECRET);
+      const { channelId } = jwt.verify(accessToken.split(' ')[1], process.env.TOKEN_SECRET);
       socket.channelId = channelId;
       socket.join(channelId);
       next();
