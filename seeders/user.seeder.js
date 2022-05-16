@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs');
 const { faker } = require('@faker-js/faker');
+const { randomIntNumber } = require('../utils/number');
 
-const randomElement = function (items) {
+const randomElementInArray = function (items) {
   return items[items.length * Math.random() | 0];
 }
 
@@ -55,7 +56,7 @@ exports.userSeeder = async function () {
   const hashed = await bcrypt.hash(password, salt);
 
   const accounts = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     const first_name = faker.name.firstName();
     const last_name = faker.name.lastName();
     const gender = faker.name.gender();
@@ -68,16 +69,20 @@ exports.userSeeder = async function () {
     const email = `user${i}@gmail.com`;
     const is_admin = !(i % 4);
     const videos = [];
-    for (let j = 0; j < 6; j++) {
+    for (let j = 0; j < 20; j++) {
       const title = generateVideoTitle();
-      const key = randomElement(videoList);
-      const thumbnailKey = randomElement(thumbnailList);
+      const key = randomElementInArray(videoList);
+      const thumbnail_key = randomElementInArray(thumbnailList);
       const size = 50;
       const duration = 50;
       const visibility = !!(j % 4);
-      const videoDescription = faker.lorem.paragraph();
+      const description = faker.lorem.paragraph();
+      const total_likes = randomIntNumber();
+      const total_views = randomIntNumber();
       const video = {
-        title, key, thumbnailKey, size, duration, visibility, description: videoDescription
+        title, key, thumbnail_key,
+        size, duration, visibility,
+        description, total_likes, total_views
       };
       videos.push(video);
     }
