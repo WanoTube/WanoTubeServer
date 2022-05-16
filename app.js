@@ -11,7 +11,6 @@ require('dotenv').config();
 
 const { connectToMongoDb } = require('./configs/database');
 const { connectSocket } = require('./configs/socket');
-const routes = require('./routes/index.route');
 const {
   errorHandler,
   notFoundErrorHandler,
@@ -43,7 +42,9 @@ async function bootstrap() {
   useMiddleware(app);
 
   //init routes
-  app.use("/", routes);
+  const apiVersion = process.env.API_VERSION || 'v1';
+  const routes = require(`./api/${apiVersion}/routes`);
+  app.use(`/${apiVersion}`, routes);
 
   //handle errors
   app.use(notFoundErrorHandler);

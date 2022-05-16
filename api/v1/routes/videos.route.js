@@ -5,8 +5,8 @@ const videosController = require('../controllers/new-videos.controller');
 const videoInfosController = require('../controllers/video-info.controller');
 const likesController = require('../controllers/likes.controller');
 const commentsController = require('../controllers/comments.controller');
-const { requireAuth } = require('../middlewares/verifyToken.middleware');
-const { forbidBlockedAccount } = require('../middlewares/forbidBlockedAccount');
+const { requireAuth } = require("../../../middlewares/verifyToken.middleware");
+const { forbidBlockedAccount } = require('../../../middlewares/forbidBlockedAccount');
 
 router.get('/search', videoInfosController.search);
 
@@ -15,7 +15,6 @@ router.get('/public', videoInfosController.getAllPublicVideoInfos);
 router.get('/tags', videoInfosController.getAllVideoTags);
 
 router.get('/feed', requireAuth(false), videoInfosController.getFeed);
-
 
 router.get('/history', requireAuth(), videoInfosController.getWatchHistory);
 

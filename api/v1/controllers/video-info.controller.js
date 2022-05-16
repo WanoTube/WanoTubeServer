@@ -2,15 +2,15 @@ const _ = require('lodash');
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
 
-const Video = require('../models/video');
-const { VideoTag } = require('../constants/video');
-const User = require('../models/user');
-const Account = require('../models/account');
-const WatchHistoryDate = require('../models/watchHistoryDate');
-const { getSignedUrl } = require('../utils/aws-s3-handlers');
-const { generateFileFromBuffer } = require('../utils/videos-handlers');
-const { uploadToS3 } = require('../utils/aws-s3-handlers');
-const { removeRedundantFiles } = require('../utils/file-handler');
+const Video = require('../../../models/video');
+const { VideoTag } = require('../../../constants/video');
+const User = require('../../../models/user');
+const Account = require('../../../models/account');
+const WatchHistoryDate = require('../../../models/watchHistoryDate');
+const { getSignedUrl } = require('../../../utils/aws-s3-handlers');
+const { generateFileFromBuffer } = require('../../../utils/videos-handlers');
+const { uploadToS3 } = require('../../../utils/aws-s3-handlers');
+const { removeRedundantFiles } = require('../../../utils/file-handler');
 
 async function _formatVideo(video) {
 	const formattedDoc = { ...video };

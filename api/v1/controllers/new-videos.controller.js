@@ -1,19 +1,18 @@
 const fs = require('fs');
-const path = require('path');
 
-const { trackProgress } = require('../configs/socket');
-const { getFileStream, uploadToS3 } = require('../utils/aws-s3-handlers');
-const { removeRedundantFiles } = require('../utils/file-handler');
+const { trackProgress } = require('../../../configs/socket');
+const { getFileStream, uploadToS3 } = require('../../../utils/aws-s3-handlers');
+const { removeRedundantFiles } = require('../../../utils/file-handler');
 const {
 	converVideoToAudio,
 	isVideoHaveAudioTrack,
 	generateThumbnail,
 	generateFileFromBuffer
-} = require('../utils/videos-handlers');
-const { handleCopyright } = require('../utils/copyright-handler');
+} = require('../../../utils/videos-handlers');
+const { handleCopyright } = require('../../../utils/copyright-handler');
 const { recogniteAudio } = require('./audio-recoginition.controller');
 const { createVideoInfos } = require('./video-info.controller');
-const Video = require('../models/video');
+const Video = require('../../../models/video');
 
 exports.getVideoById = async function (req, res) {
 	const key = req.params.key;
