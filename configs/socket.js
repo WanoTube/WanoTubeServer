@@ -43,7 +43,6 @@ async function connectSocket(server) {
 }
 
 function trackProgress(progress, message, channelId) {
-  console.log(progress, message)
   io.to(channelId).emit(message, progress);
 }
 
