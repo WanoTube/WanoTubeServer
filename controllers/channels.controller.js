@@ -3,6 +3,7 @@ const _ = require('lodash');
 const Video = require('../models/video');
 const Account = require('../models/account');
 const { getSignedUrl } = require('../utils/aws-s3-handlers');
+const { formatVideo } = require('../utils/videos-handlers');
 
 async function getChannelPublicInformation(req, res) {
   const { id } = req.params;
@@ -22,9 +23,9 @@ async function getAllChannelVideos(req, res) {
 
   try {
     const videos = await Video.find({ author_id: _id });
-    const formattedVideoDocs = videos.map(function (videoDoc) {
-      return formatVideoDocument(videoDoc);
-    })
+    const formattedVideoDocs = await Promise.all(videos.map(function (video) {
+      return formatVideo({ ...video._doc });
+    }));
     res.json({ videos: formattedVideoDocs });
   }
   catch (err) {
@@ -39,9 +40,9 @@ async function getAllChannelPublicVideos(req, res) {
   try {
     const foundChannel = await Account.findOne({ _id: id });
     const videos = await Video.find({ author_id: foundChannel.user_id, visibility: 0 }) // 0: public
-    const formattedVideoDocs = videos.map(function (videoDoc) {
-      return formatVideoDocument(videoDoc);
-    })
+    const formattedVideoDocs = await Promise.all(videos.map(function (video) {
+      return formatVideo({ ...video._doc });
+    }));
     res.json({ videos: formattedVideoDocs });
   }
   catch (err) {
@@ -50,20 +51,10 @@ async function getAllChannelPublicVideos(req, res) {
   }
 }
 
-function formatVideoDocument(videoDoc) {
-  const formattedDoc = { ...videoDoc._doc };
-  formattedDoc.thumbnail_url = getSignedUrl({ key: formattedDoc.thumbnail_key });
-  formattedDoc.url = getSignedUrl({ key: formattedDoc.video_key });
-  delete formattedDoc.video_key;
-  delete formattedDoc.thumbnail_key;
-  return formattedDoc;
-}
-
 async function followChannel(req, res) {
   console.log("followChannel")
   const { channelId: followerId } = req.user;
   const { id: followedId } = req.params;
-  console.log({ followedId, followerId })
   try {
     const followedChannel = await Account.findOneAndUpdate(
       { _id: followedId },
