@@ -90,7 +90,6 @@ const getSignedUrl = function ({ key, expires }) {
 }
 
 const uploadToS3 = async function (newFilePath, customPercentageFn = val => val, channelId) {
-	console.log(newFilePath)
 	return new Promise(function (resolve, reject) {
 		try {
 			// reqVideo is redundant
@@ -108,7 +107,7 @@ const uploadToS3 = async function (newFilePath, customPercentageFn = val => val,
 					.on('httpUploadProgress', function (progress) {
 						const progressPercentage = Math.round(progress.loaded / progress.total * 100);
 						trackUploadS3Progress(customPercentageFn(progressPercentage), channelId);
-					})
+					});
 			}
 		} catch (error) {
 			reject(error)

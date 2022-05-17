@@ -34,7 +34,7 @@ router.post('/comment/delete', commentsController.deleteCommentFromVideo);
 
 router.post('/upload', requireAuth(), forbidBlockedAccount, videosController.uploadAndProcessVideo);
 
-router.post('/', requireAuth(), forbidBlockedAccount, videosController.uploadVideo);
+router.post('/', requireAuth(), forbidBlockedAccount, videosController.uploadVideoWithUndergroundProcess);
 
 router.patch('/update', requireAuth(), forbidBlockedAccount, videoInfosController.updateVideoInfo)
 

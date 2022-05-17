@@ -46,22 +46,32 @@ function trackUploadS3Progress(progress, channelId) {
   io.to(channelId).emit("Upload to S3", progress);
 }
 
-function uploadCompleted(channelId) {
-  io.to(channelId).emit("Upload completed!");
+function notifyUploadCompleted(channelId, videoId) {
+  io.to(channelId).emit("upload-completed", videoId);
 }
 
-function trackVideoProcessingProgress(progress, channelId) {
-  io.to(channelId).emit("Track processing progress", progress);
+function trackVideoProcessingProgress(channelId, videoId, progress) {
+  io.to(channelId).emit("track-processing-progress", { videoId, progress });
 }
 
-function trackVideoRecognitionProgress(progress, channelId) {
-  io.to(channelId).emit("Track recognition progress", progress);
+function notifyProcessCompleted(channelId, videoId) {
+  io.to(channelId).emit("process-completed", { videoId });
+}
+
+function trackVideoRecognitionProgress(channelId, videoId, progress) {
+  io.to(channelId).emit("track-recognition-progress", { videoId, progress });
+}
+
+function notifyRrecognizedCompleted(channelId, videoId) {
+  io.to(channelId).emit("recognized-completed", { videoId })
 }
 
 module.exports = {
   connectSocket,
   trackUploadS3Progress,
-  uploadCompleted,
+  notifyUploadCompleted,
   trackVideoProcessingProgress,
-  trackVideoRecognitionProgress
+  notifyProcessCompleted,
+  trackVideoRecognitionProgress,
+  notifyRrecognizedCompleted
 }
