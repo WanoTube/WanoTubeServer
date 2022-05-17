@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const { faker } = require('@faker-js/faker');
+
 const { randomIntNumber } = require('../utils/number');
+const { VideoTag } = require('../constants/video');
 
 const randomElementInArray = function (items) {
   return items[items.length * Math.random() | 0];
@@ -79,10 +81,12 @@ exports.userSeeder = async function () {
       const description = faker.lorem.paragraph();
       const total_likes = randomIntNumber();
       const total_views = randomIntNumber();
+      const tags = ["", ""].map(() => randomElementInArray(Object.values(VideoTag)));
       const video = {
         title, key, thumbnail_key,
         size, duration, visibility,
-        description, total_likes, total_views
+        total_likes, total_views,
+        description, tags
       };
       videos.push(video);
     }
@@ -100,7 +104,7 @@ exports.userSeeder = async function () {
         username,
         email,
         password: hashed,
-        is_admin
+        is_admin,
       },
       videos
     };
