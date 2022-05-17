@@ -108,7 +108,9 @@ exports.updateVideoInfo = async function (req, res) {
 		}
 		foundVideo.title = title;
 		foundVideo.description = description;
-		foundVideo.tags = tags === '' ? [] : tags.split(",");
+		if (tags) {
+			foundVideo.tags = tags === '' ? [] : tags.split(",");
+		}
 		foundVideo.visibility = privacy;
 
 		const updatedVideo = await foundVideo.save();
