@@ -329,11 +329,42 @@ exports.getFeed = async function (req, res) {
 
 exports.getVideoSuggestion = async function (req, res) {
 	console.log("get video suggestion")
-	const videos = await Video.find({ visibility: 0 });
-	const formattedVideos = await Promise.all(videos.map(async function (video) {
-		const formattedVideo = await formatVideo(video._doc);
+	const NUMBER_VIDEOS_OF_AUTHOR = 12;
+	const NUMBER_RELATED_VIDEOS = 12;
+
+	const { id } = req.params;
+
+	const video = await Video.findOne({ _id: id });
+
+	const otherVideosOfAuthor = await Video.aggregate([
+		{ $match: { visibility: 0, author_id: video.author_id } },
+		{ $sample: { size: NUMBER_VIDEOS_OF_AUTHOR } }
+	]);
+	const formattedOtherVideosOfAuthor = await Promise.all(otherVideosOfAuthor.map(async function (video) {
+		const formattedVideo = await formatVideo(video);
 		return formattedVideo;
 	}));
 
-	res.json({ videos: formattedVideos });
+	const relatedVideos = await Video.aggregate([
+		{
+			$match: {
+				visibility: 0,
+				tags: {
+					$elemMatch: {
+						$in: video.tags
+					}
+				}
+			},
+		},
+		{ $sample: { size: NUMBER_RELATED_VIDEOS }, },
+	]);
+	const formattedRelatedVideos = await Promise.all(relatedVideos.map(async function (video) {
+		const formattedVideo = await formatVideo(video);
+		return formattedVideo;
+	}));
+
+	res.json({
+		otherVideosOfAuthor: formattedOtherVideosOfAuthor,
+		relatedVideos: formattedRelatedVideos
+	});
 }
