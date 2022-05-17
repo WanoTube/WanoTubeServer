@@ -20,6 +20,8 @@ router.get('/history', requireAuth(), videoInfosController.getWatchHistory);
 
 router.get('/watch-later', requireAuth(), videoInfosController.getWatchLaterVideos);
 
+router.get('/stream/:key', videosController.getVideoById);
+
 router.patch('/watch-later/:videoId/remove', requireAuth(), videoInfosController.removeWatchLaterVideo);
 
 router.patch('/watch-later/:videoId', requireAuth(), videoInfosController.watchLater);
@@ -30,9 +32,9 @@ router.post('/comment', requireAuth(), commentsController.addComment);
 
 router.post('/comment/delete', commentsController.deleteCommentFromVideo);
 
-router.get('/stream/:key', videosController.getVideoById);
-
 router.post('/upload', requireAuth(), forbidBlockedAccount, videosController.uploadAndProcessVideo);
+
+// router.post('/', requireAuth(), forbidBlockedAccount, videosController.uploadVideo);
 
 router.patch('/update', requireAuth(), forbidBlockedAccount, videoInfosController.updateVideoInfo)
 

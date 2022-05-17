@@ -51,11 +51,12 @@ async function getAllChannelPublicVideos(req, res) {
 }
 
 function formatVideoDocument(videoDoc) {
-  const formmattedDoc = { ...videoDoc._doc };
-  formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
-  formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
-  delete formmattedDoc.thumbnail_key;
-  return formmattedDoc;
+  const formattedDoc = { ...videoDoc._doc };
+  formattedDoc.thumbnail_url = getSignedUrl({ key: formattedDoc.thumbnail_key });
+  formattedDoc.url = getSignedUrl({ key: formattedDoc.video_key });
+  delete formattedDoc.video_key;
+  delete formattedDoc.thumbnail_key;
+  return formattedDoc;
 }
 
 async function followChannel(req, res) {
