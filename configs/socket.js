@@ -54,16 +54,16 @@ function trackVideoProcessingProgress(channelId, videoId, progress) {
   io.to(channelId).emit("track-processing-progress", { videoId, progress });
 }
 
-function notifyProcessCompleted(channelId, videoId) {
-  io.to(channelId).emit("process-completed", { videoId });
+function notifyProcessCompleted(channelId, videoId, { thumbnailUrl }) {
+  io.to(channelId).emit("process-completed", { videoId, thumbnailUrl });
 }
 
 function trackVideoRecognitionProgress(channelId, videoId, progress) {
   io.to(channelId).emit("track-recognition-progress", { videoId, progress });
 }
 
-function notifyRrecognizedCompleted(channelId, videoId) {
-  io.to(channelId).emit("recognized-completed", { videoId })
+function notifyRrecognizedCompleted(channelId, videoId, { recognizedMusic }) {
+  io.to(channelId).emit("recognized-completed", { videoId, recognizedMusic })
 }
 
 module.exports = {

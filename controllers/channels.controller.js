@@ -19,6 +19,7 @@ async function getChannelPublicInformation(req, res) {
 }
 
 async function getAllChannelVideos(req, res) {
+  console.log("getAllChannelVideos")
   const { _id } = req.user;
 
   try {
@@ -26,6 +27,7 @@ async function getAllChannelVideos(req, res) {
     const formattedVideoDocs = await Promise.all(videos.map(function (video) {
       return formatVideo({ ...video._doc });
     }));
+    formattedVideoDocs.sort((a, b) => b.created_at - a.created_at);
     res.json({ videos: formattedVideoDocs });
   }
   catch (err) {
@@ -35,6 +37,7 @@ async function getAllChannelVideos(req, res) {
 }
 
 async function getAllChannelPublicVideos(req, res) {
+  console.log("getAllChannelPublicVideos")
   const { id } = req.params;
 
   try {
@@ -43,6 +46,7 @@ async function getAllChannelPublicVideos(req, res) {
     const formattedVideoDocs = await Promise.all(videos.map(function (video) {
       return formatVideo({ ...video._doc });
     }));
+    formattedVideoDocs.sort((a, b) => b.created_at - a.created_at);
     res.json({ videos: formattedVideoDocs });
   }
   catch (err) {
