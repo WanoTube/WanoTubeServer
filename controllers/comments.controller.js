@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const Video = require('../../../models/video');
-const Comment = require('../../../models/comment');
-const Account = require('../../../models/account');
+const Video = require('../models/video');
+const Comment = require('../models/comment');
+const Account = require('../models/account');
 
 exports.getAllCommentsByVideoId = async function (req, res) {
 	const { id } = req.params;

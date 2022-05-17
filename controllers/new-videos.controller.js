@@ -1,18 +1,18 @@
 const fs = require('fs');
 
-const { trackProgress } = require('../../../configs/socket');
-const { getFileStream, uploadToS3 } = require('../../../utils/aws-s3-handlers');
-const { removeRedundantFiles } = require('../../../utils/file-handler');
+const { trackUploadS3Progress } = require('../configs/socket');
+const { getFileStream, uploadToS3 } = require('../utils/aws-s3-handlers');
+const { removeRedundantFiles } = require('../utils/file-handler');
 const {
 	converVideoToAudio,
 	isVideoHaveAudioTrack,
 	generateThumbnail,
 	generateFileFromBuffer
-} = require('../../../utils/videos-handlers');
-const { handleCopyright } = require('../../../utils/copyright-handler');
+} = require('../utils/videos-handlers');
+const { handleCopyright } = require('../utils/copyright-handler');
 const { recogniteAudio } = require('./audio-recoginition.controller');
 const { createVideoInfos } = require('./video-info.controller');
-const Video = require('../../../models/video');
+const Video = require('../models/video');
 
 exports.getVideoById = async function (req, res) {
 	const key = req.params.key;
@@ -26,7 +26,7 @@ exports.getVideoById = async function (req, res) {
 	}
 };
 
-exports.uploadVideo = async function (req, res) {
+exports.uploadAndProcessVideo = async function (req, res) {
 
 	const { _id, channelId } = req.user;
 
@@ -134,10 +134,10 @@ async function recogniteAudioFromVideo(videoPath, channelId) {
 			const audioSavedPath = 'uploads/audios/' + name + '.mp3';
 			if (videoPath) {
 				const isAudioIncluded = await isVideoHaveAudioTrack(videoPath);
-				trackProgress(10, 'Upload to S3', channelId);
+				trackUploadS3Progress(10, channelId);
 				if (isAudioIncluded) {
 					const convertResult = await converVideoToAudio(videoPath, audioSavedPath);
-					trackProgress(18, 'Upload to S3', channelId);
+					trackUploadS3Progress(18, channelId);
 					if (convertResult) {
 					} else {
 						throw new Error("Cannot convert music");
@@ -147,7 +147,7 @@ async function recogniteAudioFromVideo(videoPath, channelId) {
 					//TO-DO: Split to multiple audios for recognize quicker and easier to track the song name from timestamp?
 
 					const recognizeResultACR = await recogniteAudio(Buffer.from(bitmap));
-					trackProgress(20, 'Upload to S3', channelId);
+					trackUploadS3Progress(20, channelId);
 					if (!recognizeResultACR) resolve(null);
 					const recognizeResult = {
 						savedName: videoPath,
@@ -162,7 +162,6 @@ async function recogniteAudioFromVideo(videoPath, channelId) {
 				} else {
 					resolve(null)
 				}
-				trackProgress(25, 'Upload to S3');
 			} else {
 				throw new Error("File required");
 			}

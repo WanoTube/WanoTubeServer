@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
 
-const { trackProgress } = require('../configs/socket');
+const { trackUploadS3Progress } = require('../configs/socket');
 
 const converVideoToAudio = function (input, output) {
 	let nextProgress = 0;
@@ -62,7 +62,7 @@ async function compressVideo(input, output) {
 				.on('progress', (progress) => {
 					if (progress) {
 						if (nextProgress >= 100 || (nextProgress < 100 && progress.percent >= nextProgress)) {
-							trackProgress(progress, 'Compress video');
+							// trackUploadS3Progress(progress, 'Compress video');
 							nextProgress += 15;
 						}
 					}
@@ -95,7 +95,7 @@ function convertToWebmFormat(input, output, app) {
 				.on('progress', (progress) => {
 					if (progress) {
 						if (nextProgress >= 100 || (nextProgress < 100 && progress.percent >= nextProgress)) {
-							trackProgress(progress, 'Convert to Webm Format');
+							// trackUploadS3Progress(progress, 'Convert to Webm Format');
 							nextProgress += 15;
 						}
 					}
@@ -132,7 +132,7 @@ function generateThumbnail(videoFilePath, channelId) {
 					console.log('progress')
 					if (progress) {
 						if (nextProgress >= 100 || (nextProgress < 100 && progress.percent >= nextProgress)) {
-							trackProgress(progress / 4 + 25, 'Upload to S3', channelId);
+							trackUploadS3Progress(progress / 4 + 25, channelId);
 							nextProgress += 15;
 						}
 					}

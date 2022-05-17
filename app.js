@@ -43,7 +43,7 @@ async function bootstrap() {
 
   //init routes
   const apiVersion = process.env.API_VERSION || 'v1';
-  const routes = require(`./api/${apiVersion}/routes`);
+  const routes = require(`./routes`);
   app.use(`/${apiVersion}`, routes);
 
   //handle errors

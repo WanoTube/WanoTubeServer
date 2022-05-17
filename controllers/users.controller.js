@@ -3,12 +3,12 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 
-const User = require('../../../models/user');
-const Account = require('../../../models/account');
-const { registerValidator } = require('../../../validations/auth');
-const { uploadFile, getFileStream } = require('../../../utils/aws-s3-handlers');
-const { restrictImageName } = require('../../../utils/image-handlers');
-const { BlockedStatus } = require('../../../constants/user');
+const User = require('../models/user');
+const Account = require('../models/account');
+const { registerValidator } = require('../validations/auth');
+const { uploadFile, getFileStream } = require('../utils/aws-s3-handlers');
+const { restrictImageName } = require('../utils/image-handlers');
+const { BlockedStatus } = require('../constants/user');
 
 exports.createUser = async function (request, response) {
 	const { error } = registerValidator(request.body);
