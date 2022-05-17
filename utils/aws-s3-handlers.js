@@ -2,7 +2,7 @@ const S3 = require('aws-sdk/clients/s3');
 const fs = require('fs');
 const path = require('path');
 
-const { trackProgress } = require('../configs/socket');
+const { trackUploadS3Progress } = require('../configs/socket');
 
 const { AWS_BUCKET_NAME, AWS_BUCKET_REGION, AWS_ACCESS_KEY, AWS_SECRET_KEY } = process.env
 
@@ -90,7 +90,6 @@ const getSignedUrl = function ({ key, expires }) {
 }
 
 const uploadToS3 = async function (newFilePath, customPercentageFn = val => val, channelId) {
-	console.log(newFilePath)
 	return new Promise(function (resolve, reject) {
 		try {
 			// reqVideo is redundant
@@ -107,8 +106,8 @@ const uploadToS3 = async function (newFilePath, customPercentageFn = val => val,
 				uploadFile(fileName, fileStream, () => resolve(reqVideo), (err) => reject(err))
 					.on('httpUploadProgress', function (progress) {
 						const progressPercentage = Math.round(progress.loaded / progress.total * 100);
-						trackProgress(customPercentageFn(progressPercentage), 'Upload to S3', channelId);
-					})
+						trackUploadS3Progress(customPercentageFn(progressPercentage), channelId);
+					});
 			}
 		} catch (error) {
 			reject(error)

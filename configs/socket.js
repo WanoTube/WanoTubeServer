@@ -42,8 +42,36 @@ async function connectSocket(server) {
     })
 }
 
-function trackProgress(progress, message, channelId) {
-  io.to(channelId).emit(message, progress);
+function trackUploadS3Progress(progress, channelId) {
+  io.to(channelId).emit("Upload to S3", progress);
 }
 
-module.exports = { connectSocket, trackProgress }
+function notifyUploadCompleted(channelId, videoId) {
+  io.to(channelId).emit("upload-completed", videoId);
+}
+
+function trackVideoProcessingProgress(channelId, videoId, progress) {
+  io.to(channelId).emit("track-processing-progress", { videoId, progress });
+}
+
+function notifyProcessCompleted(channelId, videoId, { thumbnailUrl }) {
+  io.to(channelId).emit("process-completed", { videoId, thumbnailUrl });
+}
+
+function trackVideoRecognitionProgress(channelId, videoId, progress) {
+  io.to(channelId).emit("track-recognition-progress", { videoId, progress });
+}
+
+function notifyRrecognizedCompleted(channelId, videoId, { recognizedMusic }) {
+  io.to(channelId).emit("recognized-completed", { videoId, recognizedMusic })
+}
+
+module.exports = {
+  connectSocket,
+  trackUploadS3Progress,
+  notifyUploadCompleted,
+  trackVideoProcessingProgress,
+  notifyProcessCompleted,
+  trackVideoRecognitionProgress,
+  notifyRrecognizedCompleted
+}

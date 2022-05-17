@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const channelsController = require('../controllers/channels.controller');
-const { requireAuth } = require('../../../middlewares/verifyToken.middleware');
+const { requireAuth } = require('../middlewares/verifyToken.middleware');
 
 router.get('/videos', requireAuth(), channelsController.getAllChannelVideos);
 

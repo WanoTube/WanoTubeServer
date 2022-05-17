@@ -1,8 +1,9 @@
 const _ = require('lodash');
 
-const Video = require('../../../models/video');
-const Account = require('../../../models/account');
-const { getSignedUrl } = require('../../../utils/aws-s3-handlers');
+const Video = require('../models/video');
+const Account = require('../models/account');
+const { getSignedUrl } = require('../utils/aws-s3-handlers');
+const { formatVideo } = require('../utils/videos-handlers');
 
 async function getChannelPublicInformation(req, res) {
   const { id } = req.params;
@@ -18,13 +19,15 @@ async function getChannelPublicInformation(req, res) {
 }
 
 async function getAllChannelVideos(req, res) {
+  console.log("getAllChannelVideos")
   const { _id } = req.user;
 
   try {
     const videos = await Video.find({ author_id: _id });
-    const formattedVideoDocs = videos.map(function (videoDoc) {
-      return formatVideoDocument(videoDoc);
-    })
+    const formattedVideoDocs = await Promise.all(videos.map(function (video) {
+      return formatVideo({ ...video._doc });
+    }));
+    formattedVideoDocs.sort((a, b) => b.created_at - a.created_at);
     res.json({ videos: formattedVideoDocs });
   }
   catch (err) {
@@ -34,14 +37,16 @@ async function getAllChannelVideos(req, res) {
 }
 
 async function getAllChannelPublicVideos(req, res) {
+  console.log("getAllChannelPublicVideos")
   const { id } = req.params;
 
   try {
     const foundChannel = await Account.findOne({ _id: id });
     const videos = await Video.find({ author_id: foundChannel.user_id, visibility: 0 }) // 0: public
-    const formattedVideoDocs = videos.map(function (videoDoc) {
-      return formatVideoDocument(videoDoc);
-    })
+    const formattedVideoDocs = await Promise.all(videos.map(function (video) {
+      return formatVideo({ ...video._doc });
+    }));
+    formattedVideoDocs.sort((a, b) => b.created_at - a.created_at);
     res.json({ videos: formattedVideoDocs });
   }
   catch (err) {
@@ -50,19 +55,10 @@ async function getAllChannelPublicVideos(req, res) {
   }
 }
 
-function formatVideoDocument(videoDoc) {
-  const formmattedDoc = { ...videoDoc._doc };
-  formmattedDoc.thumbnail_url = getSignedUrl({ key: formmattedDoc.thumbnail_key });
-  formmattedDoc.url = getSignedUrl({ key: formmattedDoc.url });
-  delete formmattedDoc.thumbnail_key;
-  return formmattedDoc;
-}
-
 async function followChannel(req, res) {
   console.log("followChannel")
   const { channelId: followerId } = req.user;
   const { id: followedId } = req.params;
-  console.log({ followedId, followerId })
   try {
     const followedChannel = await Account.findOneAndUpdate(
       { _id: followedId },
