@@ -43,7 +43,25 @@ async function connectSocket(server) {
 }
 
 function trackUploadS3Progress(progress, channelId) {
-  io.to(channelId).emit('Upload to S3', progress);
+  io.to(channelId).emit("Upload to S3", progress);
 }
 
-module.exports = { connectSocket, trackUploadS3Progress }
+function uploadCompleted(channelId) {
+  io.to(channelId).emit("Upload completed!");
+}
+
+function trackVideoProcessingProgress(progress, channelId) {
+  io.to(channelId).emit("Track processing progress", progress);
+}
+
+function trackVideoRecognitionProgress(progress, channelId) {
+  io.to(channelId).emit("Track recognition progress", progress);
+}
+
+module.exports = {
+  connectSocket,
+  trackUploadS3Progress,
+  uploadCompleted,
+  trackVideoProcessingProgress,
+  trackVideoRecognitionProgress
+}
