@@ -83,8 +83,8 @@ exports.userSeeder = async function () {
     const is_admin = !(i % 4);
     const videos = [];
     for (let j = 0; j < 15; j++) {
-      const video = generateVideo(j, videoList);
-      const shortVideo = generateVideo(j, shortVideoList, VideoType.SHORT);\
+      const video = generateVideo(j, videoList, VideoType.NORMAL);
+      const shortVideo = generateVideo(j, shortVideoList, VideoType.SHORT);
       videos.push(video);
       videos.push(shortVideo);
     }
@@ -113,15 +113,15 @@ exports.userSeeder = async function () {
 
 function generateVideo(index, videos, type) {
   const title = generateVideoTitle();
-  const key = randomElementInArray(videos);
-  const thumbnail_key = randomElementInArray(thumbnailList);
+  const key = randomElementInArray(videos)[0];
+  const thumbnail_key = randomElementInArray(thumbnailList)[0];
   const size = 50;
   const duration = 50;
   const visibility = !!(index % 4);
   const description = faker.lorem.paragraph();
   const total_likes = randomIntNumber();
   const total_views = randomIntNumber();
-  const tags = ["", ""].map(() => randomElementInArray(Object.values(VideoTag)));
+  const tags = randomElementInArray(Object.values(VideoTag), 2);
   const video = {
     title, key, thumbnail_key,
     size, duration, visibility,
