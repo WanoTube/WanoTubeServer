@@ -36,7 +36,6 @@ function useMiddleware(app) {
 
 async function bootstrap() {
   await connectToMongoDb();
-  if (process.env.NODE_ENV !== "development") await seedData();
   await connectSocket(server);
 
   useMiddleware(app);

@@ -4,8 +4,10 @@ const { faker } = require('@faker-js/faker');
 const { randomIntNumber } = require('../utils/number');
 const { VideoTag, VideoType } = require('../constants/video');
 
-const randomElementInArray = function (items) {
-  return items[items.length * Math.random() | 0];
+const randomElementInArray = function (items, numberOfItems = 1) {
+  const tempItems = [...items];
+  tempItems.sort(() => Math.random() - 0.5);
+  return tempItems.slice(0, numberOfItems);
 }
 
 const thumbnailList = [
@@ -67,7 +69,7 @@ exports.userSeeder = async function () {
   const hashed = await bcrypt.hash(password, salt);
 
   const accounts = [];
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 10; i++) {
     const first_name = faker.name.firstName();
     const last_name = faker.name.lastName();
     const gender = faker.name.gender();
@@ -80,9 +82,9 @@ exports.userSeeder = async function () {
     const email = `user${i}@gmail.com`;
     const is_admin = !(i % 4);
     const videos = [];
-    for (let j = 0; j < 20; j++) {
-      const video = addVideo(j, videoList);
-      const shortVideo = addVideo(j, shortVideoList, VideoType.SHORT);
+    for (let j = 0; j < 15; j++) {
+      const video = generateVideo(j, videoList);
+      const shortVideo = generateVideo(j, shortVideoList, VideoType.SHORT);\
       videos.push(video);
       videos.push(shortVideo);
     }
@@ -109,7 +111,7 @@ exports.userSeeder = async function () {
   return accounts;
 }
 
-function addVideo(index, videos, type) {
+function generateVideo(index, videos, type) {
   const title = generateVideoTitle();
   const key = randomElementInArray(videos);
   const thumbnail_key = randomElementInArray(thumbnailList);
