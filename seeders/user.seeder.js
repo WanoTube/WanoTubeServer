@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const { faker } = require('@faker-js/faker');
 
 const { randomIntNumber } = require('../utils/number');
-const { VideoTag } = require('../constants/video');
+const { VideoTag, VideoType } = require('../constants/video');
 
 const randomElementInArray = function (items, numberOfItems = 1) {
   const tempItems = [...items];
@@ -25,7 +25,10 @@ const thumbnailList = [
   'naruto.png',
   'thanhpalm.png',
   'thumbnail.png',
-  'tomandjerry.png'
+  'tomandjerry.png',
+  'bfzy_otp.png',
+  'brilliant_clock.png',
+  'nhaxx_xx.png'
 ]
 
 const videoList = [
@@ -36,6 +39,12 @@ const videoList = [
   'real-vs-mc.mp4',
   'song.mp4',
   'titanic-my-heart-will-go-on.mp4'
+]
+
+const shortVideoList = [
+  'bfzy_otp.mp4',
+  'brilliant_clock.mp4',
+  'nhaxx_xx.mp4'
 ]
 
 generateVideoTitle = function () {
@@ -73,24 +82,11 @@ exports.userSeeder = async function () {
     const email = `user${i}@gmail.com`;
     const is_admin = !(i % 4);
     const videos = [];
-    for (let j = 0; j < 20; j++) {
-      const title = generateVideoTitle();
-      const key = randomElementInArray(videoList)[0];
-      const thumbnail_key = randomElementInArray(thumbnailList)[0];
-      const size = 50;
-      const duration = 50;
-      const visibility = !!(j % 4);
-      const description = faker.lorem.paragraph();
-      const total_likes = randomIntNumber();
-      const total_views = randomIntNumber();
-      const tags = randomElementInArray(Object.values(VideoTag, 2));
-      const video = {
-        title, key, thumbnail_key,
-        size, duration, visibility,
-        total_likes, total_views,
-        description, tags
-      };
+    for (let j = 0; j < 15; j++) {
+      const video = generateVideo(j, videoList);
+      const shortVideo = generateVideo(j, shortVideoList, VideoType.SHORT);\
       videos.push(video);
+      videos.push(shortVideo);
     }
 
     const account = {
@@ -113,4 +109,25 @@ exports.userSeeder = async function () {
     accounts.push(account);
   }
   return accounts;
+}
+
+function generateVideo(index, videos, type) {
+  const title = generateVideoTitle();
+  const key = randomElementInArray(videos);
+  const thumbnail_key = randomElementInArray(thumbnailList);
+  const size = 50;
+  const duration = 50;
+  const visibility = !!(index % 4);
+  const description = faker.lorem.paragraph();
+  const total_likes = randomIntNumber();
+  const total_views = randomIntNumber();
+  const tags = ["", ""].map(() => randomElementInArray(Object.values(VideoTag)));
+  const video = {
+    title, key, thumbnail_key,
+    size, duration, visibility,
+    total_likes, total_views,
+    description, tags, type
+  };
+  console.log(video)
+  return video;
 }
