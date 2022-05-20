@@ -4,8 +4,10 @@ const { faker } = require('@faker-js/faker');
 const { randomIntNumber } = require('../utils/number');
 const { VideoTag } = require('../constants/video');
 
-const randomElementInArray = function (items) {
-  return items[items.length * Math.random() | 0];
+const randomElementInArray = function (items, numberOfItems = 1) {
+  const tempItems = [...items];
+  tempItems.sort(() => Math.random() - 0.5);
+  return tempItems.slice(0, numberOfItems);
 }
 
 const thumbnailList = [
@@ -58,7 +60,7 @@ exports.userSeeder = async function () {
   const hashed = await bcrypt.hash(password, salt);
 
   const accounts = [];
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 10; i++) {
     const first_name = faker.name.firstName();
     const last_name = faker.name.lastName();
     const gender = faker.name.gender();
@@ -73,15 +75,15 @@ exports.userSeeder = async function () {
     const videos = [];
     for (let j = 0; j < 20; j++) {
       const title = generateVideoTitle();
-      const key = randomElementInArray(videoList);
-      const thumbnail_key = randomElementInArray(thumbnailList);
+      const key = randomElementInArray(videoList)[0];
+      const thumbnail_key = randomElementInArray(thumbnailList)[0];
       const size = 50;
       const duration = 50;
       const visibility = !!(j % 4);
       const description = faker.lorem.paragraph();
       const total_likes = randomIntNumber();
       const total_views = randomIntNumber();
-      const tags = ["", ""].map(() => randomElementInArray(Object.values(VideoTag)));
+      const tags = randomElementInArray(Object.values(VideoTag, 2));
       const video = {
         title, key, thumbnail_key,
         size, duration, visibility,
