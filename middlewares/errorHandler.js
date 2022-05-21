@@ -1,7 +1,7 @@
 const { ErrorStatus, throwError } = require('../utils/errors')
 
 const errorHandler = (error, req, res, next) => {
-  console.log(error)
+  console.log(error.message)
   if (!error.statusCode) error.statusCode = ErrorStatus.INTERNAL_SERVER_ERROR
 
   res.status(error.statusCode).json({
