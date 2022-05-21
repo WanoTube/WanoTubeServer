@@ -3,7 +3,7 @@ const fs = require('fs');
 const ffmpeg = require('fluent-ffmpeg');
 
 const { trackUploadS3Progress } = require('../configs/socket');
-const { getSignedUrl } = require('./aws-s3-handlers');
+const { getSignedUrl } = require('./aws/s3');
 const Account = require('../models/account');
 
 const converVideoToAudio = function (input, output) {

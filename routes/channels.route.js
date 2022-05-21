@@ -4,9 +4,9 @@ const channelsController = require('../controllers/channels.controller');
 const { requireAuth } = require('../middlewares/verifyToken.middleware');
 const { createJob } = require('../utils/aws/elasticTranscoder');
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
-    const job = await createJob("kingdomrush.mp4");
+    const job = await createJob("cambongfa.mp4");
     res.json({ job })
   }
   catch (err) {

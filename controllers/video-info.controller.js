@@ -7,9 +7,9 @@ const { VideoTag } = require('../constants/video');
 const User = require('../models/user');
 const Account = require('../models/account');
 const WatchHistoryDate = require('../models/watchHistoryDate');
-const { getSignedUrl } = require('../utils/aws-s3-handlers');
+const { getSignedUrl } = require('../utils/aws/s3');
 const { generateFileFromBuffer, formatVideo } = require('../utils/videos-handlers');
-const { uploadToS3 } = require('../utils/aws-s3-handlers');
+const { uploadToS3 } = require('../utils/aws/s3');
 const { removeRedundantFiles } = require('../utils/file-handler');
 
 exports.createVideoInfos = function (video) {

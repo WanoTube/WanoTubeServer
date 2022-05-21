@@ -81,12 +81,13 @@ const deleteFile = function (fileKey) {
 }
 
 const getSignedUrl = function ({ key, expires }) {
-  const signedUrl = s3.getSignedUrl('getObject', {
-    Key: key,
-    Bucket: AWS_BUCKET_NAME,
-    Expires: expires || 900000, // S3 default is 900 seconds (15 minutes)
-  })
-  return signedUrl;
+  // const signedUrl = s3.getSignedUrl('getObject', {
+  // 	Key: key,
+  // 	Bucket: AWS_BUCKET_NAME,
+  // 	Expires: expires || 900000, // S3 default is 900 seconds (15 minutes)
+  // })
+  // return signedUrl;
+  return 'https://d1td7i7nd90xol.cloudfront.net/' + key;
 }
 
 const uploadToS3 = async function (newFilePath, customPercentageFn = val => val, channelId) {

@@ -13,14 +13,14 @@ const randomElementInArray = function (items, numberOfItems = 1) {
 const thumbnailList = [
   'book.png',
   'cat.png',
-  'chelseavsliverpool.png',
+  'chel-liv.png',
   'dtck.png',
   'foucs.png',
   'game.png',
-  'harry-kane-vuot-mat-salah-trong-cuoc-tranh-gianh-vua-pha-luoi-3.png',
+  'harrykane.png',
   'kingdomrush.png',
   'liver-spurs.png',
-  'liverpool-son-heung-min.png',
+  'son.png',
   'mern.png',
   'naruto.png',
   'thanhpalm.png',
@@ -33,18 +33,22 @@ const thumbnailList = [
 
 const videoList = [
   'ando-trungquoc.mp4',
+  'aws.mp4',
   'begin-song.mp4',
-  'cambongfa.mp4',
+  'bfzy_otp.mp4',
+  'brilliant_clock.mp4',
+  'cambongda.mp4',
   'kingdomrush.mp4',
-  'real-vs-mc.mp4',
+  'real-mc.mp4',
   'song.mp4',
-  'titanic-my-heart-will-go-on.mp4'
+  'my-heart.mp4'
 ]
 
 const shortVideoList = [
   'bfzy_otp.mp4',
   'brilliant_clock.mp4',
-  'nhaxx_xx.mp4'
+  'nhaxx_xx.mp4',
+  'zky.mp4'
 ]
 
 generateVideoTitle = function () {
@@ -128,6 +132,5 @@ function generateVideo(index, videos, type) {
     total_likes, total_views,
     description, tags, type
   };
-  console.log(video)
   return video;
 }
