@@ -17,8 +17,15 @@ const VideoTag = {
   GEOGRAPHY: 'GEOGRAPHY',
   OTHER: 'OTHER'
 }
+const ProcessStatus = {
+  ERROR: 'ERROR',
+  PROCESSING: 'PROCESSING',
+  CHECKING: 'CHECKING',
+  COMPLETED: 'COMPLETED'
+}
 
 module.exports = {
   VideoTag,
-  VideoType
+  VideoType,
+  ProcessStatus
 }

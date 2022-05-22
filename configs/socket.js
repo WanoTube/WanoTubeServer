@@ -39,7 +39,7 @@ async function connectSocket(server) {
       socket.on("disconnect", function () {
         console.log("user disconnected: ", socket.id);
       })
-    })
+    });
 }
 
 function trackUploadS3Progress(progress, channelId) {
@@ -50,28 +50,18 @@ function notifyUploadCompleted(channelId, videoId) {
   io.to(channelId).emit("upload-completed", videoId);
 }
 
-function trackVideoProcessingProgress(channelId, videoId, progress) {
-  io.to(channelId).emit("track-processing-progress", { videoId, progress });
-}
-
 function notifyProcessCompleted(channelId, videoId, { thumbnailUrl }) {
   io.to(channelId).emit("process-completed", { videoId, thumbnailUrl });
 }
 
-function trackVideoRecognitionProgress(channelId, videoId, progress) {
-  io.to(channelId).emit("track-recognition-progress", { videoId, progress });
-}
-
 function notifyRrecognizedCompleted(channelId, videoId, { recognizedMusic }) {
-  io.to(channelId).emit("recognized-completed", { videoId, recognizedMusic })
+  io.to(channelId).emit("check-completed", { videoId, recognizedMusic })
 }
 
 module.exports = {
   connectSocket,
   trackUploadS3Progress,
   notifyUploadCompleted,
-  trackVideoProcessingProgress,
   notifyProcessCompleted,
-  trackVideoRecognitionProgress,
   notifyRrecognizedCompleted
 }

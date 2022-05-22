@@ -4,12 +4,12 @@ const path = require('path');
 
 const { trackUploadS3Progress } = require('../../configs/socket');
 
-const { AWS_BUCKET_NAME, AWS_BUCKET_REGION, AWS_ACCESS_KEY, AWS_SECRET_KEY } = process.env
+const { AWS_BUCKET_NAME, AWS_BUCKET_REGION, AWS_BUCKET_ACCESS_KEY_ID, AWS_BUCKET_SECRET_ACCESS_KEY } = process.env
 
 const s3 = new S3({
   region: AWS_BUCKET_REGION,
-  accessKeyId: AWS_ACCESS_KEY,
-  secretAccessKey: AWS_SECRET_KEY
+  accessKeyId: AWS_BUCKET_ACCESS_KEY_ID,
+  secretAccessKey: AWS_BUCKET_SECRET_ACCESS_KEY
 });
 
 // uploads a file to s3

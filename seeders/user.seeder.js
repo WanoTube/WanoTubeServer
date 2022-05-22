@@ -4,6 +4,8 @@ const { faker } = require('@faker-js/faker');
 const { randomIntNumber } = require('../utils/number');
 const { VideoTag, VideoType } = require('../constants/video');
 
+const DEFAULT_MANIFEST_KEY = 'output/ando_trungquoc_6289cc81aae1a24c9658cd21_1653201384-827f7cfc-b611-479c-a4b9-4f06bbeaace3/main.m3u8';
+
 const randomElementInArray = function (items, numberOfItems = 1) {
   const tempItems = [...items];
   tempItems.sort(() => Math.random() - 0.5);
@@ -126,11 +128,13 @@ function generateVideo(index, videos, type) {
   const total_likes = randomIntNumber();
   const total_views = randomIntNumber();
   const tags = randomElementInArray(Object.values(VideoTag), 2);
+  const manifest_key = DEFAULT_MANIFEST_KEY;
+  const status = "COMPLETED";
   const video = {
-    title, key, thumbnail_key,
+    title, key, thumbnail_key, manifest_key,
     size, duration, visibility,
     total_likes, total_views,
-    description, tags, type
+    description, tags, type, status
   };
   return video;
 }

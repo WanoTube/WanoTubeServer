@@ -7,7 +7,7 @@ const { createJob } = require('../utils/aws/elasticTranscoder');
 router.get('/', async (req, res, next) => {
   try {
     const job = await createJob("cambongfa.mp4");
-    res.json({ job })
+    res.json({ job });
   }
   catch (err) {
     next(err);
