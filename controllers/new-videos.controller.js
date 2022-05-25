@@ -115,7 +115,8 @@ exports.uploadVideoWithUndergroundProcess = async function (req, res) {
 
 		setTimeout(async function () {
 			const thumbnailKey = await _processThumbnail(newVideo, channelId);
-			const { manifestKey } = await createJob(videoKey);
+			// const { manifestKey } = await createJob(videoKey);
+			const manifestKey = 'output/ando_trungquoc_6289cc81aae1a24c9658cd21_1653201384-827f7cfc-b611-479c-a4b9-4f06bbeaace3/main.m3u8';
 			await Video.findOneAndUpdate(
 				{ _id: newVideo._id },
 				{ manifest_key: manifestKey, status: ProcessStatus.CHECKING },

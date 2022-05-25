@@ -43,6 +43,8 @@ const VideoSchema = new Schema({
 
 }, schemaOptions);
 
+VideoSchema.index({ title: 'text', tags: 'text', description: 'text' });
+
 VideoSchema.post("findOneAndUpdate", function (data) {
 	if (data.views) data.total_views = data.views.length;
 	if (data.visibility === 0 && !!data.recognition_result) data.visibility = 3;

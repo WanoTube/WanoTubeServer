@@ -34,10 +34,13 @@ const AccountSchema = new Schema({
 	members: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
 	blocked_accounts: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
 	watched_history: { type: [Schema.Types.ObjectId], ref: 'WatchHistoryDate', default: [] },
+	searched_history: { type: [Schema.Types.ObjectId], ref: 'Video', default: [] },
 	watch_later_videos: { type: [Schema.Types.ObjectId], ref: 'Video', default: [] },
 	strikes: { type: [Schema.Types.ObjectId], ref: 'CopyrightStrike', default: [], select: false },
 	blocked_status: { type: String, enum: Object.values(BlockedStatus), default: BlockedStatus.NONE }
 }, schemaOptions);
+
+AccountSchema.index({ username: 'text' });
 
 AccountSchema.post("findOneAndUpdate", function (data) {
 	if (!data) return;

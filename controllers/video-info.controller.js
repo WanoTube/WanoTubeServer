@@ -71,18 +71,52 @@ exports.getVideoInfoById = async function (req, res, next) {
 	}
 };
 
-exports.search = function (req, res) {
-	const searchKey = req.query.search_query
-	// TO-DO: SEARCH IN TITLE, not whole title
-	Video.find({
-		title: searchKey,
+exports.getSearchSuggestions = async function (req, res) {
+	const MAX_SEARCHED_VIDEOS_COUNT = 7;
+	const MAX_SEARCHED_ACCOUNTS_COUNT = 3;
+
+	const { keyword } = req.query;
+	const trimmedKeyword = keyword;
+
+	const searchedAccounts = await Account.find(
+		{ username: { $regex: trimmedKeyword } }
+	).limit(MAX_SEARCHED_ACCOUNTS_COUNT);
+
+	const searchedVideos = await Video.find(
+		{
+			title: { $regex: trimmedKeyword, },
+			visibility: 0
+		},
+	).limit(MAX_SEARCHED_VIDEOS_COUNT);
+
+	const searchedResults = [
+		...searchedAccounts.map(item => ({ keyword: item.username, model: "Channel" })),
+		...searchedVideos.map(item => ({ keyword: item.title, model: "Video" }))
+	];
+
+	res.json({
+		count: searchedResults.length,
+		searchedResults
+	});
+}
+
+exports.getSearchResults = async function (req, res) {
+	const { keyword } = req.query;
+	const trimmedKeyword = keyword.trim();
+
+	const searchedResults = await Video
+		.find(
+			{ $text: { $search: `${trimmedKeyword}` }, visibility: 0 },
+			{ score: { $meta: "textScore" }, title: 5, description: 100, tags: 4 }
+		)
+		.sort({ score: { $meta: 'textScore' } })
+		.limit(20)
+		.select('-status -video_key -manifest_key -__v');
+
+	res.json({
+		count: searchedResults.length,
+		searchedResults
 	})
-		.exec(function (err, result) {
-			if (!err)
-				res.json(result);
-			else
-				res.json(err);
-		})
 };
 
 exports.updateVideoInfo = async function (req, res) {

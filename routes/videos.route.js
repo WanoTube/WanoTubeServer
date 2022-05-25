@@ -8,7 +8,9 @@ const commentsController = require('../controllers/comments.controller');
 const { requireAuth } = require("../middlewares/verifyToken.middleware");
 const { forbidBlockedAccount } = require('../middlewares/forbidBlockedAccount');
 
-router.get('/search', videoInfosController.search);
+router.get('/search-suggestions', videoInfosController.getSearchSuggestions);
+
+router.get('/search-results', videoInfosController.getSearchResults);
 
 router.get('/public', videoInfosController.getAllPublicVideoInfos);
 
@@ -26,7 +28,7 @@ router.patch('/watch-later/:videoId/remove', requireAuth(), videoInfosController
 
 router.patch('/watch-later/:videoId', requireAuth(), videoInfosController.watchLater);
 
-router.post('/like', likesController.likeVideo);
+router.post('/like/:id', requireAuth(), likesController.likeVideo);
 
 router.post('/comment', requireAuth(), commentsController.addComment);
 

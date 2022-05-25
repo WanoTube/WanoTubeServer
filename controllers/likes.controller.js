@@ -1,3 +1,4 @@
+const { isNumber } = require('lodash');
 const mongoose = require('mongoose');
 
 const Like = require('../models/like');
@@ -38,23 +39,31 @@ exports.getTotalLikesByVideoId = async function (req, res) {
 };
 
 exports.likeVideo = async function (req, res) {
-	const video_id = req.body.target_id // video_id: the video being liked
+	const { id: videoId } = req.params;
+	const { channelId } = req.user;
 
 	try {
-		const updatedVideo = await Video.findById(video_id);
-		if (!updatedVideo) return res.status(404).json("Cannot find video");
+		const foundVideo = await Video.findOne({ _id: videoId }).select("+likes");
+		if (!foundVideo) return res.status(404).json("Cannot find video");
 
-		if (updatedVideo.total_likes <= 0) {
-			updatedVideo.total_likes += 1;
+		if (foundVideo.likes.map(like => like.toString()).includes(channelId)) {
+			foundVideo.likes = foundVideo.likes.filter(id => id.toString() !== channelId);
+			foundVideo.total_likes -= 1;
 		}
 		else {
-			updatedVideo.total_likes -= 1;
+			foundVideo.likes.push(channelId);
+			foundVideo.total_likes += 1;
 		}
-		await updatedVideo.save();
-		res.json(updatedVideo)
+
+		await Video.findOneAndUpdate(
+			{ _id: videoId },
+			{ likes: foundVideo.likes, total_likes: foundVideo.total_likes }
+		)
+		res.json({ updatedVideo: foundVideo })
 	}
 	catch (err) {
-		res.status(500).json("Somethin went wrong");
+		console.log(err)
+		res.status(500).json("Something went wrong");
 	}
 }
 
