@@ -12,6 +12,12 @@ const { generateFileFromBuffer, formatVideo } = require('../utils/videos-handler
 const { uploadToS3 } = require('../utils/aws/s3');
 const { removeRedundantFiles } = require('../utils/file-handler');
 
+const ONE_FETCH = 24;
+const AUTH_RANDOM_FOLLOW_CHANNELS = 3;
+const AUTH_FOLLOW_EACH_CHANNEL = 3;
+const TOP_VIEW_ANONYMUS_ONE_FETCH = 4;
+const TOP_LIKE_ANONYMUS_ONE_FETCH = 4;
+
 exports.createVideoInfos = function (video) {
 	return new Promise(async function (resolve, reject) {
 		try {
@@ -347,20 +353,73 @@ exports.getAllVideoTags = async function (req, res) {
 	res.json({ tags: videoTags });
 }
 
-exports.getFeed = async function (req, res) {
-	const POSTS_IN_ONE_FETCH = 24;
-
-	console.log("get feed")
-	const videos = await Video.aggregate([
-		{ $match: { visibility: 0 } },
-		{ $sample: { size: POSTS_IN_ONE_FETCH } }
-	]);
-	const formattedVideos = await Promise.all(videos.map(async function (video) {
-		const formattedVideo = await formatVideo(video);
-		return formattedVideo;
+const _findAuthUserFeed = async function (followings) {
+	const randomFollowingChannels = _.sampleSize(followings, AUTH_RANDOM_FOLLOW_CHANNELS);
+	const followingsUserId = await Promise.all(randomFollowingChannels.map(async (channelId) => {
+		const channel = await Account.findOne({ _id: channelId });
+		return channel.user_id;
 	}));
 
-	res.json({ videos: formattedVideos });
+	const followingVideosCount = AUTH_FOLLOW_EACH_CHANNEL * followings.length;
+
+	const randomFollowingVideos = await Video.aggregate([
+		{ $match: { author_id: { $in: followingsUserId } } },
+		{ $sample: { size: followingVideosCount } }
+	]);
+	const restVideos = await Video.aggregate([
+		{ $match: { visibility: 0 } },
+		{ $sample: { size: ONE_FETCH - followingVideosCount } }
+	]);
+	return [...randomFollowingVideos, ...restVideos];
+}
+
+const _findAnonymusUserFeed = async function () {
+	const topViewVideos = await Video.find({
+		visibility: 0
+	}).sort({ total_views: -1 }).limit(20);
+	const tempViewVideos = _.shuffle(topViewVideos);
+	console.log("get top view");
+
+	const topLikeVideos = await Video.find({
+		visibility: 0
+	}).sort({ total_likes: -1 }).limit(20);
+	console.log("get top like");
+	const tempLikeVideos = _.shuffle(topLikeVideos);
+
+	const restVideos = await Video.aggregate([
+		{ $match: { visibility: 0 } },
+		{ $sample: { size: ONE_FETCH - TOP_VIEW_ANONYMUS_ONE_FETCH - TOP_LIKE_ANONYMUS_ONE_FETCH } }
+	]);
+	console.log("get rest");
+
+	return [
+		...tempViewVideos.slice(0, TOP_LIKE_ANONYMUS_ONE_FETCH),
+		...tempLikeVideos.slice(0, TOP_LIKE_ANONYMUS_ONE_FETCH),
+		...restVideos
+	];
+}
+
+exports.getFeed = async function (req, res, next) {
+	console.log("get feed")
+	let videos = [];
+	try {
+		if (req.user && req.user.channelId) {
+			const channel = await Account.findOne({ _id: req.user.channelId }).select("+followings");
+			videos = !!channel ? await _findAuthUserFeed(channel.followings) : await _findAnonymusUserFeed();
+		}
+		else {
+			videos = await _findAnonymusUserFeed()
+		}
+		const formattedVideos = await Promise.all(videos.map(async function (video) {
+			const formattedVideo = await formatVideo(!!video._doc ? video._doc : video);
+			return formattedVideo;
+		}));
+		res.json({ videos: formattedVideos });
+	}
+	catch (err) {
+		next(err);
+	}
+
 }
 
 exports.getVideoSuggestion = async function (req, res) {
