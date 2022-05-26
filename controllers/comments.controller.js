@@ -4,27 +4,40 @@ const Video = require('../models/video');
 const Comment = require('../models/comment');
 const Account = require('../models/account');
 
-exports.getAllCommentsByVideoId = async function (req, res) {
+exports.getAllCommentsByVideoId = async function (req, res, next) {
 	const { id } = req.params;
-	const video = await Video.findOne(
-		{ _id: id }
-	).populate({
-		path: 'comments',
-		select: 'is_reply replies user content created_at video_id author_id deleted_by',
-		match: { is_reply: false, deleted_by: null },
-	});
-	const { comments } = video._doc;
-	comments.sort((a, b) => b.created_at - a.created_at);
-	const commentsWithoutReplies = comments.map(comment => {
-		const commentDoc = ({ ...comment })._doc;
-		commentDoc.number_of_replies = commentDoc.replies.length;
-		delete commentDoc.replies;
-		return commentDoc;
-	});
-	res.json(commentsWithoutReplies);
+
+	try {
+		const video = await Video.findOne(
+			{ _id: id }
+		).populate({
+			path: 'comments',
+			select: 'is_reply replies content created_at video_id author_id deleted_by',
+			match: { is_reply: false, deleted_by: null },
+		});
+
+		const author = await Account.findOne({ user_id: video.author_id }).populate('blocked_accounts');
+		const blockedAccounts = author.blocked_accounts.map(ac => ac.user_id);
+
+		const { comments } = video._doc;
+		const filteredComments = comments.filter(c => {
+			return !blockedAccounts.map(ac => ac.toString()).includes(c.author_id.toString())
+		});
+		filteredComments.sort((a, b) => b.created_at - a.created_at);
+		const commentsWithoutReplies = filteredComments.map(comment => {
+			const commentDoc = ({ ...comment })._doc;
+			commentDoc.number_of_replies = commentDoc.replies.length;
+			delete commentDoc.replies;
+			return commentDoc;
+		});
+		res.json(commentsWithoutReplies);
+	}
+	catch (err) {
+		next(err);
+	}
 };
 
-exports.getCommentReplies = async function (req, res) {
+exports.getCommentReplies = async function (req, res, next) {
 	const { id } = req.params;
 	try {
 		const mainComment = await Comment.findOne({ _id: id }).populate({
@@ -35,7 +48,15 @@ exports.getCommentReplies = async function (req, res) {
 				select: 'avatar',
 			}
 		});
-		const replies = await Promise.all(mainComment.replies.map(async (reply) => {
+
+		const author = await Account.findOne({ user_id: mainComment.author_id }).populate('blocked_accounts');
+		const blockedAccounts = author.blocked_accounts.map(ac => ac.user_id);
+
+		const filteredComments = mainComment.replies.filter(c => {
+			return !blockedAccounts.map(ac => ac.toString()).includes(c.author_id._id.toString())
+		});
+
+		const formattedReplies = await Promise.all(filteredComments.map(async (reply) => {
 			const channel = await Account.findOne({ user_id: reply.author_id });
 			const replyDoc = reply._doc;
 			replyDoc.user = { ...replyDoc.author_id._doc, username: channel._doc.username };
@@ -43,12 +64,11 @@ exports.getCommentReplies = async function (req, res) {
 			delete replyDoc.replies;
 			return replyDoc;
 		}));
-		replies.sort((a, b) => b.created_at - a.created_at);
-		res.json(replies);
+		formattedReplies.sort((a, b) => b.created_at - a.created_at);
+		res.json(formattedReplies);
 	}
 	catch (error) {
-		console.log(error);
-		res.status(500).json(error);
+		next(error);
 	}
 }
 

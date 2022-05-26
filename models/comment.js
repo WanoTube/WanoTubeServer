@@ -8,7 +8,7 @@ const CommentSchema = new Schema({
 	author_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 	video_id: { type: Schema.Types.ObjectId, ref: 'Video', required: true },
 	is_reply: { type: Boolean, default: false },
-	replies: [{ type: Schema.Types.ObjectId, ref: 'Comment', required: true }],
+	replies: { type: [Schema.Types.ObjectId], ref: 'Comment', required: true },
 	deleted_by: { type: Schema.Types.ObjectId, ref: 'Account', default: null },
 	deleted_at: { type: Date }
 }, schemaOptions);

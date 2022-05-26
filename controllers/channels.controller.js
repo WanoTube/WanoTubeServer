@@ -2,6 +2,7 @@ const _ = require('lodash');
 
 const Video = require('../models/video');
 const Account = require('../models/account');
+const Comment = require('../models/comment');
 const { formatVideo } = require('../utils/videos-handlers');
 
 async function getChannelPublicInformation(req, res) {
@@ -110,7 +111,6 @@ async function unfollowChannel(req, res) {
 async function hideUserFromChannel(req, res) {
   const { channelId } = req.user;
   const { userId } = req.params;
-  console.log(userId)
 
   const blockedAccount = await Account.findOne(
     { user_id: userId }
@@ -121,11 +121,11 @@ async function hideUserFromChannel(req, res) {
 
   const updatedAccount = await Account.findOneAndUpdate(
     { _id: channelId },
-    { $addToSet: { blocked_accounts: blockedAccount } }
+    { $addToSet: { blocked_accounts: blockedAccount._id } }
   );
 
   res.json({
-    blockedAccounts: updatedAccount.blocked_accounts
+    blockedAccounts: updatedAccount.blocked_accounts,
   });
 }
 
