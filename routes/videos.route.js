@@ -5,7 +5,7 @@ const videosController = require('../controllers/new-videos.controller');
 const videoInfosController = require('../controllers/video-info.controller');
 const likesController = require('../controllers/likes.controller');
 const commentsController = require('../controllers/comments.controller');
-const { requireAuth } = require("../middlewares/verifyToken.middleware");
+const { requireAuth } = require("../middlewares/authHandler");
 const { forbidBlockedAccount } = require('../middlewares/forbidBlockedAccount');
 
 router.get('/search-suggestions', videoInfosController.getSearchSuggestions);
@@ -31,8 +31,6 @@ router.patch('/watch-later/:videoId', requireAuth(), videoInfosController.watchL
 router.post('/like/:id', requireAuth(), likesController.likeVideo);
 
 router.post('/comment', requireAuth(), commentsController.addComment);
-
-router.post('/comment/delete', commentsController.deleteCommentFromVideo);
 
 router.post('/upload', requireAuth(), forbidBlockedAccount, videosController.uploadAndProcessVideo);
 

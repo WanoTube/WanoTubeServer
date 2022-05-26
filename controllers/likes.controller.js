@@ -43,23 +43,26 @@ exports.likeVideo = async function (req, res) {
 	const { channelId } = req.user;
 
 	try {
+		let likeStatus = 0; //0: unlike; 1: like
 		const foundVideo = await Video.findOne({ _id: videoId }).select("+likes");
 		if (!foundVideo) return res.status(404).json("Cannot find video");
 
 		if (foundVideo.likes.map(like => like.toString()).includes(channelId)) {
 			foundVideo.likes = foundVideo.likes.filter(id => id.toString() !== channelId);
 			foundVideo.total_likes -= 1;
+			likeStatus = 0;
 		}
 		else {
 			foundVideo.likes.push(channelId);
 			foundVideo.total_likes += 1;
+			likeStatus = 1;
 		}
 
 		await Video.findOneAndUpdate(
 			{ _id: videoId },
 			{ likes: foundVideo.likes, total_likes: foundVideo.total_likes }
 		)
-		res.json({ updatedVideo: foundVideo })
+		res.json({ totalLikes: foundVideo.total_likes, likeStatus })
 	}
 	catch (err) {
 		console.log(err)

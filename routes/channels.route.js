@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const channelsController = require('../controllers/channels.controller');
-const { requireAuth } = require('../middlewares/verifyToken.middleware');
+const { requireAuth } = require('../middlewares/authHandler');
 const { createJob } = require('../utils/aws/elasticTranscoder');
 
 router.get('/', async (req, res, next) => {
@@ -23,5 +23,9 @@ router.get('/:id/info', channelsController.getChannelPublicInformation);
 router.patch('/:id/follow', requireAuth(), channelsController.followChannel);
 
 router.patch('/:id/unfollow', requireAuth(), channelsController.unfollowChannel);
+
+router.patch('/users/:userId/hide', requireAuth(), channelsController.hideUserFromChannel);
+
+router.put('/hidden-accounts', requireAuth(), channelsController.updateHiddenAccountList);
 
 module.exports = router;

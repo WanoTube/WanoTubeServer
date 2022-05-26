@@ -107,10 +107,48 @@ async function unfollowChannel(req, res) {
   }
 }
 
+async function hideUserFromChannel(req, res) {
+  const { channelId } = req.user;
+  const { userId } = req.params;
+  console.log(userId)
+
+  const blockedAccount = await Account.findOne(
+    { user_id: userId }
+  );
+  if (!blockedAccount) return res.status(400).status({
+    message: "Account cannot be found!"
+  })
+
+  const updatedAccount = await Account.findOneAndUpdate(
+    { _id: channelId },
+    { $addToSet: { blocked_accounts: blockedAccount } }
+  );
+
+  res.json({
+    blockedAccounts: updatedAccount.blocked_accounts
+  });
+}
+
+async function updateHiddenAccountList(req, res) {
+  const { channelId } = req.user;
+  const { hiddenChannelIdList } = req.body;
+
+  const updatedAccount = await Account.findOneAndUpdate(
+    { _id: channelId },
+    { $set: { blocked_accounts: hiddenChannelIdList } }
+  );
+
+  res.json({
+    blockedAccounts: updatedAccount.blocked_accounts
+  });
+}
+
 module.exports = {
   getAllChannelVideos,
   getAllChannelPublicVideos,
   getChannelPublicInformation,
   followChannel,
-  unfollowChannel
+  unfollowChannel,
+  hideUserFromChannel,
+  updateHiddenAccountList
 }

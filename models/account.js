@@ -32,7 +32,7 @@ const AccountSchema = new Schema({
 	number_of_followers: { type: Number, default: 0 },
 	followings: { type: [Schema.Types.ObjectId], ref: 'Account', default: [], select: false },
 	members: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
-	blocked_accounts: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
+	blocked_accounts: { type: [Schema.Types.ObjectId], ref: 'Account', default: [] },
 	watched_history: { type: [Schema.Types.ObjectId], ref: 'WatchHistoryDate', default: [] },
 	searched_history: { type: [Schema.Types.ObjectId], ref: 'Video', default: [] },
 	watch_later_videos: { type: [Schema.Types.ObjectId], ref: 'Video', default: [] },

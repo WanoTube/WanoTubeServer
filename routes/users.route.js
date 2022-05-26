@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const usersController = require('../controllers/users.controller');
-const { requireAuth } = require("../middlewares/verifyToken.middleware");
+const { requireAuth } = require("../middlewares/authHandler");
 
 router.get('/copyright-status', requireAuth(), usersController.getCopyrightStatus);
 

@@ -6,10 +6,12 @@ const Account = require('../models/account');
 
 exports.getAllCommentsByVideoId = async function (req, res) {
 	const { id } = req.params;
-	const video = await Video.findById(id).populate({
+	const video = await Video.findOne(
+		{ _id: id }
+	).populate({
 		path: 'comments',
-		select: 'is_reply replies user content created_at video_id author_id',
-		match: { is_reply: false },
+		select: 'is_reply replies user content created_at video_id author_id deleted_by',
+		match: { is_reply: false, deleted_by: null },
 	});
 	const { comments } = video._doc;
 	comments.sort((a, b) => b.created_at - a.created_at);
@@ -25,11 +27,12 @@ exports.getAllCommentsByVideoId = async function (req, res) {
 exports.getCommentReplies = async function (req, res) {
 	const { id } = req.params;
 	try {
-		const mainComment = await Comment.findById(id).populate({
+		const mainComment = await Comment.findOne({ _id: id }).populate({
 			path: 'replies',
+			match: { deleted_by: null },
 			populate: {
 				path: 'author_id',
-				select: 'avatar'
+				select: 'avatar',
 			}
 		});
 		const replies = await Promise.all(mainComment.replies.map(async (reply) => {
@@ -91,56 +94,40 @@ exports.addComment = async function (req, res) {
 	}
 }
 
-exports.deleteCommentFromVideo = function (req, res) {
-	const body = req.body
-	const author_id = body.author_id
-	const video_id = body.video_id
-	Video.findById(video_id)
-		.exec(function (err, video) {
-			if (video && !err) {
-				if (video.comments.length <= 0) {
-					removeCommentFromVideo(author_id, video, function (result) {
-						res.json(result)
-					})
-				}
-			} else {
-				if (err) res.json(err)
-				else res.json("Video not found")
-			}
-		})
-}
+exports.removeComment = async function (req, res, next) {
+	const { _id, channelId } = req.user;
+	const { id: commentId } = req.params;
 
-function removeCommentFromVideo(author_id, video, callback) {
-	Video.findByIdAndUpdate(video.id, {
-		$pull: {
-			comments: { author_id }
-		}
-	}, function () {
-		Comment.deleteOne({ author_id, video_id: video.id }, callback(result))
-	})
-}
+	try {
+		const comment = await Comment.findById(commentId);
+		if (!comment) return res.status(400).json({
+			message: "Comment cannot be found"
+		});
 
-exports.deleteCommentInfo = function (req, res) {
-	const author_id = new mongoose.mongo.ObjectId(req.query.author_id)
-	const video_id = new mongoose.mongo.ObjectId(req.query.video_id)
-	if (author_id && video_id) {
-		Comment.deleteOne({ author_id, video_id }) //delete the first one it found
-			.then(function (data) {
-				res.status(200).json(data)
-			})
-	} else {
-		res.json("author_id and video_id is invalid")
+		const canRemoveComment = await _canRemoveComment(comment, _id);
+		if (!canRemoveComment) return res.status(403).json({
+			message: "You are not allow to remove this comment"
+		});
+
+		const removedComment = await Comment.findOneAndUpdate(
+			{ _id: commentId },
+			{ deleted_by: channelId, deleted_at: new Date(Date.now()) }
+		);
+
+		res.json({
+			removedComment: removedComment._id
+		});
+	}
+	catch (err) {
+		next(err);
 	}
 }
 
-exports.deleteCommentInfoById = function (req, res) {
-	const id = req.params.id
-	if (id) {
-		Comment.deleteOne({ id: id }) //delete the first one it found
-			.then(function (data) {
-				res.status(200).json(data)
-			})
-	} else {
-		res.json("author_id and video_id is invalid")
-	}
+const _canRemoveComment = async function (comment, removerId) { //userId
+	if (comment.author_id.toString() == removerId) return true;
+
+	const video = await Video.findById(comment.video_id);
+	if (video.author_id.toString() == removerId) return true;
+
+	return false;
 }
