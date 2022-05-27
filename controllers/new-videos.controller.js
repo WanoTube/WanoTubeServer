@@ -126,6 +126,8 @@ exports.uploadVideoWithUndergroundProcess = async function (req, res) {
 
 			setTimeout(async function () {
 				const recognizedMusic = await _checkMusic(newVideo, channelId);
+				console.log()
+
 				notifyRrecognizedCompleted(channelId, newVideo._id, { recognizedMusic });
 
 				removeRedundantFiles(newVideo.video_key);
@@ -133,7 +135,7 @@ exports.uploadVideoWithUndergroundProcess = async function (req, res) {
 		}, 0);
 
 		if (newVideo) {
-			// handleCopyright(title, channelId);
+			handleCopyright(title, channelId);
 			res.status(200).json(newVideo)
 		}
 		else {

@@ -24,7 +24,7 @@ async function handleCopyright(title, channelId) {
     console.log(strikeCount)
     if (strikeCount > 2) return;
     _enableBlockedChannel(channelId);
-  }, duration1 * 1000);
+  }, duration1 * 24000);
 
   const duration2 = STRIKE_DURATION;
   setTimeout(() => {
@@ -32,7 +32,7 @@ async function handleCopyright(title, channelId) {
       console.log("_expireCopyrightStrike");
       _expireCopyrightStrike(channelId, newCopyrightStrike._id);
     }
-  }, duration2 * 1000);
+  }, duration2 * 24000);
 }
 
 const _enableBlockedChannel = async function (channelId) {
