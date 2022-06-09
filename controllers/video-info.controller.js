@@ -264,7 +264,7 @@ exports.getWatchHistory = async function (req, res) {
 		}))
 		watchedHistoryDates.sort((a, b) => b.created_at - a.created_at)
 
-		res.status(200).json({ watchedHistoryDates });
+		res.status(200).json({ "history": watchedHistoryDates });
 	}
 	catch (error) {
 		console.log(error)
