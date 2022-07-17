@@ -143,6 +143,45 @@ async function updateHiddenAccountList(req, res) {
   });
 }
 
+async function getChannelOverview(req, res, next) {
+  const { _id } = req.user;
+
+  const channel = await Account.findOne({ 
+    user_id: _id
+  });
+
+  const videoCount = await Video.find({
+    author_id: _id
+  }).count();
+
+  const latestVideo = await Video.find({
+    author_id: _id
+  })
+  .sort({ created_at: -1 }).limit(1);
+
+  const latestComment = await Comment.find({
+    author_id: _id
+  })
+  .sort({ created_at: -1 }).limit(1);
+
+  const viewCount = await Video.aggregate(
+    [{ $group: {
+        _id: null,
+        total:   { $sum: "$total_views" },
+    }}]
+  );
+
+  res.json({
+    latestVideo: latestVideo?.[0],
+    channelAnalytic: {
+      videoCount,
+      viewCount: viewCount[0].total,
+      follower: channel.number_of_followers,
+    },
+    latestComment: latestComment?.[0], 
+  })
+}
+
 module.exports = {
   getAllChannelVideos,
   getAllChannelPublicVideos,
@@ -150,5 +189,6 @@ module.exports = {
   followChannel,
   unfollowChannel,
   hideUserFromChannel,
-  updateHiddenAccountList
+  updateHiddenAccountList,
+  getChannelOverview
 }

@@ -404,7 +404,7 @@ exports.getFeed = async function (req, res, next) {
 	let videos = [];
 	try {
 		if (req.user && req.user.channelId) {
-			const channel = await Account.findOne({ _id: req.user.channelId }).select("+followings");
+			const channel = await Account.findOne({ _id: req.user.channelId, type: 'NORMAL' }).select("+followings");
 			videos = !!channel ? await _findAuthUserFeed(channel.followings) : await _findAnonymusUserFeed();
 		}
 		else {

@@ -16,6 +16,8 @@ router.get('/', async (req, res, next) => {
 
 router.get('/videos', requireAuth(), channelsController.getAllChannelVideos);
 
+router.get('/overview', requireAuth(), channelsController.getChannelOverview);
+
 router.get('/:id/videos', channelsController.getAllChannelPublicVideos);
 
 router.get('/:id/info', channelsController.getChannelPublicInformation);
@@ -27,5 +29,6 @@ router.patch('/:id/unfollow', requireAuth(), channelsController.unfollowChannel)
 router.patch('/users/:userId/hide', requireAuth(), channelsController.hideUserFromChannel);
 
 router.put('/hidden-accounts', requireAuth(), channelsController.updateHiddenAccountList);
+
 
 module.exports = router;

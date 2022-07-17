@@ -15,6 +15,7 @@ async function handleCopyright(title, channelId) {
     },
     { new: true }
   ).select('+strikes');
+  if(!updatedAccount) return;
   const strikeCount = updatedAccount.strikes.length;
 
   if (strikeCount >= 3 || strikeCount <= 0) return;
