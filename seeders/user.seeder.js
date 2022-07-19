@@ -21,7 +21,7 @@ const thumbnailList = [
 ]
 
 const videoList = [
-  'ando-trungquoc.mp4',
+  'ando-trungquoc1.mp4',
   'begin-song.mp4',
   'kingdomrush.mp4',
   'real-vs-mc.mp4',
