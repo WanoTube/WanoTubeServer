@@ -13,37 +13,34 @@ const randomElementInArray = function (items, numberOfItems = 1) {
 }
 
 const thumbnailList = [
-  'book.png',
-  'cat.png',
-  'chel-liv.png',
-  'dtck.png',
-  'foucs.png',
-  'game.png',
-  'harrykane.png',
+  'ando-trungquoc.png',
+  'begin-song.png',
   'kingdomrush.png',
-  'liver-spurs.png',
-  'son.png',
-  'mern.png',
-  'naruto.png',
-  'thanhpalm.png',
-  'thumbnail.png',
-  'tomandjerry.png',
-  'bfzy_otp.png',
-  'brilliant_clock.png',
-  'nhaxx_xx.png'
+  'real-vs-mc.png',
+  'song.png'
 ]
 
 const videoList = [
   'ando-trungquoc.mp4',
-  'aws.mp4',
   'begin-song.mp4',
-  'bfzy_otp.mp4',
-  'brilliant_clock.mp4',
-  'cambongda.mp4',
   'kingdomrush.mp4',
-  'real-mc.mp4',
-  'song.mp4',
-  'my-heart.mp4'
+  'real-vs-mc.mp4',
+  'song.mp4'
+]
+
+const videoTagList = [
+  'EDUCATION',
+  'MUSIC',
+  'GAME',
+  'SPORT',
+  'MUSIC'
+]
+
+const shortThumbnailList = [
+  'bfzy_otp.png',
+  'brilliant_clock.png',
+  'nhaxx_xx.png',
+  'zky.png'
 ]
 
 const shortVideoList = [
@@ -52,6 +49,7 @@ const shortVideoList = [
   'nhaxx_xx.mp4',
   'zky.mp4'
 ]
+
 
 generateVideoTitle = function () {
   const random = Math.floor(Math.random() * 10);
@@ -89,8 +87,8 @@ exports.userSeeder = async function () {
     const is_admin = !(i % 4);
     const videos = [];
     for (let j = 0; j < 15; j++) {
-      const video = generateVideo(j, videoList, VideoType.NORMAL);
-      const shortVideo = generateVideo(j, shortVideoList, VideoType.SHORT);
+      const video = generateVideo(j, videoList, thumbnailList, VideoType.NORMAL);
+      const shortVideo = generateVideo(j, shortVideoList, shortThumbnailList, VideoType.SHORT);
       videos.push(video);
       videos.push(shortVideo);
     }
@@ -117,17 +115,18 @@ exports.userSeeder = async function () {
   return accounts;
 }
 
-function generateVideo(index, videos, type) {
+function generateVideo(index, videos, thumbnailList, type) {
   const title = generateVideoTitle();
-  const key = randomElementInArray(videos)[0];
-  const thumbnail_key = randomElementInArray(thumbnailList)[0];
+  const random = Math.floor(Math.random() * videos.length);
+  const key = videos[random];
+  const thumbnail_key = thumbnailList[random];
   const size = 50;
   const duration = 50;
   const visibility = !!(index % 4);
   const description = faker.lorem.paragraph();
   const total_likes = randomIntNumber();
   const total_views = randomIntNumber();
-  const tags = randomElementInArray(Object.values(VideoTag), 2);
+  const tags = videoTagList[random];
   const manifest_key = DEFAULT_MANIFEST_KEY;
   const status = "COMPLETED";
   const video = {
