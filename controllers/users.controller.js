@@ -244,10 +244,14 @@ exports.updateUser = async function (req, res) {
 exports.getCopyrightStatus = async function (req, res) {
 	console.log("getCopyrightStatus");
 	const { channelId } = req.user;
-	const { blocked_status, strikes } = await Account.findById(channelId).populate("blocked_status").populate("strikes");
-	res.json({
-		blocked_status, strikes
-	});
+	try {
+		const { blocked_status, strikes } = await Account.findById(channelId).populate("blocked_status").populate("strikes");
+		res.json({
+			blocked_status, strikes
+		});
+	} catch (err) {
+		res.status(500).json(err)
+	}
 }
 
 exports.getFollowInfo = async function (req, res) {
