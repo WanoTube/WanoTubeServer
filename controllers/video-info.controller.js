@@ -260,9 +260,10 @@ exports.getWatchHistory = async function (req, res) {
 				delete formattedVideoDoc.author_id;
 				return formattedVideoDoc;
 			}))
+			formattedHistoryDateDoc.videos.sort((a, b) => -1);
 			return formattedHistoryDateDoc;
 		}))
-		watchedHistoryDates.sort((a, b) => b.created_at - a.created_at)
+		watchedHistoryDates.sort((a, b) => b.created_at - a.created_at);
 
 		res.status(200).json({ "history": watchedHistoryDates });
 	}
@@ -291,6 +292,8 @@ exports.getWatchLaterVideos = async function (req, res) {
 			delete formattedVideoDoc.author_id;
 			return formattedVideoDoc;
 		}))
+
+		videos.sort((a, b) => -1);
 
 		res.json({ videos })
 	}

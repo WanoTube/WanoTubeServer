@@ -87,7 +87,7 @@ exports.uploadAndProcessVideo = async function (req, res) {
 			res.status(500).json("Cannot save DB");
 		}
 	} catch (error) {
-		console.log(error)
+		console.log(error.msg)
 		if (error.msg) return res.status(400).json(error.msg);
 		else return res.status(400).json(error);
 	}

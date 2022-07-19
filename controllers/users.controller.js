@@ -258,8 +258,10 @@ exports.getCopyrightStatus = async function (req, res) {
 exports.getFollowInfo = async function (req, res) {
 	const { channelId } = req.user;
 	try {
-		const { number_of_followers, followings } = await Account.findOne({ _id: channelId }).select("+followings");
-		res.json({ number_of_followers, followings });
+		const a = await Account.findOne({ _id: channelId }).select("+followings");
+		console.log(a);
+		const { number_of_followers, followings } = a;
+ 		res.json({ number_of_followers, followings });
 	}
 	catch (error) {
 		console.log(error)
