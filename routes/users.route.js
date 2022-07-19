@@ -16,7 +16,7 @@ router.get('/follow-info', requireAuth(), usersController.getFollowInfo);
 
 router.get('/followings', requireAuth(), usersController.getFollowingChannels);
 
-router.put('/update', usersController.updateUser);
+router.put('/update', requireAuth(), usersController.updateUser);
 
 router.get('/avatar/:key', usersController.getAvatar);
 

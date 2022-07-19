@@ -212,8 +212,9 @@ function uploadToS3(fileName, fileStream, app) {
 }
 
 exports.updateUser = async function (req, res) {
+	const { id: userId } = req.user;
 	const body = req.body
-	const { id, first_name, last_name, gender, birth_date, phone_number, description, country } = body;
+	const { first_name, last_name, gender, birth_date, phone_number, description, country } = body;
 	if (email) {
 		try {
 			const checkEmailExist = await Account.findOne({ email: email });
