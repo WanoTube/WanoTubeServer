@@ -37,9 +37,9 @@ const videoTagList = [
 ]
 
 const shortThumbnailList = [
-  'bfzy_otp.png',
-  'brilliant_clock.png',
-  'nhaxx_xx.png',
+  'bfzy_otp_1.png',
+  'brilliant_clock_1.png',
+  'nhaxx_xx_1.png',
   'zky.png'
 ]
 
